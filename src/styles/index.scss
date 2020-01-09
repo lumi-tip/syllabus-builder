@@ -1,7 +1,13 @@
 @import "~bootstrap/scss/bootstrap.scss";
 
-li.content-piece{ font-size: 12px; display: inline-block; background: #BDBDBD; padding: 2px; }
-li.content-piece:hover{  background: #BFBFBF; }
+.pointer{ cursor: pointer; }
+
+li.content-piece{ 
+    font-size: 12px; display: inline-block; background: #BDBDBD; padding: 3px; 
+    margin: 1px;
+    i:hover{ background: rgba(0, 0, 0, 0.2) }
+}
+li.content-piece:hover{  background: #ededed; }
 
 .content-widget{
     font-size: 12px;

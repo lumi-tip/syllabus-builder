@@ -22,13 +22,13 @@ const Main = injectContent(() => {
 			<div className="row no-gutters">
 				<div className="left-side col-4 col-md-3 bg-light">
 					<div className="content lessons">
-						<ContentWidget type="lessons" pieces={store.lessons} />
-					</div>
-					<div className="content projects">
-						<ContentWidget type="project" pieces={store.projects} />
+						<ContentWidget type="lesson" pieces={store.lessons} />
 					</div>
 					<div className="content replits">
 						<ContentWidget type="replit" pieces={store.replits} />
+					</div>
+					<div className="content projects">
+						<ContentWidget type="project" pieces={store.projects} />
 					</div>
 					<div className="content quizzes">
 						<ContentWidget type="quiz" pieces={store.quizzes} />

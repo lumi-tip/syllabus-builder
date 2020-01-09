@@ -24,13 +24,15 @@ const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 						: "inherit"
 			}}>
 			<h4>{heading}</h4>
-			<ul className="p-0">
-				{pieces.length == 0 && <p className="p-0">No content</p>}
+			<ul className="py-0 px-1">
+				{pieces.length == 0 && (
+					<small className="p-0">No content</small>
+				)}
 				{pieces.map(p => (
 					<ContentPiece
 						key={p.slug}
 						type={p.type}
-						title={p.title}
+						title={p.title || p.info.name}
 						onDelete={() => onDelete(p)}
 					/>
 				))}
@@ -86,7 +88,7 @@ const Day = ({
 				/>
 				<Column
 					heading="Quizzes"
-					type="quizzes"
+					type="quiz"
 					pieces={quizzes}
 					onDrop={item => onDrop(item)}
 					onDelete={item => onDelete(item)}

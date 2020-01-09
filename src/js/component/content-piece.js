@@ -15,7 +15,7 @@ const ContentPiece = ({ title, type, data, onDelete }) => {
 			{onDelete && (
 				<i
 					onClick={() => onDelete(data)}
-					className="fas fa-trash-alt"
+					className="fas fa-trash-alt pointer p-1"
 				/>
 			)}
 		</li>

@@ -419,9 +419,14 @@ class Wrapper {
 		return {
 			all: () => {
 				//return this.get(url + "/lesson/all/v2");
-				return this.get(
-					"https://content.breatheco.de/static/api/lessons.json"
-				);
+				return new Promise((resolve, reject) => {
+					fetch(
+						"https://content.breatheco.de/static/api/lessons.json"
+					)
+						.then(r => r.json())
+						.then(data => resolve(data))
+						.catch(err => reject(err));
+				});
 			},
 			get: id => {
 				return this.get(url + "/lessons/" + id);
