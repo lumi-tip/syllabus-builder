@@ -2,10 +2,7 @@
 class Wrapper {
 	constructor() {
 		this.options = {
-			assetsPath:
-				typeof process != "undefined"
-					? process.env.ASSETS_URL + "/apis"
-					: null,
+			assetsPath: typeof process != "undefined" ? process.env.ASSETS_URL + "/apis" : null,
 			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
 			_debug: typeof process != "undefined" ? process.env.DEBUG : false,
 			getToken: (type = "api") => {
@@ -25,22 +22,17 @@ class Wrapper {
 	calculatePending() {
 		for (let method in this.pending)
 			for (let path in this.pending[method])
-				if (
-					typeof this.pending[method] != "undefined" &&
-					this.pending[method][path] === true
-				) {
+				if (typeof this.pending[method] != "undefined" && this.pending[method][path] === true) {
 					if (!this.isPending) {
 						this.isPending = true;
-						if (typeof this.options.onLoading == "function")
-							this.options.onLoading(this.isPending);
+						if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 					}
 					return true;
 				}
 
 		if (this.isPending) {
 			this.isPending = false;
-			if (typeof this.options.onLoading == "function")
-				this.options.onLoading(this.isPending);
+			if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 		}
 		return false;
 	}
@@ -54,11 +46,7 @@ class Wrapper {
 		return fetch(...args);
 	}
 	req(method, path, args) {
-		const token = this.options.getToken(
-			path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1
-				? "assets"
-				: "api"
-		);
+		const token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		let opts = {
 			method,
 			cache: "no-cache",
@@ -68,16 +56,12 @@ class Wrapper {
 
 		if (method === "get") path += this.serialize(args).toStr();
 		else {
-			if (method == "put" && !args)
-				throw new Error("Missing request body");
+			if (method == "put" && !args) throw new Error("Missing request body");
 			opts.body = this.serialize(args).toJSON();
 		}
 
 		return new Promise((resolve, reject) => {
-			if (
-				typeof this.pending[method][path] !== "undefined" &&
-				this.pending[method][path]
-			)
+			if (typeof this.pending[method][path] !== "undefined" && this.pending[method][path])
 				reject({
 					pending: true,
 					msg: `Request ${method}: ${path} was ignored because a previous one was already pending`
@@ -106,9 +90,7 @@ class Wrapper {
 							if (this.options.onLogout) this.options.onLogout();
 						} else if (resp.status == 400)
 							resp.json()
-								.then(err =>
-									reject({ msg: err.msg || err, code: 400 })
-								)
+								.then(err => reject({ msg: err.msg || err, code: 400 }))
 								.catch(() =>
 									reject({
 										msg: "Invalid Argument",
@@ -124,10 +106,7 @@ class Wrapper {
 					return false;
 				})
 				.then(json => {
-					if (!json)
-						throw new Error(
-							"There was a problem processing the request"
-						);
+					if (!json) throw new Error("There was a problem processing the request");
 					resolve(json);
 					return json;
 				})
@@ -203,10 +182,7 @@ class Wrapper {
 				});
 			},
 			remind: username => {
-				return this.post(
-					url + "/remind/" + encodeURIComponent(username),
-					{ username }
-				);
+				return this.post(url + "/remind/" + encodeURIComponent(username), { username });
 			}
 		};
 	}
@@ -321,18 +297,13 @@ class Wrapper {
 		let assetsURL = this.options.assetsPath;
 		return {
 			getByStudent: (student_id, args = []) => {
-				return this.get(
-					assetsURL + "/message/student/" + student_id,
-					args
-				);
+				return this.get(assetsURL + "/message/student/" + student_id, args);
 			},
 			templates: () => {
 				return this.get(assetsURL + "/message/templates");
 			},
 			markAs: (messageId, status) => {
-				return this.post(
-					assetsURL + "/message/" + messageId + "/" + status
-				);
+				return this.post(assetsURL + "/message/" + messageId + "/" + status);
 			}
 		};
 	}
@@ -358,19 +329,13 @@ class Wrapper {
 				studentsArray = studentsArray.map(id => {
 					return { student_id: id };
 				});
-				return this.post(
-					url + "/student/cohort/" + cohortId,
-					studentsArray
-				);
+				return this.post(url + "/student/cohort/" + cohortId, studentsArray);
 			},
 			removeStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
 					return { student_id: id };
 				});
-				return this.delete(
-					url + "/student/cohort/" + cohortId,
-					studentsArray
-				);
+				return this.delete(url + "/student/cohort/" + cohortId, studentsArray);
 			}
 		};
 	}
@@ -420,9 +385,7 @@ class Wrapper {
 			all: () => {
 				//return this.get(url + "/lesson/all/v2");
 				return new Promise((resolve, reject) => {
-					fetch(
-						"https://content.breatheco.de/static/api/lessons.json"
-					)
+					fetch("https://content.breatheco.de/static/api/lessons.json")
 						.then(r => r.json())
 						.then(data => resolve(data))
 						.catch(err => reject(err));
@@ -468,10 +431,7 @@ class Wrapper {
 	activity() {
 		let url = this.options.assetsPath;
 		return {
-			addStudentActivity: (
-				id,
-				{ user_agent, cohort, day, slug, data }
-			) => {
+			addStudentActivity: (id, { user_agent, cohort, day, slug, data }) => {
 				return this.post(url + "/activity/user/" + id, {
 					user_agent,
 					cohort,

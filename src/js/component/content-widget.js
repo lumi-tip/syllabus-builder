@@ -14,18 +14,15 @@ const ContentWidget = ({ pieces, type }) => {
 				<div>No {type.toLowerCase()} to show</div>
 			) : (
 				<div>
-					<h3 onClick={() => setCollapsed(!collapsed)}>
-						{type + " "}
-					</h3>
+					<h3 onClick={() => setCollapsed(!collapsed)}>{type + " "}</h3>
 					<input
+						className="transparent"
 						placeholder={"Click to search..."}
 						onChange={e => setSearchToken(e.target.value)}
 						value={searchToken}
 					/>
 					{type == "project" && (
-						<select
-							onChange={e => setTagToken(e.target.value)}
-							value={tagToken}>
+						<select onChange={e => setTagToken(e.target.value)} value={tagToken}>
 							<option key={0} value={null}>
 								Technology
 							</option>
@@ -37,9 +34,7 @@ const ContentWidget = ({ pieces, type }) => {
 						</select>
 					)}
 					{type == "lesson" && (
-						<select
-							onChange={e => setTagToken(e.target.value)}
-							value={tagToken}>
+						<select onChange={e => setTagToken(e.target.value)} value={tagToken}>
 							<option key={0} value={null}>
 								Tag
 							</option>
@@ -62,21 +57,14 @@ const ContentWidget = ({ pieces, type }) => {
 					.filter(p => !searchToken || p.title.includes(searchToken))
 					.filter(p => {
 						if (tagToken) {
-							if (type === "lesson")
-								return p.tags.includes(tagToken);
-							else if (type === "project")
-								return p.technology === tagToken;
+							if (type === "lesson") return p.tags ? p.tags.includes(tagToken) : false;
+							else if (type === "project") return p.technology === tagToken;
 							else return true;
 						}
 						return true;
 					})
 					.map((l, i) => (
-						<ContentPiece
-							key={i}
-							type={type}
-							title={l.title || l.info.name}
-							data={l}
-						/>
+						<ContentPiece key={i} type={type} data={l} />
 					))}
 			</ul>
 		</div>

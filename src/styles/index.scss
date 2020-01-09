@@ -9,6 +9,14 @@ li.content-piece{
 }
 li.content-piece:hover{  background: #ededed; }
 
+input.transparent, textarea.transparent{
+    background: none;
+    border: none;
+    &:focus {
+        outline:none;
+    }
+}
+
 .content-widget{
     font-size: 12px;
     h3{ font-size: 16px; text-decoration: underline; cursor: pointer; display: inline; }

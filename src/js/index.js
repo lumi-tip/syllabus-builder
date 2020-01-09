@@ -36,20 +36,12 @@ const Main = injectContent(() => {
 				</div>
 				<div className="col-8 col-md-9 p-3">
 					<div className="text-right mb-2">
-						<button
-							className="btn btn-dark btn-sm"
-							onClick={() => actions.addDay()}>
+						<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
 							<i className="fas fa-plus" /> Add new day
 						</button>
 					</div>
-					{store.days.map((d, i) => (
-						<Day
-							key={i}
-							number={i}
-							onDrop={item => actions.movePiece(i, item.data)}
-							onDelete={data => actions.moveOutPiece(i, data)}
-							{...d}
-						/>
+					{store.days.sort((a, b) => (a.number < b.number ? 0 : 1)).map((d, i) => (
+						<Day key={i} data={d} />
 					))}
 				</div>
 			</div>

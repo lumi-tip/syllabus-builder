@@ -2,27 +2,26 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
 
-const ContentPiece = ({ title, type, data, onDelete }) => {
+const ContentPiece = ({ type, data, onDelete }) => {
 	const [{ isDragging }, drag] = useDrag({
 		item: { type, data },
 		collect: monitor => ({
 			isDragging: !!monitor.isDragging()
 		})
 	});
+	let title = "";
+	if (data && typeof data != "undefined") {
+		if (typeof data.title != "undefined") title = data.title;
+		else if (typeof data.info != "undefined") title = data.info.name;
+	}
+	if (title == "") title = "Undefined title";
 	return (
 		<li className="content-piece" ref={drag}>
-			{title}{" "}
-			{onDelete && (
-				<i
-					onClick={() => onDelete(data)}
-					className="fas fa-trash-alt pointer p-1"
-				/>
-			)}
+			{title} {onDelete && <i onClick={() => onDelete(data)} className="fas fa-trash-alt pointer p-1" />}
 		</li>
 	);
 };
 ContentPiece.propTypes = {
-	title: PropTypes.string,
 	type: PropTypes.string,
 	data: PropTypes.object,
 	onDelete: PropTypes.func

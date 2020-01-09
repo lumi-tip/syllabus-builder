@@ -49,56 +49,54 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 				);
 			},
-			addDay: () => {
+			pieces: function() {
 				const store = getStore();
-				setStore({
-					days: store.days.concat([
-						{
-							lessons: [],
-							projects: [],
-							replits: [],
-							quizzes: []
-						}
-					])
-				});
+				return {
+					in: (piece, day) => {
+						this.pieces().delete(piece);
+						this.days().update(day);
+					},
+					out: (piece, day) => {
+						this.pieces().add(piece);
+						this.days().update(day);
+					},
+					add: piece =>
+						setStore({
+							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug).concat(piece)
+						}),
+					delete: piece =>
+						setStore({
+							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug)
+						})
+				};
 			},
-			movePiece: (i, piece) => {
+			days: () => {
 				const store = getStore();
-				setStore({
-					[mapEntity[piece.type]]: store[
-						mapEntity[piece.type]
-					].filter(p => p.slug != piece.slug),
-					days: store.days.map((d, _i) => {
-						if (_i != i) return d;
-						else
-							return {
-								...d,
-								[mapEntity[piece.type]]: d[
-									mapEntity[piece.type]
-								]
-									.filter(p => p.slug != piece.slug)
-									.concat(piece)
-							};
-					})
-				});
-			},
-			moveOutPiece: (i, piece) => {
-				const store = getStore();
-				setStore({
-					[mapEntity[piece.type]]: store[mapEntity[piece.type]]
-						.filter(p => p.slug != piece.slug)
-						.concat(piece),
-					days: store.days.map((d, _i) => {
-						if (_i != i) return d;
-						else
-							return {
-								...d,
-								[mapEntity[piece.type]]: d[
-									mapEntity[piece.type]
-								].filter(p => p.slug != piece.slug)
-							};
-					})
-				});
+				return {
+					add: () =>
+						setStore({
+							days: store.days.concat([
+								{
+									number: store.days.length + 1,
+									label: "",
+									"key-concepts": [],
+									lessons: [],
+									projects: [],
+									replits: [],
+									quizzes: []
+								}
+							])
+						}),
+					update: day => {
+						const store = getStore();
+						setStore({
+							days: store.days.map(d => {
+								if (d.number != day.number) return d;
+								else return { ...d, ...day };
+							})
+						});
+					}
+				};
 			}
 		}
 	};
