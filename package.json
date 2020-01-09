@@ -57,6 +57,8 @@
 		"prop-types": "^15.6.1",
 		"query-string": "^5.1.1",
 		"react": "^16.8.6",
+		"react-dnd": "^10.0.2",
+		"react-dnd-html5-backend": "^10.0.2",
 		"react-dom": "^16.8.6",
 		"react-polyfills": "0.0.1"
 	}

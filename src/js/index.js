@@ -4,6 +4,8 @@ import ReactDOM from "react-dom";
 import "../styles/index.scss";
 import { Day, ContentWidget } from "./component";
 import { ContentContext, injectContent } from "./context.js";
+import { DndProvider } from "react-dnd";
+import Backend from "react-dnd-html5-backend";
 //include your index.scss file into the bundle
 
 const Main = injectContent(() => {
@@ -13,24 +15,32 @@ const Main = injectContent(() => {
 		actions.fetch(["lessons", "quiz", "project"]);
 	}, []);
 	return (
-		<div className="row no-gutters">
-			<div className="left-side col-4 bg-light">
-				<div className="content lessons">
-					<ContentWidget type="lessons" pieces={store.lessons} />
+		<DndProvider backend={Backend}>
+			<div className="row no-gutters">
+				<div className="left-side col-4 bg-light">
+					<div className="content lessons">
+						<ContentWidget type="lessons" pieces={store.lessons} />
+					</div>
+					<div className="content projects">
+						<ContentWidget type="project" pieces={store.projects} />
+					</div>
 				</div>
-				<div className="content projects">
-					<ContentWidget type="project" pieces={store.project} />
+				<div className="col-8 p-3">
+					<div className="text-right mb-2">
+						<button className="btn btn-dark btn-sm">
+							<i className="fas fa-plus" /> Add new day
+						</button>
+					</div>
+					{store.days.map((d, i) => (
+						<Day
+							key={i}
+							number={i}
+							onDrop={piece => actions.movePiece(piece, i)}
+						/>
+					))}
 				</div>
 			</div>
-			<div className="col-8 p-3">
-				<div className="text-right mb-2">
-					<button className="btn btn-dark btn-sm">
-						<i className="fas fa-plus" /> Add new day
-					</button>
-				</div>
-				<Day />
-			</div>
-		</div>
+		</DndProvider>
 	);
 });
 

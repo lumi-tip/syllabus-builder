@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import ContentPiece from "./content-piece.js";
 
 const ContentWidget = ({ pieces, type }) => {
 	const [searchToken, setSearchToken] = useState(null);
@@ -11,7 +12,7 @@ const ContentWidget = ({ pieces, type }) => {
 				<p>
 					{type + " "}
 					<input
-						placeHolder={"Click to search..."}
+						placeholder={"Click to search..."}
 						onChange={e => setSearchToken(e.target.value)}
 						value={searchToken}
 					/>
@@ -20,7 +21,7 @@ const ContentWidget = ({ pieces, type }) => {
 			{pieces
 				.filter(p => !searchToken || p.title.includes(searchToken))
 				.map((l, i) => (
-					<li key={i}>{l.title}</li>
+					<ContentPiece key={i} type={type} title={l.title} />
 				))}
 		</ul>
 	);

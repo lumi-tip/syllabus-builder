@@ -10,6 +10,12 @@ API.setOptions({
 	apiPath: "https://api.breatheco.de"
 });
 
+const mapEntity = {
+    "lesson": "lessons",
+    "project": "projects",
+    "replit": "replits",
+    "quiz": "quizzes"
+}
 export function injectContent(Child) {
 	const StoreWrapper = props => {
 		const [store, setStore] = useState({
@@ -27,7 +33,7 @@ export function injectContent(Child) {
 							API[entity]()
 								.all()
 								.then(data => {
-									setStore({ ...store, [entity]: data });
+									setStore({ ...store, [mapEntity[entity]]: data });
 									resolve(data);
 								});
 						})
