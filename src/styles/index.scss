@@ -1,21 +1,27 @@
 @import "~bootstrap/scss/bootstrap.scss";
 
+li.content-piece{ font-size: 12px; display: inline-block; background: #BDBDBD; padding: 2px; }
+li.content-piece:hover{  background: #BFBFBF; }
+
+.content-widget{
+    font-size: 12px;
+    h3{ font-size: 16px; text-decoration: underline; cursor: pointer; display: inline; }
+}
 .left-side{
     overflow-y: auto;
     height: 100vh;
     padding: 5px;
     .content{
-        font-size: 12px;
         background: grey;
         padding: 5px;
         margin-bottom: 5px;
         ul{ padding: 0; }
-        li{ display: inline-block; background: #BDBDBD; padding: 2px; cursor: pointer; }
-        li:hover{  background: #BFBFBF; }
+        li{cursor: pointer;}
     }
 }
 .day{
     border-radius: 5px;
+    margin-bottom: 5px;
     h3{ font-size: 18px; padding: 5px 5px 0px 5px;}
     h4{ font-size: 16px; padding: 5px 5px 0px 5px; }
 }

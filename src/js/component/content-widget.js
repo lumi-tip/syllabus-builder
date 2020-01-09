@@ -4,26 +4,41 @@ import ContentPiece from "./content-piece.js";
 
 const ContentWidget = ({ pieces, type }) => {
 	const [searchToken, setSearchToken] = useState(null);
+	const [collapsed, setCollapsed] = useState(true);
 	return (
-		<ul>
+		<div className="content-widget">
 			{pieces.length == 0 ? (
-				<p>No {type.toLowerCase()} to show</p>
+				<div>No {type.toLowerCase()} to show</div>
 			) : (
-				<p>
-					{type + " "}
+				<div>
+					<h3 onClick={() => setCollapsed(!collapsed)}>
+						{type + " "}
+					</h3>
 					<input
 						placeholder={"Click to search..."}
 						onChange={e => setSearchToken(e.target.value)}
 						value={searchToken}
 					/>
-				</p>
+				</div>
 			)}
-			{pieces
-				.filter(p => !searchToken || p.title.includes(searchToken))
-				.map((l, i) => (
-					<ContentPiece key={i} type={type} title={l.title} />
-				))}
-		</ul>
+			<ul
+				className="p-0"
+				style={{
+					height: collapsed ? "100px" : "400px",
+					overflow: "auto"
+				}}>
+				{pieces
+					.filter(p => !searchToken || p.title.includes(searchToken))
+					.map((l, i) => (
+						<ContentPiece
+							key={i}
+							type={type}
+							title={l.title}
+							data={l}
+						/>
+					))}
+			</ul>
+		</div>
 	);
 };
 ContentWidget.propTypes = {
@@ -32,6 +47,7 @@ ContentWidget.propTypes = {
 };
 
 ContentWidget.defaultProps = {
-	type: ""
+	type: "",
+	pieces: []
 };
 export default ContentWidget;

@@ -243,7 +243,7 @@ class Wrapper {
 				return this.get(url + "/project/all");
 			}
 		};
-	},
+	}
 	replit() {
 		let url = this.options.assetsPath;
 		return {
@@ -251,7 +251,7 @@ class Wrapper {
 				return this.get(url + "/replit/all");
 			}
 		};
-	},
+	}
 	quiz() {
 		let url = this.options.assetsPath;
 		return {
@@ -259,7 +259,7 @@ class Wrapper {
 				return this.get(url + "/quiz/all");
 			}
 		};
-	},
+	}
 	user() {
 		let url = this.options.apiPath;
 		return {
