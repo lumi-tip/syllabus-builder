@@ -47,7 +47,13 @@ const Day = ({ number, data }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [concept, setConcept] = useState("");
 	return (
-		<div className="day bg-light">
+		<div className="day bg-light position-relative">
+			<div className={"drag-up"}>
+				<i className="fas fa-chevron-up" />
+			</div>
+			<div className={"drag-down"}>
+				<i className="fas fa-chevron-down" />
+			</div>
 			<h3>
 				Day {data.number}:{" "}
 				<SmartInput

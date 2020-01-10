@@ -7,32 +7,48 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type }) =>
 	const [value, setValue] = useState(initialValue);
 	const [timer, setTimer] = useState(null);
 
-	const mix = {
-		text: props => <input type="text" {...props} />,
-		textarea: props => <textarea {...props} />
-	};
-	const Component = mix[type];
-
 	useEffect(() => {
 		setTimer(null);
 	}, []);
 
-	return (
-		<Component
-			className={className}
-			placeholder={placeholder}
-			onChange={e => {
-				clearTimeout(timer);
-				setValue(e.target.value);
-				setTimer(setTimeout(() => onChange(value), WAIT_INTERVAL));
-			}}
-			onKeyDown={e => {
-				if (e.charCode === ENTER_KEY) {
-					onChange(value);
-				}
-			}}
-		/>
-	);
+	if (type === "textarea")
+		return (
+			<textarea
+				key="key"
+				className={className}
+				placeholder={placeholder}
+				value={value}
+				onChange={e => {
+					clearTimeout(timer);
+					setValue(e.target.value);
+					setTimer(setTimeout(() => onChange(value), WAIT_INTERVAL));
+				}}
+				onKeyDown={e => {
+					if (e.charCode === ENTER_KEY) {
+						onChange(value);
+					}
+				}}
+			/>
+		);
+	else if (type === "text")
+		return (
+			<input
+				type="text"
+				className={className}
+				placeholder={placeholder}
+				value={value}
+				onChange={e => {
+					clearTimeout(timer);
+					setValue(e.target.value);
+					setTimer(setTimeout(() => onChange(value), WAIT_INTERVAL));
+				}}
+				onKeyDown={e => {
+					if (e.charCode === ENTER_KEY) {
+						onChange(value);
+					}
+				}}
+			/>
+		);
 };
 SmartInput.propTypes = {
 	className: PropTypes.string,
