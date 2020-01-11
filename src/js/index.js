@@ -2,10 +2,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import "../styles/index.scss";
-import { Day, ContentWidget } from "./component";
+import { Day, ContentWidget, UploadSyllabus, SyllabusDetails } from "./component";
 import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
+import { Notifier, Notify } from "bc-react-notifier";
 //include your index.scss file into the bundle
 
 const Main = injectContent(() => {
@@ -17,10 +18,12 @@ const Main = injectContent(() => {
 		actions.fetch("project");
 		actions.fetch("replit");
 	}, []);
+	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	return (
 		<DndProvider backend={Backend}>
+			<Notifier />
 			<div className="row no-gutters">
-				<div className="left-side col-4 col-md-3 bg-light">
+				<div className="left-side col-4 col-md-3 bg-light pt-0">
 					<div className="content lessons">
 						<ContentWidget type="lesson" pieces={store.lessons} />
 					</div>
@@ -34,14 +37,61 @@ const Main = injectContent(() => {
 						<ContentWidget type="quiz" pieces={store.quizzes} />
 					</div>
 				</div>
-				<div className="col-8 col-md-9 p-3">
+				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3">
 					<div className="text-right mb-2">
 						<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
 							<i className="fas fa-plus" /> Add new day
 						</button>
+						<button
+							className="btn btn-dark btn-sm"
+							onClick={() => {
+								let noti = Notify.add(
+									"info",
+									UploadSyllabus,
+									answer => {
+										console.log("The user answer is: ", answer);
+										noti.remove();
+									},
+									9999999999999
+								);
+								actions.upload();
+							}}>
+							<i className="fas fa-file-upload" /> Upload Syllabus
+						</button>
+						<button className="btn btn-dark btn-sm" onClick={() => actions.download()}>
+							<i className="fas fa-file-download" /> Download Syllabus
+						</button>
+						<button
+							className="btn btn-dark btn-sm"
+							onClick={() => {
+								let noti = Notify.add(
+									"info",
+									({ onConfirm }) => <SyllabusDetails onConfirm={onConfirm} profiles={store.profiles} />,
+									answer => {
+										noti.remove();
+									},
+									9999999999999
+								);
+								actions.upload();
+							}}>
+							<i className="fas fa-bars" /> Details
+						</button>
 					</div>
-					{store.days.sort((a, b) => (a.number < b.number ? 0 : 1)).map((d, i) => (
-						<Day key={i} data={d} />
+					{sortedDays.map((d, i) => (
+						<Day
+							key={d.id.toString() + d.position.toString()}
+							data={d}
+							onMoveUp={() => {
+								const other = store.days.find(_day => _day.position === d.position - 1);
+								actions.days().update(d.id, { ...d, position: d.position - 1 });
+								actions.days().update(other.id, { ...other, position: other.position + 1 });
+							}}
+							onMoveDown={() => {
+								const other = store.days.find(_day => _day.position === d.position + 1);
+								actions.days().update(d.id, { ...d, position: d.position + 1 });
+								actions.days().update(other.id, { ...other, position: other.position - 1 });
+							}}
+						/>
 					))}
 				</div>
 			</div>

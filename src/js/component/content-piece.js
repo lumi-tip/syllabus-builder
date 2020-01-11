@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
 
-const ContentPiece = ({ type, data, onDelete }) => {
+const ContentPiece = ({ data, onDelete }) => {
 	const [{ isDragging }, drag] = useDrag({
-		item: { type, data },
+		item: { type: data.type, data },
 		collect: monitor => ({
 			isDragging: !!monitor.isDragging()
 		})
@@ -22,7 +22,6 @@ const ContentPiece = ({ type, data, onDelete }) => {
 	);
 };
 ContentPiece.propTypes = {
-	type: PropTypes.string,
 	data: PropTypes.object,
 	onDelete: PropTypes.func
 };

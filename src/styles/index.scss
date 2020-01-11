@@ -9,20 +9,29 @@ li.content-piece{
 }
 li.content-piece:hover{  background: #ededed; }
 
+input, textarea{ font-size: 12px; }
 input.transparent, textarea.transparent{
     background: none;
     border: none;
     &:focus {
         outline:none;
     }
+    &::placeholder{
+        color: #404040;
+    }
 }
 
 .content-widget{
     font-size: 12px;
-    h3{ font-size: 16px; text-decoration: underline; cursor: pointer; display: inline; }
+    h3{ 
+        font-size: 16px; text-decoration: underline; cursor: pointer; text-transform: capitalize; 
+        float: left;
+    }
+    select{font-size: 12px;}
 }
 .left-side{
     overflow-y: auto;
+    position: fixed;
     height: 100vh;
     padding: 5px;
     .content{
@@ -36,8 +45,16 @@ input.transparent, textarea.transparent{
 .day{
     border-radius: 5px;
     margin-bottom: 5px;
-    h3{ font-size: 18px; padding: 5px 5px 0px 5px;}
+    h3{ font-size: 18px; padding: 5px 5px 0px 25px; }
     h4{ font-size: 16px; padding: 5px 5px 0px 5px; }
-    .drag-up{ top: 0; left: 0; position: absolute; }
-    .drag-down{ bottom: 0; left: 0; position: absolute; }
+    .drag-up,.drag-down{ left: 0; position: absolute; background: black; color: white; padding: 0px 3px; z-index: 2; }
+    .drag-up{ top: 0; border-radius: 5px 0px 0px 0px; }
+    .drag-down{ bottom: 0; border-radius: 0px 0px 0px 5px; }
+}
+.bcnotifier{
+    display: none;
+    margin: 0; padding: 0;
+    li{ padding: 0; }
+    &.active{ display: block;}
+    .alert{ margin: 0; }
 }

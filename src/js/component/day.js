@@ -1,9 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
-import ReactTags from "react-tag-autocomplete";
 
 const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 	const [{ isOver, canDrop }, drop] = useDrop({
@@ -24,9 +23,9 @@ const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 			<h4>{heading}</h4>
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
-				{pieces.map(p => (
-					<ContentPiece key={p.slug} type={p.type} data={p} onDelete={() => onDelete(p)} />
-				))}
+				{pieces.map(p => {
+					return <ContentPiece key={p.slug} type={p.type} data={p} onDelete={() => onDelete(p)} />;
+				})}
 			</ul>
 		</div>
 	);
@@ -43,24 +42,41 @@ Column.defaultProps = {
 	type: null
 };
 
-const Day = ({ number, data }) => {
+const Day = ({ data, onMoveUp, onMoveDown }) => {
 	const { store, actions } = useContext(ContentContext);
+	const [_data, setData] = useState(data);
 	const [concept, setConcept] = useState("");
+
+	useEffect(
+		() => {
+			let updated = false;
+			for (let key in data) {
+				if (data[key] != _data[key]) updated = true;
+			}
+			if (updated) setData(data);
+		},
+		[data]
+	);
+
 	return (
 		<div className="day bg-light position-relative">
-			<div className={"drag-up"}>
-				<i className="fas fa-chevron-up" />
-			</div>
-			<div className={"drag-down"}>
-				<i className="fas fa-chevron-down" />
-			</div>
+			{_data.position > 1 && (
+				<div className={"drag-up pointer"} onClick={() => onMoveUp()}>
+					<i className="fas fa-chevron-up" />
+				</div>
+			)}
+			{_data.position < store.days.length && (
+				<div className={"drag-down pointer"} onClick={() => onMoveDown()}>
+					<i className="fas fa-chevron-down" />
+				</div>
+			)}
 			<h3>
-				Day {data.number}:{" "}
+				Day {_data.label}:{" "}
 				<SmartInput
 					className="transparent"
 					placeholder="Write the date label..."
-					onChange={val => actions.days().update({ ...data, label: val })}
-					initialValue={data.label}
+					onChange={label => actions.days().update(_data.id, { ..._data, label })}
+					initialValue={_data.label}
 				/>
 			</h3>
 			<div className="row no-gutters">
@@ -69,8 +85,8 @@ const Day = ({ number, data }) => {
 						type="textarea"
 						className="transparent w-100"
 						placeholder="Add a description for the students..."
-						onChange={teacher_instructions => actions.days().update({ ...data, label: teacher_instructions })}
-						initialValue={data.teacher_instructions || data.instructions}
+						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
+						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
 				</div>
 				<div className="col-6 pl-1">
@@ -78,25 +94,18 @@ const Day = ({ number, data }) => {
 						type="textarea"
 						className="transparent w-100"
 						placeholder="Add a description for the teacher..."
-						onChange={description => actions.days().update({ ...data, description })}
-						initialValue={data.description}
+						onChange={description => actions.days().update(_data.id, { ..._data, description })}
+						initialValue={_data.description}
 					/>
 				</div>
 				<div className="col-12 pl-1">
-					<SmartInput
-						type="textarea"
-						className="transparent w-100"
-						placeholder="Any particular homework?"
-						onChange={homework => actions.days().update({ ...data, homework })}
-						initialValue={data.homework}
-					/>
-				</div>
-				<div className="col-12 pl-1">
-					{data["key-concepts"].map(c => (
+					{_data["key-concepts"].map(c => (
 						<span key={c} className="badge badge-dark mx-1">
 							{c}{" "}
 							<i
-								onClick={() => actions.days().update({ ...data, ["key-concepts"]: data["key-concepts"].filter(kc => kc != c) })}
+								onClick={() =>
+									actions.days().update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
+								}
 								className="fas fa-trash-alt pointer p-1"
 							/>
 						</span>
@@ -109,7 +118,7 @@ const Day = ({ number, data }) => {
 						onChange={e => setConcept(e.target.value)}
 						onKeyPress={e => {
 							if (e.charCode == 13) {
-								actions.days().update({ ...data, ["key-concepts"]: data["key-concepts"].concat([concept]) });
+								actions.days().update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].concat([concept]) });
 								setConcept("");
 							}
 						}}
@@ -120,79 +129,91 @@ const Day = ({ number, data }) => {
 				<Column
 					heading="Lessons"
 					type="lesson"
-					pieces={data.lessons}
+					pieces={_data.lessons}
 					onDrop={item =>
 						actions.pieces().in(item, {
-							number: data.number,
-							lessons: data.lessons.concat([item.data])
+							id: _data.id,
+							lessons: _data.lessons.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
-							number: data.number,
-							lessons: data.lessons.filter(l => l.slug != item.data.slug)
+							id: _data.id,
+							lessons: _data.lessons.filter(l => l.slug != item.data.slug)
 						})
 					}
 				/>
 				<Column
 					heading="Replits"
 					type="replit"
-					pieces={data.replits}
+					pieces={_data.replits}
 					onDrop={item =>
 						actions.pieces().in(item, {
-							number: data.number,
-							replits: data.replits.concat([item.data])
+							id: _data.id,
+							replits: _data.replits.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
-							number: data.number,
-							replits: data.replits.filter(l => l.slug != item.data.slug)
+							id: _data.id,
+							replits: _data.replits.filter(l => l.slug != item.data.slug)
 						})
 					}
 				/>
 				<Column
 					heading="Project"
 					type="project"
-					pieces={data.projects}
+					pieces={_data.projects}
 					onDrop={item =>
 						actions.pieces().in(item, {
-							number: data.number,
-							projects: data.projects.concat([item.data])
+							id: _data.id,
+							projects: _data.projects.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
-							number: data.number,
-							projects: data.projects.filter(l => l.slug != item.data.slug)
+							id: _data.id,
+							projects: _data.projects.filter(l => l.slug != item.data.slug)
 						})
 					}
 				/>
 				<Column
 					heading="Quizzes"
 					type="quiz"
-					pieces={data.quizzes}
+					pieces={_data.quizzes}
 					onDrop={item =>
 						actions.pieces().in(item, {
-							number: data.number,
-							quizzes: data.quizzes.concat([item.data])
+							id: _data.id,
+							quizzes: _data.quizzes.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
-							number: data.number,
-							quizzes: data.quizzes.filter(l => l.slug != item.data.slug)
+							id: _data.id,
+							quizzes: _data.quizzes.filter(l => l.slug != item.data.slug)
 						})
 					}
 				/>
+			</div>
+			<div className="row no-gutters">
+				<div className="col-12 pl-1">
+					<SmartInput
+						type="textarea"
+						className="transparent w-100"
+						placeholder="Any particular homework?"
+						onChange={homework => actions.days().update(_data.id, { ..._data, homework })}
+						initialValue={_data.homework}
+					/>
+				</div>
 			</div>
 		</div>
 	);
 };
 Day.propTypes = {
-	number: PropTypes.number,
 	onDrop: PropTypes.func,
 	onUpdate: PropTypes.func,
+	onMoveUp: PropTypes.func,
+	onMoveDown: PropTypes.func,
 	data: PropTypes.object
 };
 export default Day;

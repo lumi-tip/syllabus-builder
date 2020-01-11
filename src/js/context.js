@@ -22,6 +22,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			days: [],
+			info: {
+				label: "",
+				profile: null,
+				description: ""
+			},
+			profiles: [],
 			lessons: [],
 			projects: [],
 			replits: [],
@@ -49,16 +55,43 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 				);
 			},
+			upload: url => {
+				fetch(url)
+					.then(resp => {
+						if (resp.ok) {
+							return resp.json();
+						} else throw new Error("There was an error code " + resp.status);
+					})
+					.then(json => {
+						setStore({ days: json.days });
+					})
+					.catch();
+			},
+			download: () => {
+				const store = getStore();
+				var dataStr =
+					"data:text/json;charset=utf-8," +
+					encodeURIComponent(
+						JSON.stringify({
+							...store.info,
+							days: store.days
+						})
+					);
+				var dlAnchorElem = document.getElementById("downloadAnchorElem");
+				dlAnchorElem.setAttribute("href", dataStr);
+				dlAnchorElem.setAttribute("download", store.info.profile ? store.info.profile + ".json" : "syllabus.json");
+				dlAnchorElem.click();
+			},
 			pieces: function() {
 				const store = getStore();
 				return {
 					in: (piece, day) => {
 						this.pieces().delete(piece);
-						this.days().update(day);
+						this.days().update(day.id, day);
 					},
 					out: (piece, day) => {
 						this.pieces().add(piece);
-						this.days().update(day);
+						this.days().update(day.id, day);
 					},
 					add: piece =>
 						setStore({
@@ -77,7 +110,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 						setStore({
 							days: store.days.concat([
 								{
-									number: store.days.length + 1,
+									id: store.days.length + 1,
+									position: store.days.length + 1,
 									label: "",
 									"key-concepts": [],
 									lessons: [],
@@ -87,11 +121,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 								}
 							])
 						}),
-					update: day => {
+					update: (id, day) => {
 						const store = getStore();
 						setStore({
 							days: store.days.map(d => {
-								if (d.number != day.number) return d;
+								if (d.id != id) return d;
 								else return { ...d, ...day };
 							})
 						});
