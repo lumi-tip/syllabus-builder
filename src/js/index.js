@@ -13,15 +13,11 @@ const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 
 	useEffect(() => {
-		actions.fetch("lesson");
-		actions.fetch("quiz");
-		actions.fetch("project");
-		actions.fetch("replit");
+		actions.fetch(["lesson", "quiz", "project", "replit", "profile"]);
 	}, []);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	return (
 		<DndProvider backend={Backend}>
-			<Notifier />
 			<div className="row no-gutters">
 				<div className="left-side col-4 col-md-3 bg-light pt-0">
 					<div className="content lessons">
@@ -37,8 +33,9 @@ const Main = injectContent(() => {
 						<ContentWidget type="quiz" pieces={store.quizzes} />
 					</div>
 				</div>
-				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3">
-					<div className="text-right mb-2">
+				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
+					<Notifier />
+					<div className="text-right mb-2 mt-3">
 						<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
 							<i className="fas fa-plus" /> Add new day
 						</button>
@@ -66,13 +63,13 @@ const Main = injectContent(() => {
 							onClick={() => {
 								let noti = Notify.add(
 									"info",
-									({ onConfirm }) => <SyllabusDetails onConfirm={onConfirm} profiles={store.profiles} />,
+									SyllabusDetails,
 									answer => {
+										if (answer.value) actions.setInfo(answer.data);
 										noti.remove();
 									},
 									9999999999999
 								);
-								actions.upload();
 							}}>
 							<i className="fas fa-bars" /> Details
 						</button>

@@ -71,7 +71,7 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 				</div>
 			)}
 			<h3>
-				Day {_data.label}:{" "}
+				Day {_data.position}:{" "}
 				<SmartInput
 					className="transparent"
 					placeholder="Write the date label..."

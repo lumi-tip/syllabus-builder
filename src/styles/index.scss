@@ -2,6 +2,7 @@
 
 .pointer{ cursor: pointer; }
 
+ul li{ list-style: none; }
 li.content-piece{ 
     font-size: 12px; display: inline-block; background: #BDBDBD; padding: 3px; 
     margin: 1px;
@@ -56,5 +57,7 @@ input.transparent, textarea.transparent{
     margin: 0; padding: 0;
     li{ padding: 0; }
     &.active{ display: block;}
-    .alert{ margin: 0; }
+    .alert{ margin: 0; padding: 0;
+        &.alert-info{ background-color: transparent; border: none; }
+    }
 }

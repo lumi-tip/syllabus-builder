@@ -15,7 +15,8 @@ const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
 	replit: "replits",
-	quiz: "quizzes"
+	quiz: "quizzes",
+	profile: "profiles"
 };
 
 const getState = ({ getStore, getActions, setStore }) => {
@@ -42,7 +43,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 							//fetch('https://assets.breatheco.de/apis/lesson/all/v2')
 							API[entity]()
 								.all()
-								.then(data => {
+								.then(_data => {
+									const data = _data.data || _data;
 									const newStore = {
 										[mapEntity[entity]]: data.map(e => {
 											e.type = entity;
@@ -67,15 +69,37 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 					.catch();
 			},
+			setInfo: data => {
+				setStore({ info: { ...data } });
+			},
 			download: () => {
 				const store = getStore();
 				var dataStr =
 					"data:text/json;charset=utf-8," +
 					encodeURIComponent(
-						JSON.stringify({
-							...store.info,
-							days: store.days
-						})
+						JSON.stringify(
+							{
+								...store.info,
+								days: store.days.map(d => ({
+									...d,
+									projects: undefined,
+									project:
+										d.projects.length == 0
+											? undefined
+											: {
+													title: d.projects[0].title,
+													instructions: `https://projects.breatheco.de/project/${d.projects[0].slug}`
+											  },
+									assignments: d.projects.map(p => p.slug),
+									replits: d.replits.map(e => ({
+										title: e.title,
+										slug: e.slug
+									}))
+								}))
+							},
+							null,
+							"   "
+						)
 					);
 				var dlAnchorElem = document.getElementById("downloadAnchorElem");
 				dlAnchorElem.setAttribute("href", dataStr);
