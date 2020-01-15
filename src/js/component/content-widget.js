@@ -48,7 +48,7 @@ const ContentWidget = ({ pieces, type, className }) => {
 				</div>
 			)}
 			<ul
-				className="p-0"
+				className="p-0 w-100"
 				style={{
 					height: collapsed ? "100px" : "400px",
 					overflow: "auto"

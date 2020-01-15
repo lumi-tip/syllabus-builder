@@ -8,9 +8,10 @@ export const UploadSyllabus = ({ onConfirm }) => {
 		<div className="alert alert-light">
 			<input
 				type="text"
+				readOnly={typeof value.content != "undefined"}
 				className="form-control"
 				placeholder={"Type the syllabus URL here. E.g: https://domain.com/syllabus.json"}
-				value={value}
+				value={value.content || value}
 				onChange={e => setValue(e.target.value)}
 			/>
 			<input
@@ -19,10 +20,11 @@ export const UploadSyllabus = ({ onConfirm }) => {
 				placeholder={"Or browser for a file"}
 				onChange={e => {
 					const reader = new FileReader();
+					const files = e.target.files;
 					reader.onload = () => {
-						setValue(reader.result);
+						setValue({ name: files[0].name, content: reader.result });
 					};
-					reader.readAsText(e.target.files[0]);
+					reader.readAsText(files[0]);
 				}}
 			/>
 			<button className="btn btn-success mr-2" onClick={() => value != "" && onConfirm({ value: true, url: value })}>
@@ -41,9 +43,9 @@ UploadSyllabus.propTypes = {
 
 export const SyllabusDetails = ({ onConfirm }) => {
 	const { store } = useContext(ContentContext);
-	const [label, setLabel] = useState("");
+	const [label, setLabel] = useState(store.info.label);
 	const [profile, setProfile] = useState(store.info.profile);
-	const [desc, setDesc] = useState("");
+	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(1);
 
 	return (
@@ -107,7 +109,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						onClick={() =>
 							onConfirm({
 								value: true,
-								data: { profile, description: desc, label, slug: profile + "v." + version }
+								data: { profile, description: desc, label, slug: profile + ".v" + version }
 							})
 						}>
 						Save

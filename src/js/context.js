@@ -61,8 +61,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			upload: data => {
 				//if its not a url
-				if (!data.startsWith("http")) {
-					const content = JSON.parse(data);
+				if (!data.content.startsWith("http") && typeof data.content === "string") {
+					const content = JSON.parse(data.content);
+					const pieces = data.content.split(",");
+					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content;
 					setStore({
 						days: days.map((d, i) => ({
@@ -86,7 +88,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								return l;
 							})
 						})),
-						info: { profile, label, description }
+						info: { slug: profile, profile, label, description, version }
 					});
 				} else
 					fetch(data)
@@ -97,7 +99,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 						.then(json => {
 							const { days, profile, label, description } = json;
-							setStore({ days, info: { profile, label, description } });
+							const pieces = data.split(",");
+							const version = pieces.length === 3 ? pieces[1] : "";
+							setStore({ days, info: { slug: profile, profile, label, description, version } });
 						})
 						.catch();
 			},

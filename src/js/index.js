@@ -21,16 +21,16 @@ const Main = injectContent(() => {
 			<div className="row no-gutters">
 				<div className="left-side col-4 col-md-3 bg-light pt-0">
 					<div className="content lessons">
-						<ContentWidget className="w-100" type="lesson" pieces={store.lessons} />
+						<ContentWidget type="lesson" pieces={store.lessons} />
 					</div>
 					<div className="content replits">
-						<ContentWidget className="w-100" type="replit" pieces={store.replits} />
+						<ContentWidget type="replit" pieces={store.replits} />
 					</div>
 					<div className="content projects">
-						<ContentWidget className="w-100" type="project" pieces={store.projects} />
+						<ContentWidget type="project" pieces={store.projects} />
 					</div>
 					<div className="content quizzes">
-						<ContentWidget className="w-100" type="quiz" pieces={store.quizzes} />
+						<ContentWidget type="quiz" pieces={store.quizzes} />
 					</div>
 				</div>
 				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
