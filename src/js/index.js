@@ -21,20 +21,26 @@ const Main = injectContent(() => {
 			<div className="row no-gutters">
 				<div className="left-side col-4 col-md-3 bg-light pt-0">
 					<div className="content lessons">
-						<ContentWidget type="lesson" pieces={store.lessons} />
+						<ContentWidget className="w-100" type="lesson" pieces={store.lessons} />
 					</div>
 					<div className="content replits">
-						<ContentWidget type="replit" pieces={store.replits} />
+						<ContentWidget className="w-100" type="replit" pieces={store.replits} />
 					</div>
 					<div className="content projects">
-						<ContentWidget type="project" pieces={store.projects} />
+						<ContentWidget className="w-100" type="project" pieces={store.projects} />
 					</div>
 					<div className="content quizzes">
-						<ContentWidget type="quiz" pieces={store.quizzes} />
+						<ContentWidget className="w-100" type="quiz" pieces={store.quizzes} />
 					</div>
 				</div>
 				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
 					<Notifier />
+					{store.info.label &&
+						store.info.label != "" && (
+							<div>
+								{store.info.label}: {store.info.slug}
+							</div>
+						)}
 					<div className="text-right mb-2 mt-3">
 						<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
 							<i className="fas fa-plus" /> Add new day
@@ -46,12 +52,11 @@ const Main = injectContent(() => {
 									"info",
 									UploadSyllabus,
 									answer => {
-										console.log("The user answer is: ", answer);
+										if (answer.value) actions.upload(answer.url);
 										noti.remove();
 									},
 									9999999999999
 								);
-								actions.upload();
 							}}>
 							<i className="fas fa-file-upload" /> Upload Syllabus
 						</button>
@@ -87,6 +92,9 @@ const Main = injectContent(() => {
 								const other = store.days.find(_day => _day.position === d.position + 1);
 								actions.days().update(d.id, { ...d, position: d.position + 1 });
 								actions.days().update(other.id, { ...other, position: other.position - 1 });
+							}}
+							onDelete={id => {
+								actions.days().delete(id);
 							}}
 						/>
 					))}

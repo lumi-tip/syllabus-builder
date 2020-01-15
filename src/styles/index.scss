@@ -5,11 +5,13 @@
 ul li{ list-style: none; }
 li.content-piece{ 
     font-size: 12px; display: inline-block; background: #BDBDBD; padding: 3px; 
+    border-radius: 3px;
     margin: 1px;
     i:hover{ background: rgba(0, 0, 0, 0.2) }
 }
 li.content-piece:hover{  background: #ededed; }
 
+.bg-white-light{ background: rgba(255,255,255,0.7) !important;}
 input, textarea{ font-size: 12px; }
 input.transparent, textarea.transparent{
     background: none;

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 const WAIT_INTERVAL = 2000;
 const ENTER_KEY = 13;
 
-const SmartInput = ({ className, placeholder, onChange, initialValue, type }) => {
+const SmartInput = ({ className, placeholder, onChange, initialValue, type, style }) => {
 	const [value, setValue] = useState(initialValue);
 	const [timer, setTimer] = useState(null);
 
@@ -23,6 +23,7 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type }) =>
 			<textarea
 				key="key"
 				className={className}
+				style={style}
 				placeholder={placeholder}
 				value={value}
 				onChange={e => {
@@ -41,6 +42,7 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type }) =>
 		return (
 			<input
 				type="text"
+				style={style}
 				className={className}
 				placeholder={placeholder}
 				value={value}
@@ -62,10 +64,12 @@ SmartInput.propTypes = {
 	type: PropTypes.string,
 	placeholder: PropTypes.string,
 	initialValue: PropTypes.string,
+	style: PropTypes.object,
 	onChange: PropTypes.func
 };
 SmartInput.defaultProps = {
 	className: "",
+	style: null,
 	type: "text",
 	initialValue: "",
 	placeholder: ""

@@ -13,6 +13,18 @@ export const UploadSyllabus = ({ onConfirm }) => {
 				value={value}
 				onChange={e => setValue(e.target.value)}
 			/>
+			<input
+				type="file"
+				className="form-control"
+				placeholder={"Or browser for a file"}
+				onChange={e => {
+					const reader = new FileReader();
+					reader.onload = () => {
+						setValue(reader.result);
+					};
+					reader.readAsText(e.target.files[0]);
+				}}
+			/>
 			<button className="btn btn-success mr-2" onClick={() => value != "" && onConfirm({ value: true, url: value })}>
 				Save
 			</button>
@@ -32,6 +44,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [label, setLabel] = useState("");
 	const [profile, setProfile] = useState(store.info.profile);
 	const [desc, setDesc] = useState("");
+	const [version, setVersion] = useState(1);
 
 	return (
 		<div>
@@ -46,17 +59,38 @@ export const SyllabusDetails = ({ onConfirm }) => {
 					/>
 				</div>
 				<div className="col-6">
-					<select className="form-control" onChange={e => setProfile(e.target.value)} value={profile}>
-						<option key={0} value={null}>
-							Profile
-						</option>
-						{store.profiles.map((t, i) => (
-							<option key={i} value={t.slug}>
-								{t.name}
-							</option>
-						))}
-					</select>
+					<div className="input-group mb-3">
+						<select className="form-control" onChange={e => setProfile(e.target.value)} value={profile}>
+							{store.profiles.length == 0 ? (
+								<option key={0} value={null}>
+									Loading...
+								</option>
+							) : (
+								<option key={0} value={null}>
+									Select profile
+								</option>
+							)}
+							{store.profiles.map((t, i) => (
+								<option key={i} value={t.slug}>
+									{t.name} ({t.slug})
+								</option>
+							))}
+						</select>
+						<div className="input-group-append">
+							<span className="input-group-text" id="basic-addon2">
+								v
+								<input
+									type="number"
+									min="1"
+									value={version}
+									onChange={e => parseInt(e.target.value, 10) > 0 && setVersion(e.target.value)}
+								/>
+							</span>
+						</div>
+					</div>
 				</div>
+			</div>
+			<div className="row">
 				<div className="col-12">
 					<textarea
 						className="form-control"
@@ -68,7 +102,14 @@ export const SyllabusDetails = ({ onConfirm }) => {
 			</div>
 			<div className="row">
 				<div className="col-12 text-center">
-					<button className="btn btn-success mr-2" onClick={() => onConfirm({ value: true, data: { profile, description: desc, label } })}>
+					<button
+						className="btn btn-success mr-2"
+						onClick={() =>
+							onConfirm({
+								value: true,
+								data: { profile, description: desc, label, slug: profile + "v." + version }
+							})
+						}>
 						Save
 					</button>
 					<button className="btn btn-light" onClick={() => onConfirm(false)}>

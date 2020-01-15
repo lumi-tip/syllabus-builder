@@ -25,6 +25,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			days: [],
 			info: {
 				label: "",
+				slug: "",
+				version: "",
 				profile: null,
 				description: ""
 			},
@@ -57,17 +59,47 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 				);
 			},
-			upload: url => {
-				fetch(url)
-					.then(resp => {
-						if (resp.ok) {
-							return resp.json();
-						} else throw new Error("There was an error code " + resp.status);
-					})
-					.then(json => {
-						setStore({ days: json.days });
-					})
-					.catch();
+			upload: data => {
+				//if its not a url
+				if (!data.startsWith("http")) {
+					const content = JSON.parse(data);
+					const { days, profile, label, description } = content;
+					setStore({
+						days: days.map((d, i) => ({
+							...d,
+							id: i + 1,
+							position: i + 1,
+							lessons: d.lessons.map(l => {
+								l.type = "lesson";
+								return l;
+							}),
+							replits: d.replits.map(l => {
+								l.type = "replit";
+								return l;
+							}),
+							projects: d.assignments.map(l => {
+								l.type = "project";
+								return l;
+							}),
+							quizzes: d.quizzes.map(l => {
+								l.type = "quizze";
+								return l;
+							})
+						})),
+						info: { profile, label, description }
+					});
+				} else
+					fetch(data)
+						.then(resp => {
+							if (resp.ok) {
+								return resp.json();
+							} else throw new Error("There was an error code " + resp.status);
+						})
+						.then(json => {
+							const { days, profile, label, description } = json;
+							setStore({ days, info: { profile, label, description } });
+						})
+						.catch();
 			},
 			setInfo: data => {
 				setStore({ info: { ...data } });
@@ -80,6 +112,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						JSON.stringify(
 							{
 								...store.info,
+								slug: undefined,
 								days: store.days.map(d => ({
 									...d,
 									projects: undefined,
@@ -111,7 +144,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					);
 				var dlAnchorElem = document.getElementById("downloadAnchorElem");
 				dlAnchorElem.setAttribute("href", dataStr);
-				dlAnchorElem.setAttribute("download", store.info.profile ? store.info.profile + ".json" : "syllabus.json");
+				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".json" : "syllabus.json");
 				dlAnchorElem.click();
 			},
 			pieces: function() {
@@ -160,6 +193,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 								if (d.id != id) return d;
 								else return { ...d, ...day };
 							})
+						});
+					},
+					delete: id => {
+						const store = getStore();
+						setStore({
+							days: store.days
+								.filter(d => d.id != id)
+								.sort((a, b) => (a.position > b.position ? -1 : 1))
+								.map((d, i) => {
+									return { ...d, position: i + 1 };
+								})
 						});
 					}
 				};

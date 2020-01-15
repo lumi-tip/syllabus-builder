@@ -42,7 +42,7 @@ Column.defaultProps = {
 	type: null
 };
 
-const Day = ({ data, onMoveUp, onMoveDown }) => {
+const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [_data, setData] = useState(data);
 	const [concept, setConcept] = useState("");
@@ -72,8 +72,12 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 			)}
 			<h3>
 				Day {_data.position}:{" "}
+				<div className={"pointer float-right"} onClick={() => onDelete(_data.id)}>
+					<i className="fas fa-trash" />
+				</div>
 				<SmartInput
 					className="transparent"
+					style={{ width: "300px" }}
 					placeholder="Write the date label..."
 					onChange={label => actions.days().update(_data.id, { ..._data, label })}
 					initialValue={_data.label}
@@ -83,7 +87,7 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 				<div className="col-6 pl-1">
 					<SmartInput
 						type="textarea"
-						className="transparent w-100"
+						className="transparent w-100 bg-white-light rounded"
 						placeholder="Add a description for the students..."
 						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
 						initialValue={_data.teacher_instructions || _data.instructions}
@@ -92,13 +96,13 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 				<div className="col-6 pl-1">
 					<SmartInput
 						type="textarea"
-						className="transparent w-100"
+						className="transparent w-100 bg-white-light rounded"
 						placeholder="Add a description for the teacher..."
 						onChange={description => actions.days().update(_data.id, { ..._data, description })}
 						initialValue={_data.description}
 					/>
 				</div>
-				<div className="col-12 pl-1">
+				<div className="col-12 mx-1 bg-white-light rounded">
 					{_data["key-concepts"].map(c => (
 						<span key={c} className="badge badge-dark mx-1">
 							{c}{" "}
@@ -139,7 +143,7 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							lessons: _data.lessons.filter(l => l.slug != item.data.slug)
+							lessons: _data.lessons.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
 						})
 					}
 				/>
@@ -196,10 +200,10 @@ const Day = ({ data, onMoveUp, onMoveDown }) => {
 				/>
 			</div>
 			<div className="row no-gutters">
-				<div className="col-12 pl-1">
+				<div className="col-12 px-1">
 					<SmartInput
 						type="textarea"
-						className="transparent w-100"
+						className="transparent w-100 bg-white-light rounded"
 						placeholder="Any particular homework?"
 						onChange={homework => actions.days().update(_data.id, { ..._data, homework })}
 						initialValue={_data.homework}
@@ -214,6 +218,7 @@ Day.propTypes = {
 	onUpdate: PropTypes.func,
 	onMoveUp: PropTypes.func,
 	onMoveDown: PropTypes.func,
+	onDelete: PropTypes.func,
 	data: PropTypes.object
 };
 export default Day;
