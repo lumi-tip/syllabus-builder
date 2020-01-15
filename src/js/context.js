@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
 
@@ -107,6 +107,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			setInfo: data => {
 				setStore({ info: { ...data } });
+				window.location.hash = data.slug;
 			},
 			download: () => {
 				const store = getStore();
@@ -222,13 +223,21 @@ export function injectContent(Child) {
 			getState({
 				getStore: () => state.store,
 				getActions: () => state.actions,
-				setStore: updatedStore =>
+				setStore: updatedStore => {
+					const store = Object.assign(state.store, updatedStore);
 					setState({
-						store: Object.assign(state.store, updatedStore),
+						store,
 						actions: { ...state.actions }
-					})
+					});
+					localStorage.setItem(`syllabus-${state.store.info.slug}`, JSON.stringify(store));
+				}
 			})
 		);
+		useEffect(() => {
+			let slug = window.location.hash.replace("#", "");
+			const previousStore = localStorage.getItem(`syllabus-${slug}`);
+			if (previousStore) this.setState({ store: previousStore });
+		}, []);
 		return (
 			<ContentContext.Provider value={state}>
 				<Child {...props} />

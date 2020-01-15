@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import ContentPiece from "./content-piece.js";
 
-const ContentWidget = ({ pieces, type, className }) => {
+const ContentWidget = ({ pieces, type, className, contentHeight }) => {
 	const [searchToken, setSearchToken] = useState("");
 	const [tagToken, setTagToken] = useState(null);
 	const [collapsed, setCollapsed] = useState(true);
@@ -50,7 +50,7 @@ const ContentWidget = ({ pieces, type, className }) => {
 			<ul
 				className="p-0 w-100"
 				style={{
-					height: collapsed ? "100px" : "400px",
+					maxHeight: collapsed ? contentHeight : "90vh",
 					overflow: "auto"
 				}}>
 				{pieces
@@ -73,12 +73,14 @@ const ContentWidget = ({ pieces, type, className }) => {
 ContentWidget.propTypes = {
 	pieces: PropTypes.array,
 	type: PropTypes.string,
-	className: PropTypes.string
+	className: PropTypes.string,
+	contentHeight: PropTypes.string
 };
 
 ContentWidget.defaultProps = {
 	type: "",
 	className: "",
+	contentHeight: "",
 	pieces: []
 };
 export default ContentWidget;
