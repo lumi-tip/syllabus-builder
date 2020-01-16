@@ -66,6 +66,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content;
+					const { projects } = getStore();
 					setStore({
 						days: days.map((d, i) => ({
 							...d,
@@ -79,9 +80,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 								l.type = "replit";
 								return l;
 							}),
-							projects: d.assignments.map(l => {
-								l.type = "project";
-								return l;
+							projects: d.assignments.map(p => {
+								const project = projects.find(_pro => _pro.slug === p);
+								return project;
 							}),
 							quizzes: d.quizzes.map(l => {
 								l.type = "quizze";
@@ -236,7 +237,7 @@ export function injectContent(Child) {
 		useEffect(() => {
 			let slug = window.location.hash.replace("#", "");
 			const previousStore = localStorage.getItem(`syllabus-${slug}`);
-			if (previousStore) this.setState({ store: previousStore });
+			if (previousStore) setState({ store: JSON.parse(previousStore) });
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>
