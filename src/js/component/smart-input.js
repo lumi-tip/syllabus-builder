@@ -29,7 +29,7 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 				onChange={e => {
 					clearTimeout(timer);
 					setValue(e.target.value);
-					setTimer(setTimeout(() => onChange(value), WAIT_INTERVAL));
+					setTimer(setTimeout(() => onChange(e.target.value), WAIT_INTERVAL));
 				}}
 				onKeyDown={e => {
 					if (e.charCode === ENTER_KEY) {

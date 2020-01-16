@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
 
@@ -37,25 +37,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 			quizzes: []
 		},
 		actions: {
-			fetch: models => {
+			setStore: _store => setStore(_store),
+			getStore: () => getStore(),
+			fetch: (models, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
 				const promises = models.map(
 					entity =>
 						new Promise((resolve, reject) => {
-							//fetch('https://assets.breatheco.de/apis/lesson/all/v2')
-							API[entity]()
-								.all()
-								.then(_data => {
-									const data = _data.data || _data;
-									const newStore = {
-										[mapEntity[entity]]: data.map(e => {
-											e.type = entity;
-											return e;
-										})
-									};
-									setStore(newStore);
-									resolve(data);
-								});
+							if (forceUpdate || !Array.isArray(mapEntity[entity] || mapEntity[entity].length == 0))
+								API[entity]()
+									.all()
+									.then(_data => {
+										const data = _data.data || _data;
+										const newStore = {
+											[mapEntity[entity]]: data.map(e => {
+												e.type = entity;
+												return e;
+											})
+										};
+										setStore(newStore);
+										resolve(data);
+									});
 						})
 				);
 			},
@@ -107,6 +109,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			setInfo: data => {
 				setStore({ info: { ...data } });
+				window.location.hash = data.slug;
 			},
 			download: () => {
 				const store = getStore();
@@ -222,13 +225,21 @@ export function injectContent(Child) {
 			getState({
 				getStore: () => state.store,
 				getActions: () => state.actions,
-				setStore: updatedStore =>
-					setState({
-						store: Object.assign(state.store, updatedStore),
-						actions: { ...state.actions }
-					})
+				setStore: updatedStore => {
+					const currentStore = state.actions.getStore();
+					const store = Object.assign(currentStore, updatedStore);
+					setState({ store, actions: { ...state.actions } });
+					localStorage.setItem("syllabus-" + store.info.slug, JSON.stringify(store));
+				}
 			})
 		);
+		useEffect(() => {
+			const slug = window.location.hash.replace("#", "");
+			const previousStore = localStorage.getItem("syllabus-" + slug);
+			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
+
+			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile"]), 1000);
+		}, []);
 		return (
 			<ContentContext.Provider value={state}>
 				<Child {...props} />

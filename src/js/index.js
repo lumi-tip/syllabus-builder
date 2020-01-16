@@ -12,25 +12,22 @@ import { Notifier, Notify } from "bc-react-notifier";
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 
-	useEffect(() => {
-		actions.fetch(["lesson", "quiz", "project", "replit", "profile"]);
-	}, []);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	return (
 		<DndProvider backend={Backend}>
 			<div className="row no-gutters">
 				<div className="left-side col-4 col-md-3 bg-light pt-0">
 					<div className="content lessons">
-						<ContentWidget type="lesson" pieces={store.lessons} />
+						<ContentWidget type="lesson" pieces={store.lessons} onRefresh={() => actions.fetch(["lesson"], true)} />
 					</div>
 					<div className="content replits">
-						<ContentWidget type="replit" pieces={store.replits} />
+						<ContentWidget type="replit" pieces={store.replits} onRefresh={() => actions.fetch(["replit"], true)} />
 					</div>
 					<div className="content projects">
-						<ContentWidget type="project" pieces={store.projects} />
+						<ContentWidget type="project" pieces={store.projects} onRefresh={() => actions.fetch(["project"], true)} />
 					</div>
 					<div className="content quizzes">
-						<ContentWidget type="quiz" pieces={store.quizzes} />
+						<ContentWidget type="quiz" pieces={store.quizzes} onRefresh={() => actions.fetch(["quiz"])} />
 					</div>
 				</div>
 				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
