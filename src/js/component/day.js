@@ -160,7 +160,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							replits: _data.replits.filter(l => l.slug != item.data.slug)
+							replits: _data.replits.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
 						})
 					}
 				/>
@@ -177,7 +177,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							projects: _data.projects.filter(l => l.slug != item.data.slug)
+							projects: _data.projects.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
 						})
 					}
 				/>
@@ -194,7 +194,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							quizzes: _data.quizzes.filter(l => l.slug != item.data.slug)
+							quizzes: _data.quizzes.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
 						})
 					}
 				/>
