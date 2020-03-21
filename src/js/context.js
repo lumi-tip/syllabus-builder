@@ -63,12 +63,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			upload: data => {
 				//if its not a url
-				if (!data.content.startsWith("http") && typeof data.content === "string") {
+				const { projects } = getStore();
+				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content;
-					const { projects } = getStore();
 					setStore({
 						days: days.map((d, i) => ({
 							...d,
@@ -82,7 +82,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								l.type = "replit";
 								return l;
 							}),
-							projects: d.assignments.map(p => {
+							assignments: d.assignments.map(p => {
 								const project = projects.find(_pro => _pro.slug === p);
 								return project;
 							}),
@@ -101,7 +101,25 @@ const getState = ({ getStore, getActions, setStore }) => {
 							} else throw new Error("There was an error code " + resp.status);
 						})
 						.then(json => {
-							const { days, profile, label, description } = json;
+							let { days, profile, label, description, weeks } = json;
+							if (weeks)
+								days = weeks
+									.map(w => w.days)
+									.flat()
+									.filter(d => d.label !== "Weekend")
+									.map((d, i) => ({
+										...d,
+										id: i + 1,
+										position: i + 1,
+										lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
+										replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
+										assignments: d.assignments
+											? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
+											: [],
+										quizzes: d.quizzes ? d.lessons.map(l => ({ ...l, type: "quiz" })) : [],
+										"key-concepts": d["key-concepts"] || []
+									}));
+							console.log("Days", days);
 							const pieces = data.split(",");
 							const version = pieces.length === 3 ? pieces[1] : "";
 							setStore({ days, info: { slug: profile, profile, label, description, version } });
@@ -131,7 +149,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 													title: d.projects[0].title,
 													instructions: `https://projects.breatheco.de/project/${d.projects[0].slug}`
 											  },
-									assignments: d.projects.map(p => p.slug),
+									assignments: d.assignments.map(p => p.slug),
 									replits: d.replits.map(e => ({
 										title: e.title,
 										slug: e.slug

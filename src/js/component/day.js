@@ -58,6 +58,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 		[data]
 	);
 
+	console.log("Printing day", _data);
 	return (
 		<div className="day bg-light position-relative">
 			{_data.position > 1 && (
@@ -88,7 +89,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
-						placeholder="Add a description for the students..."
+						placeholder="Add a description for the teacher..."
 						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
 						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
@@ -97,7 +98,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
-						placeholder="Add a description for the teacher..."
+						placeholder="Add a description for the dstudents..."
 						onChange={description => actions.days().update(_data.id, { ..._data, description })}
 						initialValue={_data.description}
 					/>
@@ -165,19 +166,21 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					}
 				/>
 				<Column
-					heading="Project"
+					heading="Projects"
 					type="project"
-					pieces={_data.projects}
+					pieces={_data.assignments}
 					onDrop={item =>
 						actions.pieces().in(item, {
 							id: _data.id,
-							projects: _data.projects.concat([item.data])
+							projects: _data.assignments.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							projects: _data.projects.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+							projects: _data.assignments.filter(
+								l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug)
+							)
 						})
 					}
 				/>
