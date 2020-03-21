@@ -24,7 +24,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 					{onRefresh && <i onClick={() => onRefresh()} className="fas fa-sync fa-xs float-right" />}
 					{type == "project" && (
 						<select className="form-control" onChange={e => setTagToken(e.target.value)} value={tagToken}>
-							<option key={0} value={null}>
+							<option key={0} value={""}>
 								Technology
 							</option>
 							{technologies.map((t, i) => (
@@ -36,7 +36,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 					)}
 					{type == "lesson" && (
 						<select className="form-control" onChange={e => setTagToken(e.target.value)} value={tagToken}>
-							<option key={0} value={null}>
+							<option key={0} value={""}>
 								Tag
 							</option>
 							{tags.map((t, i) => (
@@ -57,7 +57,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 				{pieces
 					.filter(p => !searchToken.toLowerCase() || p.title.toLowerCase().includes(searchToken))
 					.filter(p => {
-						if (tagToken) {
+						if (tagToken && tagToken !== "") {
 							if (type === "lesson") return p.tags ? p.tags.includes(tagToken.toLowerCase()) : false;
 							else if (type === "project") return p.technology.toLowerCase() === tagToken.toLowerCase();
 							else return true;
@@ -65,7 +65,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 						return true;
 					})
 					.map((l, i) => (
-						<ContentPiece key={i} data={l} />
+						<ContentPiece key={i} data={l} previewLink={true} />
 					))}
 			</ul>
 		</div>
