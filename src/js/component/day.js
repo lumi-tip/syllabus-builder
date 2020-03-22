@@ -172,13 +172,13 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDrop={item =>
 						actions.pieces().in(item, {
 							id: _data.id,
-							projects: _data.assignments.concat([item.data])
+							assignments: _data.assignments.concat([item.data])
 						})
 					}
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
-							projects: _data.assignments.filter(
+							assignments: _data.assignments.filter(
 								l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug)
 							)
 						})

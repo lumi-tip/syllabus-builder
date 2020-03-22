@@ -50,7 +50,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										const data = _data.data || _data;
 										const newStore = {
-											[mapEntity[entity]]: data.map(e => {
+											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
 												return e;
 											})
@@ -87,7 +87,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								return project;
 							}),
 							quizzes: d.quizzes.map(l => {
-								l.type = "quizze";
+								l.type = "quiz";
 								return l;
 							})
 						})),
@@ -116,7 +116,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 										assignments: d.assignments
 											? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
 											: [],
-										quizzes: d.quizzes ? d.lessons.map(l => ({ ...l, type: "quiz" })) : [],
+										quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
 										"key-concepts": d["key-concepts"] || []
 									}));
 							console.log("Days", days);
@@ -143,11 +143,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 									...d,
 									projects: undefined,
 									project:
-										d.projects.length == 0
+										d.assignments.length == 0
 											? undefined
 											: {
-													title: d.projects[0].title,
-													instructions: `https://projects.breatheco.de/project/${d.projects[0].slug}`
+													title: d.assignments[0].title,
+													instructions: `https://projects.breatheco.de/project/${d.assignments[0].slug}`
 											  },
 									assignments: d.assignments.map(p => p.slug),
 									replits: d.replits.map(e => ({
@@ -206,7 +206,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									label: "",
 									"key-concepts": [],
 									lessons: [],
-									projects: [],
+									assignments: [],
 									replits: [],
 									quizzes: []
 								}
