@@ -57,7 +57,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 		},
 		[data]
 	);
-
 	console.log("Printing day", _data);
 	return (
 		<div className="day bg-light position-relative">
@@ -104,17 +103,22 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					/>
 				</div>
 				<div className="col-12 mx-1 bg-white-light rounded">
-					{_data["key-concepts"].map(c => (
-						<span key={c} className="badge badge-dark mx-1">
-							{c}{" "}
-							<i
-								onClick={() =>
-									actions.days().update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
-								}
-								className="fas fa-trash-alt pointer p-1"
-							/>
-						</span>
-					))}
+					{_data["key-concepts"] !== undefined &&
+						_data["key-concepts"].map(c => {
+							return (
+								<span key={c} className="badge badge-dark mx-1">
+									{c}{" "}
+									<i
+										onClick={() =>
+											actions
+												.days()
+												.update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
+										}
+										className="fas fa-trash-alt pointer p-1"
+									/>
+								</span>
+							);
+						})}
 					<input
 						type="text"
 						placeholder={"Add a Key Concept"}

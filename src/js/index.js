@@ -1,6 +1,8 @@
 //import react into the bundle
 import React, { useContext, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import "bootstrap";
+import "jquery";
 import "../styles/index.scss";
 import { Day, ContentWidget, UploadSyllabus, SyllabusDetails } from "./component";
 import { ContentContext, injectContent } from "./context.js";
@@ -13,111 +15,162 @@ const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
+
 	return (
-		<DndProvider backend={Backend}>
-			<div className="row no-gutters">
-				<div className="left-side col-4 col-md-3 bg-light pt-0">
-					<div className="content lessons">
-						<ContentWidget
-							type="lesson"
-							contentHeight="calc(22vh - 50px)"
-							pieces={store.lessons}
-							onRefresh={() => actions.fetch(["lesson"], true)}
-						/>
-					</div>
-					<div className="content replits">
-						<ContentWidget
-							type="replit"
-							contentHeight="calc(22vh - 50px)"
-							pieces={store.replits}
-							onRefresh={() => actions.fetch(["replit"], true)}
-						/>
-					</div>
-					<div className="content projects">
-						<ContentWidget
-							type="project"
-							contentHeight="calc(22vh - 50px)"
-							pieces={store.projects}
-							onRefresh={() => actions.fetch(["project"], true)}
-						/>
-					</div>
-					<div className="content quizzes">
+		<>
+			<DndProvider backend={Backend}>
+				<div className="row no-gutters">
+					<div className="left-side col-4 col-md-3 bg-light pt-0">
+						<div className="content lessons">
+							<ContentWidget
+								type="lesson"
+								contentHeight="calc(22vh - 50px)"
+								pieces={store.lessons}
+								onRefresh={() => actions.fetch(["lesson"], true)}
+							/>
+						</div>
+						<div className="content replits">
+							<ContentWidget
+								type="replit"
+								contentHeight="calc(22vh - 50px)"
+								pieces={store.replits}
+								onRefresh={() => actions.fetch(["replit"], true)}
+							/>
+						</div>
+						<div className="content projects">
+							<ContentWidget
+								type="project"
+								contentHeight="calc(22vh - 50px)"
+								pieces={store.projects}
+								onRefresh={() => actions.fetch(["project"], true)}
+							/>
+						</div>
+						<div className="content quizzes">
+							<ContentWidget
+								type="quiz"
+								contentHeight="calc(22vh - 50px)"
+								pieces={store.quizzes}
+								onRefresh={() => actions.fetch(["quiz"])}
+							/>
+						</div>
+						{/* <div className="content quizzes">
 						<ContentWidget
 							type="quiz"
 							contentHeight="calc(22vh - 50px)"
-							pieces={store.quizzes}
-							onRefresh={() => actions.fetch(["quiz"])}
+							pieces={store.courses}
+							onRefresh={() => actions.fetch(["courseV2"])}
 						/>
+					</div> */}
 					</div>
-				</div>
-				<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
-					<Notifier />
-					{store.info.label &&
-						store.info.label != "" && (
-							<div>
-								{store.info.label}: {store.info.slug}
+					<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
+						<Notifier />
+						{store.info.label &&
+							store.info.label != "" && (
+								<div>
+									{store.info.label}: {store.info.slug}
+								</div>
+							)}
+
+						<div className="text-right mb-2 mt-3">
+							<div className="btn-group">
+								<a
+									className="btn btn-dark btn-sm dropdown-toggle"
+									href="#"
+									type="button"
+									id="dropdownMenuLink"
+									data-toggle="dropdown"
+									aria-haspopup="true"
+									aria-expanded="false">
+									Sylabus courses
+								</a>
+								<div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+									{store.courses.map((course, i) => {
+										return (
+											<a key={i} className="dropdown-item" href="#">
+												{course.slug}
+											</a>
+										);
+									})}
+									<div className="dropdown-divider" />
+									<a className="dropdown-item disabled">Version</a>
+									<div className="container">
+										<div className="row">
+											{store.sylabus.map((syllabu, i) => {
+												// console.log(syllabu);
+												return (
+													<>
+														<div key={i} className="col-md-2">
+															<span onClick={() => actions.getApiSyllabus(syllabu.version, syllabu.course)}>
+																{syllabu.version}
+															</span>
+														</div>
+													</>
+												);
+											})}
+										</div>
+									</div>
+								</div>
 							</div>
-						)}
-					<div className="text-right mb-2 mt-3">
-						<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
-							<i className="fas fa-plus" /> Add new day
-						</button>
-						<button
-							className="btn btn-dark btn-sm"
-							onClick={() => {
-								let noti = Notify.add(
-									"info",
-									UploadSyllabus,
-									answer => {
-										if (answer.value) actions.upload(answer.url);
-										noti.remove();
-									},
-									9999999999999
-								);
-							}}>
-							<i className="fas fa-file-upload" /> Upload Syllabus
-						</button>
-						<button className="btn btn-dark btn-sm" onClick={() => actions.download()}>
-							<i className="fas fa-file-download" /> Download Syllabus
-						</button>
-						<button
-							className="btn btn-dark btn-sm"
-							onClick={() => {
-								let noti = Notify.add(
-									"info",
-									SyllabusDetails,
-									answer => {
-										if (answer.value) actions.setInfo(answer.data);
-										noti.remove();
-									},
-									9999999999999
-								);
-							}}>
-							<i className="fas fa-bars" /> Details
-						</button>
+							<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
+								<i className="fas fa-plus" /> Add new day
+							</button>
+							<button
+								className="btn btn-dark btn-sm"
+								onClick={() => {
+									let noti = Notify.add(
+										"info",
+										UploadSyllabus,
+										answer => {
+											if (answer.value) actions.upload(answer.url);
+											noti.remove();
+										},
+										9999999999999
+									);
+								}}>
+								<i className="fas fa-file-upload" /> Upload Syllabus
+							</button>
+							<button className="btn btn-dark btn-sm" onClick={() => actions.download()}>
+								<i className="fas fa-file-download" /> Download Syllabus
+							</button>
+							<button
+								className="btn btn-dark btn-sm"
+								onClick={() => {
+									let noti = Notify.add(
+										"info",
+										SyllabusDetails,
+										answer => {
+											if (answer.value) actions.setInfo(answer.data);
+											noti.remove();
+										},
+										9999999999999
+									);
+								}}>
+								<i className="fas fa-bars" /> Details
+							</button>
+						</div>
+						{sortedDays.map((d, i) => (
+							<Day
+								key={d.id.toString() + d.position.toString()}
+								data={d}
+								onMoveUp={() => {
+									const other = store.days.find(_day => _day.position === d.position - 1);
+									actions.days().update(d.id, { ...d, position: d.position - 1 });
+									actions.days().update(other.id, { ...other, position: other.position + 1 });
+								}}
+								onMoveDown={() => {
+									const other = store.days.find(_day => _day.position === d.position + 1);
+									actions.days().update(d.id, { ...d, position: d.position + 1 });
+									actions.days().update(other.id, { ...other, position: other.position - 1 });
+								}}
+								onDelete={id => {
+									actions.days().delete(id);
+								}}
+							/>
+						))}
 					</div>
-					{sortedDays.map((d, i) => (
-						<Day
-							key={d.id.toString() + d.position.toString()}
-							data={d}
-							onMoveUp={() => {
-								const other = store.days.find(_day => _day.position === d.position - 1);
-								actions.days().update(d.id, { ...d, position: d.position - 1 });
-								actions.days().update(other.id, { ...other, position: other.position + 1 });
-							}}
-							onMoveDown={() => {
-								const other = store.days.find(_day => _day.position === d.position + 1);
-								actions.days().update(d.id, { ...d, position: d.position + 1 });
-								actions.days().update(other.id, { ...other, position: other.position - 1 });
-							}}
-							onDelete={id => {
-								actions.days().delete(id);
-							}}
-						/>
-					))}
 				</div>
-			</div>
-		</DndProvider>
+			</DndProvider>
+		</>
 	);
 });
 

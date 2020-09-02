@@ -8,17 +8,19 @@ API.setOptions({
 	assetsPath:
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
-	apiPath: "https://api.breatheco.de"
+	apiPath: "https://api.breatheco.de",
+	apiPathV2: "https://breathecode.herokuapp.com/v1"
 });
-
 const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
 	replit: "replits",
 	quiz: "quizzes",
-	profile: "profiles"
+	profile: "profiles",
+	sylabu: "sylabus",
+	courseV2: "courses"
 };
-
+console.log(API);
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -34,12 +36,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 			lessons: [],
 			projects: [],
 			replits: [],
-			quizzes: []
+			quizzes: [],
+			sylabus: [],
+			courses: []
 		},
+
 		actions: {
 			setStore: _store => setStore(_store),
 			getStore: () => getStore(),
 			fetch: (models, forceUpdate = false) => {
+				console.log(models);
 				if (!Array.isArray(models)) models = [models];
 				const promises = models.map(
 					entity =>
@@ -62,35 +68,54 @@ const getState = ({ getStore, getActions, setStore }) => {
 				);
 			},
 			upload: data => {
+				console.log(data);
+
 				//if its not a url
 				const { projects } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
+					console.log(content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
-					const { days, profile, label, description } = content;
+					const { days, profile, label, description } = content.json;
+
 					setStore({
-						days: days.map((d, i) => ({
-							...d,
-							id: i + 1,
-							position: i + 1,
-							lessons: d.lessons.map(l => {
-								l.type = "lesson";
-								return l;
-							}),
-							replits: d.replits.map(l => {
-								l.type = "replit";
-								return l;
-							}),
-							assignments: d.assignments.map(p => {
-								const project = projects.find(_pro => _pro.slug === p);
-								return project;
-							}),
-							quizzes: d.quizzes.map(l => {
-								l.type = "quiz";
-								return l;
-							})
-						})),
+						days: days.map((d, i) => {
+							console.log(d);
+							return {
+								...d,
+								id: i + 1,
+								position: i + 1,
+								lessons:
+									d.lesson !== undefined
+										? d.lessons.map(l => {
+												l.type = "lesson";
+												return l;
+										  })
+										: (d.lesson = []),
+								replits:
+									d.replits !== undefined
+										? Object.keys(d.replits).map(l => {
+												l.type = "replit";
+												return l;
+										  })
+										: (d.replits = []),
+								assignments:
+									d.assignments !== undefined
+										? d.assignments.map(p => {
+												const project = projects.find(_pro => _pro.slug === p);
+												return project;
+										  })
+										: (d.assignments = []),
+								quizzes:
+									d.quizzes !== undefined
+										? d.quizzes.map(l => {
+												l.type = "quiz";
+												return l;
+										  })
+										: (d.quizzes = [])
+							};
+						}),
 						info: { slug: profile, profile, label, description, version }
 					});
 				} else
@@ -194,6 +219,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 				};
 			},
+			getApiSyllabus: (version, course) => {
+				console.log(version, course);
+				fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
+					headers: {
+						"Content-type": "application/json",
+						Authorization: "Token 3dde751f27f15f0891f297617973f964f0b35632"
+					}
+				})
+					.then(resp => resp.text())
+					.then(data => {
+						console.log(data);
+						const actions = getActions();
+						actions.upload(data);
+					});
+			},
 			days: () => {
 				const store = getStore();
 				return {
@@ -257,7 +297,7 @@ export function injectContent(Child) {
 			const previousStore = localStorage.getItem("syllabus-" + slug);
 			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
 
-			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile"]), 1000);
+			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "sylabu", "courseV2"]), 1000);
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>

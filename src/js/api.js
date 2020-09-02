@@ -4,6 +4,7 @@ class Wrapper {
 		this.options = {
 			assetsPath: typeof process != "undefined" ? process.env.ASSETS_URL + "/apis" : null,
 			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
+			apiPathV2: typeof process != "undefined" ? process.env.API_URL_V2 : null,
 			_debug: typeof process != "undefined" ? process.env.DEBUG : false,
 			getToken: (type = "api") => {
 				return type == "api" ? this.apiPath : this.assetsPath;
@@ -19,6 +20,7 @@ class Wrapper {
 			delete: {}
 		};
 	}
+
 	calculatePending() {
 		for (let method in this.pending)
 			for (let path in this.pending[method])
@@ -46,14 +48,20 @@ class Wrapper {
 		return fetch(...args);
 	}
 	req(method, path, args) {
-		const token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
+		let token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
+		const params = new URLSearchParams(window.location.search);
+		const Api_key = params.get("key");
+		if (path.includes("syllabus") || path.includes("course")) token = "Token " + Api_key;
+
 		let opts = {
 			method,
 			cache: "no-cache",
 			headers: { "Content-Type": "application/json" }
 		};
-		if (token) opts.headers["Authorization"] = token;
 
+		if (token) {
+			opts.headers["Authorization"] = token;
+		}
 		if (method === "get") path += this.serialize(args).toStr();
 		else {
 			if (method == "put" && !args) throw new Error("Missing request body");
@@ -224,7 +232,7 @@ class Wrapper {
 		let url = this.options.assetsPath;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/replit/all");
+				return this.get(url + "/registry/all");
 			}
 		};
 	}
@@ -379,6 +387,47 @@ class Wrapper {
 			}
 		};
 	}
+	sylabu() {
+		let url = this.options.apiPathV2;
+		return {
+			all: () => {
+				return this.get(url + "/coursework/course/full-stack/syllabus");
+			}
+			// get: id => {
+			// 	return this.get(url + "/coursework/course/" + id);
+			// }
+			// add: args => {
+			// 	return this.put(url + "/coursework/course/", args);
+			// },
+			// update: (id, args) => {
+			// 	return this.post(url + "/coursework/course/" + id, args);
+			// },
+			// delete: id => {
+			// 	return this.delete(url + "/coursework/course/" + id);
+			// }
+		};
+	}
+	courseV2() {
+		let url = this.options.apiPathV2;
+		return {
+			all: () => {
+				return this.get(url + "/coursework/course");
+			}
+			// get: id => {
+			// 	return this.get(url + "/coursework/course/" + id);
+			// }
+			// add: args => {
+			// 	return this.put(url + "/coursework/course/", args);
+			// },
+			// update: (id, args) => {
+			// 	return this.post(url + "/coursework/course/" + id, args);
+			// },
+			// delete: id => {
+			// 	return this.delete(url + "/coursework/course/" + id);
+			// }
+		};
+	}
+
 	lesson() {
 		let url = this.options.assetsPath;
 		return {
