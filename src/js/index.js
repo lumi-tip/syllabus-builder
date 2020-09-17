@@ -1,5 +1,5 @@
 //import react into the bundle
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import ReactDOM from "react-dom";
 import "bootstrap";
 import "jquery";
@@ -9,13 +9,52 @@ import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import { Notifier, Notify } from "bc-react-notifier";
+import swal from "sweetalert";
+
 //include your index.scss file into the bundle
 
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
-
+	const [state, setState] = useState(false);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
-
+	const handleClick = course => {
+		setState(true);
+		actions.setCourseSlug(course);
+	};
+	const confirmSaveDay = () => {
+		if (store.info.slug !== "" && store.days.length > 0) {
+			swal({
+				title: "Are you sure?",
+				text: "Once save, you will be creating a new syllabus version",
+				icon: "warning",
+				buttons: true,
+				dangerMode: true
+			}).then(willSave => {
+				if (willSave) {
+					actions.saveSyllabus();
+					swal(" New syllabus version saved successfuly", {
+						icon: "success"
+					});
+				} else {
+					swal("Operation canceled by user");
+				}
+			});
+		} else if (store.info.slug === "") {
+			swal({
+				title: "Syllabus details can't be empty",
+				text: "Please fill the syllabus details to save",
+				icon: "error",
+				button: "OK"
+			});
+		} else if (store.days.length === 0) {
+			swal({
+				title: "Syllabus without days",
+				text: "A new syllabus version can't be save without days, please add new days to the syllabus",
+				icon: "error",
+				button: "OK"
+			});
+		}
+	};
 	return (
 		<>
 			<DndProvider backend={Backend}>
@@ -53,14 +92,6 @@ const Main = injectContent(() => {
 								onRefresh={() => actions.fetch(["quiz"])}
 							/>
 						</div>
-						{/* <div className="content quizzes">
-						<ContentWidget
-							type="quiz"
-							contentHeight="calc(22vh - 50px)"
-							pieces={store.courses}
-							onRefresh={() => actions.fetch(["courseV2"])}
-						/>
-					</div> */}
 					</div>
 					<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
 						<Notifier />
@@ -72,9 +103,40 @@ const Main = injectContent(() => {
 							)}
 
 						<div className="text-right mb-2 mt-3">
-							<div className="btn-group">
+							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveDay()}>
+								<i className="fas fa-save" /> Save Syllabus
+							</button>
+
+							<div className="btn-group ">
 								<a
-									className="btn btn-dark btn-sm dropdown-toggle"
+									className={"btn btn-dark btn-sm dropdown-toggle " + (state !== false ? "" : "d-none")}
+									href="#"
+									type="button"
+									id="dropdownMenuLink"
+									data-toggle="dropdown"
+									aria-haspopup="true"
+									aria-expanded="false">
+									Sylabus version
+								</a>
+								<div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+									{store.syllabus !== null && store.syllabus.length > 0 ? (
+										store.syllabus.map((syllabu, i) => {
+											return (
+												<a key={i} className="dropdown-item" href="#" onClick={() => actions.getApiSyllabus(syllabu.version)}>
+													{syllabu.version}
+												</a>
+											);
+										})
+									) : (
+										<a className="dropdown-item" href="#">
+											no version
+										</a>
+									)}
+								</div>
+							</div>
+							<div className="btn-group ">
+								<a
+									className="btn btn-dark btn-sm dropdown-toggle "
 									href="#"
 									type="button"
 									id="dropdownMenuLink"
@@ -86,29 +148,17 @@ const Main = injectContent(() => {
 								<div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
 									{store.courses.map((course, i) => {
 										return (
-											<a key={i} className="dropdown-item" href="#">
+											<a
+												key={i}
+												className="dropdown-item"
+												href="#"
+												onClick={() => {
+													handleClick(course.slug);
+												}}>
 												{course.slug}
 											</a>
 										);
 									})}
-									<div className="dropdown-divider" />
-									<a className="dropdown-item disabled">Version</a>
-									<div className="container">
-										<div className="row">
-											{store.sylabus.map((syllabu, i) => {
-												// console.log(syllabu);
-												return (
-													<>
-														<div key={i} className="col-md-2">
-															<span onClick={() => actions.getApiSyllabus(syllabu.version, syllabu.course)}>
-																{syllabu.version}
-															</span>
-														</div>
-													</>
-												);
-											})}
-										</div>
-									</div>
 								</div>
 							</div>
 							<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>

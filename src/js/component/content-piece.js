@@ -6,9 +6,10 @@ const urls = {
 	lesson: "https://content.breatheco.de/lesson/",
 	project: "https://projects.breatheco.de/project/",
 	quiz: "https://assets.breatheco.de/apps/quiz/",
-	replit: ""
+	replit: "https://assets.breatheco.de/apis/registry/all"
 };
 const ContentPiece = ({ data, onDelete, previewLink }) => {
+	// console.log(data);
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type, data },
 		collect: monitor => ({
@@ -28,6 +29,7 @@ const ContentPiece = ({ data, onDelete, previewLink }) => {
 		else if (typeof data.info != "undefined") title = data.info.name;
 	}
 	if (title == "") title = "Undefined title";
+	// console.log(title);
 	return (
 		<li className="content-piece" ref={drag}>
 			{title}

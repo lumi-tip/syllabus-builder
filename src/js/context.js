@@ -17,10 +17,9 @@ const mapEntity = {
 	replit: "replits",
 	quiz: "quizzes",
 	profile: "profiles",
-	sylabu: "sylabus",
+	syllabu: "syllabus",
 	courseV2: "courses"
 };
-console.log(API);
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -37,7 +36,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			projects: [],
 			replits: [],
 			quizzes: [],
-			sylabus: [],
+			syllabus: null,
 			courses: []
 		},
 
@@ -45,7 +44,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 			setStore: _store => setStore(_store),
 			getStore: () => getStore(),
 			fetch: (models, forceUpdate = false) => {
-				console.log(models);
 				if (!Array.isArray(models)) models = [models];
 				const promises = models.map(
 					entity =>
@@ -55,6 +53,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.all()
 									.then(_data => {
 										const data = _data.data || _data;
+										if (mapEntity[entity] === "replits") {
+											const store = getStore();
+											const replitsData = [Object.values(data)];
+											const newReplitStore = {
+												[mapEntity[entity]]: replitsData[0].map(e => {
+													e.type = "replit";
+													return e;
+												})
+											};
+											setStore(newReplitStore);
+										}
 										const newStore = {
 											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
@@ -68,34 +77,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 				);
 			},
 			upload: data => {
-				console.log(data);
-
 				//if its not a url
 				const { projects } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
-					console.log(content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content.json;
-
 					setStore({
 						days: days.map((d, i) => {
-							console.log(d);
 							return {
 								...d,
 								id: i + 1,
 								position: i + 1,
 								lessons:
-									d.lesson !== undefined
+									d.lessons !== undefined
 										? d.lessons.map(l => {
 												l.type = "lesson";
 												return l;
 										  })
-										: (d.lesson = []),
+										: (d.lessons = []),
 								replits:
 									d.replits !== undefined
-										? Object.keys(d.replits).map(l => {
+										? d.replits.map(l => {
 												l.type = "replit";
 												return l;
 										  })
@@ -144,7 +148,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 										quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
 										"key-concepts": d["key-concepts"] || []
 									}));
-							console.log("Days", days);
 							const pieces = data.split(",");
 							const version = pieces.length === 3 ? pieces[1] : "";
 							setStore({ days, info: { slug: profile, profile, label, description, version } });
@@ -198,6 +201,65 @@ const getState = ({ getStore, getActions, setStore }) => {
 				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".json" : "syllabus.json");
 				dlAnchorElem.click();
 			},
+			saveSyllabus: () => {
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
+				const store = getStore();
+				fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus", {
+					method: "POST",
+					body: JSON.stringify(
+						{
+							...store.info,
+							slug: undefined,
+							json: {
+								days: store.days.map(d => ({
+									...d,
+									projects: undefined,
+									project:
+										d.assignments.length == 0
+											? undefined
+											: {
+													title: d.assignments[0].title,
+													instructions: `https://projects.breatheco.de/project/${d.assignments[0].slug}`
+											  },
+									assignments: d.assignments.map(p => p.slug),
+									replits: d.replits.map(e => ({
+										title: e.title,
+										slug: e.slug
+									})),
+									quizzes: d.quizzes.map(e => ({
+										title: e.title,
+										slug: e.slug
+									})),
+									lessons: d.lessons.map(e => ({
+										title: e.title,
+										slug: e.slug
+									}))
+								}))
+							}
+						},
+						null,
+						"   "
+					),
+					headers: {
+						"Content-type": "application/json",
+						Authorization: "Token " + apiKey
+					}
+				})
+					.then(resp => resp.json())
+					.then(data => {});
+				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
+				setStore({
+					days: [],
+					info: {
+						label: "",
+						slug: "",
+						version: "",
+						profile: null,
+						description: ""
+					}
+				});
+			},
 			pieces: function() {
 				const store = getStore();
 				return {
@@ -209,29 +271,50 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.pieces().add(piece);
 						this.days().update(day.id, day);
 					},
-					add: piece =>
+					add: piece => {
 						setStore({
 							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug).concat(piece)
-						}),
+						});
+					},
 					delete: piece =>
 						setStore({
 							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug)
 						})
 				};
 			},
-			getApiSyllabus: (version, course) => {
-				console.log(version, course);
+			getApiSyllabus: version => {
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
 				fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
 					headers: {
 						"Content-type": "application/json",
-						Authorization: "Token 3dde751f27f15f0891f297617973f964f0b35632"
+						Authorization: "Token " + apiKey
 					}
 				})
 					.then(resp => resp.text())
 					.then(data => {
-						console.log(data);
 						const actions = getActions();
-						actions.upload(data);
+						actions.upload((data = { content: data }));
+					});
+			},
+			setCourseSlug: courseSlug => {
+				const store = getStore();
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
+				fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/syllabus", {
+					headers: {
+						"Content-type": "application/json",
+						Authorization: "Token " + apiKey
+					}
+				})
+					.then(resp => resp.json())
+					.then(data => {
+						setStore({
+							...store,
+							syllabus: data
+						});
+						// const actions = getActions();
+						// actions.upload((data = { name: "hola", content: data }));
 					});
 			},
 			days: () => {
@@ -297,7 +380,7 @@ export function injectContent(Child) {
 			const previousStore = localStorage.getItem("syllabus-" + slug);
 			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
 
-			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "sylabu", "courseV2"]), 1000);
+			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "courseV2"]), 1000);
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>
