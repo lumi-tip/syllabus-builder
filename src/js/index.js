@@ -25,14 +25,14 @@ const Main = injectContent(() => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			swal({
 				title: "Are you sure?",
-				text: "Once save, you will be creating a new syllabus version",
+				text: "Once saved, you will be creating a new syllabus version",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
 			}).then(willSave => {
 				if (willSave) {
 					actions.saveSyllabus();
-					swal(" New syllabus version saved successfuly", {
+					swal("New syllabus version saved successfully", {
 						icon: "success"
 					});
 				} else {
@@ -49,7 +49,7 @@ const Main = injectContent(() => {
 		} else if (store.days.length === 0) {
 			swal({
 				title: "Syllabus without days",
-				text: "A new syllabus version can't be save without days, please add new days to the syllabus",
+				text: "A new syllabus version can't be saved without days, please add new days to the syllabus",
 				icon: "error",
 				button: "OK"
 			});
