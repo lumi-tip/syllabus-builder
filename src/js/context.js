@@ -54,7 +54,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										const data = _data.data || _data;
 										if (mapEntity[entity] === "replits") {
-											const store = getStore();
 											const replitsData = [Object.values(data)];
 											const newReplitStore = {
 												[mapEntity[entity]]: replitsData[0].map(e => {
@@ -272,14 +271,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					add: piece => {
-						setStore({
-							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug).concat(piece)
-						});
+						piece.type == "quiz"
+							? setStore({
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.info.slug !== piece.info.slug).concat(piece)
+							  })
+							: setStore({
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug !== piece.slug).concat(piece)
+							  });
 					},
-					delete: piece =>
-						setStore({
-							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.slug)
-						})
+					delete: piece => {
+						piece.type == "quiz"
+							? setStore({
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.info.slug != piece.data.info.slug)
+							  })
+							: setStore({
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.data.slug)
+							  });
+					}
 				};
 			},
 			getApiSyllabus: version => {
