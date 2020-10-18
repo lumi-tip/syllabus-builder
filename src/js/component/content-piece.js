@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
+import { url } from "../constants/constans";
 
-const urls = {
-	lesson: "https://content.breatheco.de/lesson/",
-	project: "https://projects.breatheco.de/project/",
-	quiz: "https://assets.breatheco.de/apis/quiz/",
-	replit: "https://assets.breatheco.de/apis/registry/all"
-};
+const urls = url;
+console.log(urls);
 const ContentPiece = ({ data, onDelete, previewLink }) => {
 	// console.log(data);
 	const [{ isDragging }, drag] = useDrag({

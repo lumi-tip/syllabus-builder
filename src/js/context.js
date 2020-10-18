@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
+import { url } from "./constants/constans";
+
+const urls = url;
+console.log(urls);
 
 export const ContentContext = React.createContext({});
 
@@ -36,7 +40,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			projects: [],
 			replits: [],
 			quizzes: [],
-			syllabus: null,
+			syllabus: [],
 			courses: []
 		},
 
@@ -80,6 +84,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const { projects } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
+					console.log(content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content.json;
@@ -119,7 +124,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.quizzes = [])
 							};
 						}),
-						info: { slug: profile, profile, label, description, version }
+						info: { slug: profile, profile, label, description, version: content.version }
 					});
 				} else
 					fetch(data)
@@ -154,6 +159,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						.catch();
 			},
 			setInfo: data => {
+				console.log(data);
 				setStore({ info: { ...data } });
 				window.location.hash = data.slug;
 			},
@@ -174,7 +180,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 											? undefined
 											: {
 													title: d.assignments[0].title,
-													instructions: `https://projects.breatheco.de/project/${d.assignments[0].slug}`
+													instructions: `${urls.project}${d.assignments[0].slug}`
 											  },
 									assignments: d.assignments.map(p => p.slug),
 									replits: d.replits.map(e => ({
@@ -204,13 +210,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const store = getStore();
+				console.log(urls.project);
 				fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus", {
 					method: "POST",
 					body: JSON.stringify(
 						{
-							...store.info,
 							slug: undefined,
 							json: {
+								...store.info,
 								days: store.days.map(d => ({
 									...d,
 									projects: undefined,
@@ -219,7 +226,66 @@ const getState = ({ getStore, getActions, setStore }) => {
 											? undefined
 											: {
 													title: d.assignments[0].title,
-													instructions: `https://projects.breatheco.de/project/${d.assignments[0].slug}`
+													instructions: `${urls.project}${d.assignments[0].slug}`
+											  },
+									assignments: d.assignments.map(p => p.slug),
+									replits: d.replits.map(e => ({
+										title: e.title,
+										slug: e.slug
+									})),
+									quizzes: d.quizzes.map(e => ({
+										title: e.title,
+										slug: e.slug
+									})),
+									lessons: d.lessons.map(e => ({
+										title: e.title,
+										slug: e.slug
+									}))
+								}))
+							}
+						},
+						null,
+						"   "
+					),
+					headers: {
+						"Content-type": "application/json",
+						Authorization: "Token " + apiKey
+					}
+				})
+					.then(resp => resp.json())
+					.then(data => {});
+				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
+				setStore({
+					days: [],
+					info: {
+						label: "",
+						slug: "",
+						version: "",
+						profile: null,
+						description: ""
+					}
+				});
+			},
+			editSyllabus: () => {
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
+				const store = getStore();
+				fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version, {
+					method: "PUT",
+					body: JSON.stringify(
+						{
+							slug: undefined,
+							json: {
+								...store.info,
+								days: store.days.map(d => ({
+									...d,
+									projects: undefined,
+									project:
+										d.assignments.length == 0
+											? undefined
+											: {
+													title: d.assignments[0].title,
+													instructions: `${urls.project}${d.assignments[0].slug}`
 											  },
 									assignments: d.assignments.map(p => p.slug),
 									replits: d.replits.map(e => ({
@@ -291,6 +357,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 			},
 			getApiSyllabus: version => {
+				console.log(urls);
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
@@ -302,6 +369,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					.then(resp => resp.text())
 					.then(data => {
 						const actions = getActions();
+						console.log(data);
 						actions.upload((data = { content: data }));
 					});
 			},
@@ -321,8 +389,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 							...store,
 							syllabus: data
 						});
-						// const actions = getActions();
-						// actions.upload((data = { name: "hola", content: data }));
 					});
 			},
 			days: () => {

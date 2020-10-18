@@ -1,4 +1,6 @@
 /* global fetch, localStorage, window */
+import swal from "sweetalert";
+
 class Wrapper {
 	constructor() {
 		this.options = {
@@ -81,6 +83,13 @@ class Wrapper {
 
 			this.fetch(path, opts)
 				.then(resp => {
+					if (resp.status === 401) {
+						swal({
+							title: "Token expired!",
+							text: "Please, generate a new one and refresh the page",
+							icon: "warning"
+						});
+					}
 					this.pending[method][path] = false;
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
@@ -387,26 +396,6 @@ class Wrapper {
 			}
 		};
 	}
-	// syllabu() {
-	// 	let url = this.options.apiPathV2;
-	// 	return {
-	// 		all: () => {
-	// 			return this.get(url + "/coursework/course/full-stack/syllabus");
-	// 		}
-	// 		// get: id => {
-	// 		// 	return this.get(url + "/coursework/course/" + id);
-	// 		// }
-	// 		// add: args => {
-	// 		// 	return this.put(url + "/coursework/course/", args);
-	// 		// },
-	// 		// update: (id, args) => {
-	// 		// 	return this.post(url + "/coursework/course/" + id, args);
-	// 		// },
-	// 		// delete: id => {
-	// 		// 	return this.delete(url + "/coursework/course/" + id);
-	// 		// }
-	// 	};
-	// }
 	courseV2() {
 		let url = this.options.apiPathV2;
 		return {

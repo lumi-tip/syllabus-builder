@@ -17,11 +17,7 @@ const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 	const [state, setState] = useState(false);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
-	const handleClick = course => {
-		setState(true);
-		actions.setCourseSlug(course);
-	};
-	const confirmSaveDay = () => {
+	const confirmSaveSillabus = () => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			swal({
 				title: "Are you sure?",
@@ -33,6 +29,40 @@ const Main = injectContent(() => {
 				if (willSave) {
 					actions.saveSyllabus();
 					swal("New syllabus version saved successfully", {
+						icon: "success"
+					});
+				} else {
+					swal("Operation canceled by user");
+				}
+			});
+		} else if (store.info.slug === "") {
+			swal({
+				title: "Syllabus details can't be empty",
+				text: "Please fill the syllabus details to save",
+				icon: "error",
+				button: "OK"
+			});
+		} else if (store.days.length === 0) {
+			swal({
+				title: "Syllabus without days",
+				text: "A new syllabus version can't be saved without days, please add new days to the syllabus",
+				icon: "error",
+				button: "OK"
+			});
+		}
+	};
+	const confirmEditSillabus = () => {
+		if (store.info.slug !== "" && store.days.length > 0) {
+			swal({
+				title: "Are you sure?",
+				text: "Once saved, you will be creating a new syllabus version",
+				icon: "warning",
+				buttons: true,
+				dangerMode: true
+			}).then(willEdit => {
+				if (willEdit) {
+					actions.editSyllabus();
+					swal("New syllabus version was edited successfully", {
 						icon: "success"
 					});
 				} else {
@@ -103,64 +133,14 @@ const Main = injectContent(() => {
 							)}
 
 						<div className="text-right mb-2 mt-3">
-							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveDay()}>
+							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus()}>
+								<i className="fas fa-save" /> Edit Syllabus
+							</button>
+
+							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus()}>
 								<i className="fas fa-save" /> Save Syllabus
 							</button>
 
-							<div className="btn-group ">
-								<a
-									className={"btn btn-dark btn-sm dropdown-toggle " + (state !== false ? "" : "d-none")}
-									href="#"
-									type="button"
-									id="dropdownMenuLink"
-									data-toggle="dropdown"
-									aria-haspopup="true"
-									aria-expanded="false">
-									Sylabus version
-								</a>
-								<div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-									{store.syllabus !== null && store.syllabus.length > 0 ? (
-										store.syllabus.map((syllabu, i) => {
-											return (
-												<a key={i} className="dropdown-item" href="#" onClick={() => actions.getApiSyllabus(syllabu.version)}>
-													{syllabu.version}
-												</a>
-											);
-										})
-									) : (
-										<a className="dropdown-item" href="#">
-											no version
-										</a>
-									)}
-								</div>
-							</div>
-							<div className="btn-group ">
-								<a
-									className="btn btn-dark btn-sm dropdown-toggle "
-									href="#"
-									type="button"
-									id="dropdownMenuLink"
-									data-toggle="dropdown"
-									aria-haspopup="true"
-									aria-expanded="false">
-									Sylabus courses
-								</a>
-								<div className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-									{store.courses.map((course, i) => {
-										return (
-											<a
-												key={i}
-												className="dropdown-item"
-												href="#"
-												onClick={() => {
-													handleClick(course.slug);
-												}}>
-												{course.slug}
-											</a>
-										);
-									})}
-								</div>
-							</div>
 							<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
 								<i className="fas fa-plus" /> Add new day
 							</button>
