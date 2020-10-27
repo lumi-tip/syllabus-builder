@@ -64,9 +64,10 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 						}
 						return true;
 					})
-					.map((l, i) => (
-						<ContentPiece key={i} data={l} previewLink={true} />
-					))}
+					.map((l, i) => {
+						// console.log(l);
+						return <ContentPiece key={i} data={l} previewLink={true} />;
+					})}
 			</ul>
 		</div>
 	);

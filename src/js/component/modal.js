@@ -42,12 +42,17 @@ UploadSyllabus.propTypes = {
 };
 
 export const SyllabusDetails = ({ onConfirm }) => {
-	const { store } = useContext(ContentContext);
+	const { store, actions } = useContext(ContentContext);
 	const [label, setLabel] = useState(store.info.label);
 	const [profile, setProfile] = useState(store.info.profile);
 	const [desc, setDesc] = useState(store.info.description);
-	const [version, setVersion] = useState(1);
-
+	const [version, setVersion] = useState(store.info.version);
+	const [state, setState] = useState(false);
+	const handleClick = course => {
+		setState(true);
+		setProfile(course), actions.setCourseSlug(course);
+	};
+	console.log(state);
 	return (
 		<div>
 			<div className="row">
@@ -55,40 +60,47 @@ export const SyllabusDetails = ({ onConfirm }) => {
 					<input
 						type="text"
 						className="form-control"
-						placeholder={"Course label, e.g: FullStack 12 weeks"}
+						placeholder={store.info.label !== undefined ? store.info.label : "Course label, e.g: FullStack 12 weeks"}
 						value={label}
 						onChange={e => setLabel(e.target.value)}
 					/>
 				</div>
 				<div className="col-6">
 					<div className="input-group mb-3">
-						<select className="form-control" onChange={e => setProfile(e.target.value)} value={profile}>
-							{store.profiles.length == 0 ? (
-								<option key={0} value={null}>
-									Loading...
-								</option>
-							) : (
-								<option key={0} value={null}>
-									Select profile
-								</option>
-							)}
-							{store.profiles.map((t, i) => (
-								<option key={i} value={t.slug}>
-									{t.name} ({t.slug})
-								</option>
-							))}
+						<select className="form-control" onChange={e => handleClick(e.target.value)} value={profile}>
+							<option key={0} value={null} selected disabled>
+								Select profile
+							</option>
+							{store.profiles.map((course, i) => {
+								return (
+									<option key={i} value={course.slug}>
+										{course.slug}
+									</option>
+								);
+							})}
 						</select>
-						<div className="input-group-append">
-							<span className="input-group-text" id="basic-addon2">
-								v
-								<input
-									type="number"
-									min="1"
-									value={version}
-									onChange={e => parseInt(e.target.value, 10) > 0 && setVersion(e.target.value)}
-								/>
-							</span>
-						</div>
+						<select
+							className={"form-control  " + (state !== false ? "" : "d-none")}
+							onChange={e => {
+								actions.getApiSyllabus(e.target.value);
+								setVersion(e.target.value);
+							}}
+							value={store.info.value}>
+							<option key={0} value={null} selected disabled>
+								Select version
+							</option>
+							{store.syllabus !== null && store.syllabus.length > 0 ? (
+								store.syllabus.map((syllabu, i) => {
+									return (
+										<option key={i} value={syllabu.version}>
+											{syllabu.version}
+										</option>
+									);
+								})
+							) : (
+								<option disabled>no version</option>
+							)}
+						</select>
 					</div>
 				</div>
 			</div>
@@ -96,7 +108,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 				<div className="col-12">
 					<textarea
 						className="form-control"
-						placeholder="What is this syllabus about?"
+						placeholder={store.info.description !== undefined ? store.info.description : "What is this syllabus about?"}
 						value={desc}
 						onChange={e => setDesc(e.target.value)}
 					/>
@@ -109,7 +121,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						onClick={() =>
 							onConfirm({
 								value: true,
-								data: { profile, description: desc, label, slug: profile + ".v" + version }
+								data: { profile, description: desc, label, slug: profile + ".v" + version, version }
 							})
 						}>
 						Save

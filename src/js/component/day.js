@@ -57,8 +57,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 		},
 		[data]
 	);
-
-	console.log("Printing day", _data);
 	return (
 		<div className="day bg-light position-relative">
 			{_data.position > 1 && (
@@ -104,17 +102,22 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					/>
 				</div>
 				<div className="col-12 mx-1 bg-white-light rounded">
-					{_data["key-concepts"].map(c => (
-						<span key={c} className="badge badge-dark mx-1">
-							{c}{" "}
-							<i
-								onClick={() =>
-									actions.days().update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
-								}
-								className="fas fa-trash-alt pointer p-1"
-							/>
-						</span>
-					))}
+					{_data["key-concepts"] !== undefined &&
+						_data["key-concepts"].map(c => {
+							return (
+								<span key={c} className="badge badge-dark mx-1">
+									{c}{" "}
+									<i
+										onClick={() =>
+											actions
+												.days()
+												.update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
+										}
+										className="fas fa-trash-alt pointer p-1"
+									/>
+								</span>
+							);
+						})}
 					<input
 						type="text"
 						placeholder={"Add a Key Concept"}
@@ -194,12 +197,15 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 							quizzes: _data.quizzes.concat([item.data])
 						})
 					}
-					onDelete={item =>
+					onDelete={item => {
+						console.log(item, _data);
 						actions.pieces().out(item, {
 							id: _data.id,
-							quizzes: _data.quizzes.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
-						})
-					}
+							quizzes: _data.quizzes.filter(l => {
+								typeof item.info.slug === "undefined" ? l.info.slug != item.info.slug : l.info.slug != item.info.slug;
+							})
+						});
+					}}
 				/>
 			</div>
 			<div className="row no-gutters">
