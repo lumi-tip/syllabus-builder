@@ -17,24 +17,29 @@ const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 	const [state, setState] = useState(false);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
-	const confirmSaveSillabus = () => {
+	const confirmSaveSillabus = async () => {
 		if (store.info.slug !== "" && store.days.length > 0) {
-			swal({
+			const willSave = await swal({
 				title: "Are you sure?",
 				text: "Once saved, you will be creating a new syllabus version",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
-			}).then(willSave => {
-				if (willSave) {
-					actions.saveSyllabus();
+			});
+			if (willSave) {
+				try {
+					const data = await actions.saveSyllabus();
 					swal("New syllabus version saved successfully", {
 						icon: "success"
 					});
-				} else {
-					swal("Operation canceled by user");
+				} catch (error) {
+					swal(error.message || error, {
+						icon: "error"
+					});
 				}
-			});
+			} else {
+				swal("Operation canceled by user");
+			}
 		} else if (store.info.slug === "") {
 			swal({
 				title: "Syllabus details can't be empty",
@@ -51,24 +56,29 @@ const Main = injectContent(() => {
 			});
 		}
 	};
-	const confirmEditSillabus = () => {
+	const confirmEditSillabus = async () => {
 		if (store.info.slug !== "" && store.days.length > 0) {
-			swal({
+			const willEdit = await swal({
 				title: "Are you sure?",
 				text: "Once saved, you will be creating a new syllabus version",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
-			}).then(willEdit => {
-				if (willEdit) {
-					actions.editSyllabus();
+			});
+			if (willEdit) {
+				try {
+					const data = await actions.editSyllabus();
 					swal("New syllabus version was edited successfully", {
 						icon: "success"
 					});
-				} else {
-					swal("Operation canceled by user");
+				} catch (error) {
+					swal(error.message || error, {
+						icon: "error"
+					});
 				}
-			});
+			} else {
+				swal("Operation canceled by user");
+			}
 		} else if (store.info.slug === "") {
 			swal({
 				title: "Syllabus details can't be empty",
@@ -133,19 +143,28 @@ const Main = injectContent(() => {
 							)}
 
 						<div className="text-right mb-2 mt-3">
-							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus()}>
-								<i className="fas fa-save" /> Edit Syllabus
-							</button>
+							{store.days.length > 0 && (
+								<>
+									<button className="btn btn-warning btn-sm mr-2" onClick={() => actions.clear()}>
+										<i className="fas fa-save" /> Clear
+									</button>
+									<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus()}>
+										<i className="fas fa-save" /> Save
+									</button>
+									<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus()}>
+										<i className="fas fa-save" /> Save as...
+									</button>
+									<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.download()}>
+										<i className="fas fa-file-download" /> Export
+									</button>
+								</>
+							)}
 
-							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus()}>
-								<i className="fas fa-save" /> Save Syllabus
-							</button>
-
-							<button className="btn btn-dark btn-sm" onClick={() => actions.days().add()}>
+							<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
 								<i className="fas fa-plus" /> Add new day
 							</button>
 							<button
-								className="btn btn-dark btn-sm"
+								className="btn btn-dark btn-sm mr-2"
 								onClick={() => {
 									let noti = Notify.add(
 										"info",
@@ -157,10 +176,7 @@ const Main = injectContent(() => {
 										9999999999999
 									);
 								}}>
-								<i className="fas fa-file-upload" /> Upload Syllabus
-							</button>
-							<button className="btn btn-dark btn-sm" onClick={() => actions.download()}>
-								<i className="fas fa-file-download" /> Download Syllabus
+								<i className="fas fa-file-upload" /> Import
 							</button>
 							<button
 								className="btn btn-dark btn-sm"
@@ -175,7 +191,7 @@ const Main = injectContent(() => {
 										9999999999999
 									);
 								}}>
-								<i className="fas fa-bars" /> Details
+								<i className="fas fa-bars" /> Load
 							</button>
 						</div>
 						{sortedDays.map((d, i) => (

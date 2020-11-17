@@ -52,7 +52,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 		setState(true);
 		setProfile(course), actions.setCourseSlug(course);
 	};
-	console.log(state);
 	return (
 		<div>
 			<div className="row">

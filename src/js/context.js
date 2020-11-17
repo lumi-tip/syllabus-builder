@@ -4,7 +4,6 @@ import API from "./api.js";
 import { url } from "./constants/constans";
 
 const urls = url;
-console.log(urls);
 
 export const ContentContext = React.createContext({});
 
@@ -75,7 +74,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 										};
 										setStore(newStore);
 										resolve(data);
-									});
+									})
+									.catch(error => reject(error));
 						})
 				);
 			},
@@ -84,7 +84,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const { projects } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
-					console.log(content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
 					const { days, profile, label, description } = content.json;
@@ -127,39 +126,41 @@ const getState = ({ getStore, getActions, setStore }) => {
 						info: { slug: profile, profile, label, description, version: content.version }
 					});
 				} else
-					fetch(data)
-						.then(resp => {
-							if (resp.ok) {
-								return resp.json();
-							} else throw new Error("There was an error code " + resp.status);
-						})
-						.then(json => {
-							let { days, profile, label, description, weeks } = json;
-							if (weeks)
-								days = weeks
-									.map(w => w.days)
-									.flat()
-									.filter(d => d.label !== "Weekend")
-									.map((d, i) => ({
-										...d,
-										id: i + 1,
-										position: i + 1,
-										lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
-										replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
-										assignments: d.assignments
-											? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
-											: [],
-										quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
-										"key-concepts": d["key-concepts"] || []
-									}));
-							const pieces = data.split(",");
-							const version = pieces.length === 3 ? pieces[1] : "";
-							setStore({ days, info: { slug: profile, profile, label, description, version } });
-						})
-						.catch();
+					new Promise((resolve, reject) => {
+						return fetch(data)
+							.then(resp => {
+								if (resp.ok) {
+									return resp.json();
+								} else throw new Error("There was an error code " + resp.status);
+							})
+							.then(json => {
+								let { days, profile, label, description, weeks } = json;
+								if (weeks)
+									days = weeks
+										.map(w => w.days)
+										.flat()
+										.filter(d => d.label !== "Weekend")
+										.map((d, i) => ({
+											...d,
+											id: i + 1,
+											position: i + 1,
+											lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
+											replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
+											assignments: d.assignments
+												? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
+												: [],
+											quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
+											"key-concepts": d["key-concepts"] || []
+										}));
+								const pieces = data.split(",");
+								const version = pieces.length === 3 ? pieces[1] : "";
+								setStore({ days, info: { slug: profile, profile, label, description, version } });
+								resolve(json);
+							})
+							.catch(error => reject(error));
+					});
 			},
 			setInfo: data => {
-				console.log(data);
 				setStore({ info: { ...data } });
 				window.location.hash = data.slug;
 			},
@@ -206,12 +207,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".json" : "syllabus.json");
 				dlAnchorElem.click();
 			},
-			saveSyllabus: () => {
+			saveSyllabus: async () => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const store = getStore();
-				console.log(urls.project);
-				fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus", {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus", {
 					method: "POST",
 					body: JSON.stringify(
 						{
@@ -230,12 +230,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 											  },
 									assignments: d.assignments.map(p => p.slug),
 									replits: d.replits.map(e => ({
-										title: e.title,
-										slug: e.slug
+										info: {
+											title: e.title,
+											slug: e.slug
+										}
 									})),
 									quizzes: d.quizzes.map(e => ({
-										title: e.title,
-										slug: e.slug
+										info: {
+											title: e.info.name,
+											slug: e.info.slug
+										}
 									})),
 									lessons: d.lessons.map(e => ({
 										title: e.title,
@@ -251,9 +255,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}
-				})
-					.then(resp => resp.json())
-					.then(data => {});
+				});
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						const data = await resp.json();
+						throw Error(data.details);
+					} else {
+						throw Error("There was an error saving the syllabus");
+					}
+				}
+				return await resp.json();
+			},
+			clear: () => {
+				const store = getStore();
 				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
 				setStore({
 					days: [],
@@ -266,11 +280,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				});
 			},
-			editSyllabus: () => {
+			editSyllabus: async () => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const store = getStore();
-				fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version, {
+				const actions = getActions();
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version, {
 					method: "PUT",
 					body: JSON.stringify(
 						{
@@ -293,8 +308,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 										slug: e.slug
 									})),
 									quizzes: d.quizzes.map(e => ({
-										title: e.title,
-										slug: e.slug
+										info: {
+											title: e.info.name,
+											slug: e.info.slug
+										}
 									})),
 									lessons: d.lessons.map(e => ({
 										title: e.title,
@@ -310,20 +327,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}
-				})
-					.then(resp => resp.json())
-					.then(data => {});
-				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
-				setStore({
-					days: [],
-					info: {
-						label: "",
-						slug: "",
-						version: "",
-						profile: null,
-						description: ""
-					}
 				});
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						const data = await resp.json();
+						throw Error(data.details);
+					} else {
+						throw Error("There was an error saving the syllabus");
+					}
+				}
+				return await resp;
 			},
 			pieces: function() {
 				const store = getStore();
@@ -337,18 +350,30 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					add: piece => {
-						piece.type == "quiz"
+						piece.type === "quiz"
 							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.info.slug !== piece.info.slug).concat(piece)
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
+										.filter(
+											p =>
+												typeof piece.info.slug !== undefined
+													? p.info.slug !== piece.info.slug
+													: p.info.slug !== piece.data.info.slug
+										)
+										.concat(piece)
 							  })
 							: setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug !== piece.slug).concat(piece)
 							  });
 					},
 					delete: piece => {
-						piece.type == "quiz"
+						piece.type === "quiz"
 							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.info.slug != piece.data.info.slug)
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(
+										p =>
+											typeof piece.data.info.slug === undefined
+												? p.info.slug !== piece.slug
+												: p.info.slug !== piece.data.info.slug
+									)
 							  })
 							: setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.data.slug)
@@ -356,40 +381,47 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-			getApiSyllabus: version => {
-				console.log(urls);
+			getApiSyllabus: async version => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}
-				})
-					.then(resp => resp.text())
-					.then(data => {
-						const actions = getActions();
-						console.log(data);
-						actions.upload((data = { content: data }));
-					});
+				});
+				const data = await resp.text();
+				const actions = getActions();
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						throw Error(data.details);
+					} else {
+						throw Error("There was an error saving the syllabus");
+					}
+				}
+				return await actions.upload({ content: data });
+
+				// .catch(error=>)
 			},
-			setCourseSlug: courseSlug => {
+			setCourseSlug: async courseSlug => {
 				const store = getStore();
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/syllabus", {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/syllabus", {
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}
-				})
-					.then(resp => resp.json())
-					.then(data => {
-						setStore({
-							...store,
-							syllabus: data
-						});
-					});
+				});
+				const data = await resp.json();
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						throw Error(data.details);
+					} else {
+						throw Error("There was an error saving the syllabus");
+					}
+				}
+				setStore({ ...store, syllabus: data });
 			},
 			days: () => {
 				const store = getStore();
