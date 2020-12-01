@@ -402,18 +402,6 @@ class Wrapper {
 			all: () => {
 				return this.get(url + "/coursework/course");
 			}
-			// get: id => {
-			// 	return this.get(url + "/coursework/course/" + id);
-			// }
-			// add: args => {
-			// 	return this.put(url + "/coursework/course/", args);
-			// },
-			// update: (id, args) => {
-			// 	return this.post(url + "/coursework/course/" + id, args);
-			// },
-			// delete: id => {
-			// 	return this.delete(url + "/coursework/course/" + id);
-			// }
 		};
 	}
 

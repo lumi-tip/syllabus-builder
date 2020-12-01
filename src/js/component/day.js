@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { object } from "prop-types";
 import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
@@ -23,9 +23,13 @@ const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 			<h4>{heading}</h4>
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
-				{pieces.map(p => {
-					return <ContentPiece key={p.slug} type={p.type} data={p} onDelete={() => onDelete(p)} />;
-				})}
+				{pieces.info !== undefined
+					? pieces.map(p => {
+							return <ContentPiece key={p.info.slug} type={p.type} data={p.info} onDelete={() => onDelete(p.info)} />;
+					  })
+					: pieces.map(p => {
+							return <ContentPiece key={p.slug} type={p.type} data={p} onDelete={() => onDelete(p)} />;
+					  })}
 			</ul>
 		</div>
 	);
@@ -191,18 +195,17 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					heading="Quizzes"
 					type="quiz"
 					pieces={_data.quizzes}
-					onDrop={item =>
+					onDrop={item => {
 						actions.pieces().in(item, {
 							id: _data.id,
 							quizzes: _data.quizzes.concat([item.data])
-						})
-					}
+						});
+					}}
 					onDelete={item => {
-						console.log(item, _data);
 						actions.pieces().out(item, {
 							id: _data.id,
 							quizzes: _data.quizzes.filter(l => {
-								typeof item.info.slug === "undefined" ? l.info.slug != item.info.slug : l.info.slug != item.info.slug;
+								typeof item.info.slug !== "undefined" ? l.info.slug !== item.info.slug : item.info.slug;
 							})
 						});
 					}}

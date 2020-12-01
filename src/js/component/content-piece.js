@@ -4,9 +4,9 @@ import { useDrag } from "react-dnd";
 import { url } from "../constants/constans";
 
 const urls = url;
-console.log(urls);
 const ContentPiece = ({ data, onDelete, previewLink }) => {
-	// console.log(data);
+	let slug = "";
+	// data.type === "quiz" && console.log(data, "contentPieces");
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type, data },
 		collect: monitor => ({
@@ -14,16 +14,21 @@ const ContentPiece = ({ data, onDelete, previewLink }) => {
 		})
 	});
 	const link = data => {
-		const slug = data.type === "replit" ? data.value : data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
+		if (data.type !== "quiz") {
+			slug = data.type === "replit" ? data.value : data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
+		} else {
+			slug = data.info.slug;
+		}
 
 		const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
-		console.log("the url: ", url);
+		// console.log("the url: ", url);
 		return url;
 	};
+	// data.type == "quiz" && console.log(data);
 	let title = "";
-	if (data && typeof data != "undefined") {
-		if (typeof data.title != "undefined") title = data.title;
-		else if (typeof data.info != "undefined") title = data.info.name;
+	if (data && typeof data !== "undefined") {
+		if (typeof data.title !== "undefined") title = data.title;
+		else if (typeof data.info !== "undefined") title = data.info.name !== undefined ? data.info.name : data.info.title;
 	}
 	if (title == "") title = "Undefined title";
 	// console.log(title);
