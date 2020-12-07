@@ -13,6 +13,9 @@ import swal from "sweetalert";
 
 //include your index.scss file into the bundle
 
+const params = new URLSearchParams(window.location.search);
+const API_KEY = params.get("token");
+
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 	const [state, setState] = useState(false);
@@ -95,6 +98,13 @@ const Main = injectContent(() => {
 			});
 		}
 	};
+
+	if (!API_KEY)
+		return (
+			<div>
+				Click here to <a href={`https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`}>log in</a>
+			</div>
+		);
 	return (
 		<>
 			<DndProvider backend={Backend}>
