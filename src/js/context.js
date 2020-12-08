@@ -399,9 +399,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw Error("There was an error saving the syllabus");
 					}
 				}
-				return await actions.upload({ content: data });
 
-				// .catch(error=>)
+				return await actions.upload({ content: data });
 			},
 			setCourseSlug: async courseSlug => {
 				const store = getStore();
