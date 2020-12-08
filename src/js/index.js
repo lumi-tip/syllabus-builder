@@ -24,14 +24,14 @@ const Main = injectContent(() => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			const willSave = await swal({
 				title: "Are you sure?",
-				text: "Once saved, you will be creating a new syllabus version",
+				text: "Creating a NEW syllabus version?",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
 			});
 			if (willSave) {
 				try {
-					const data = await actions.saveSyllabus();
+					const data = await actions.saveSyllabus().then(s => actions.setInfo({ version: s.version }));
 					swal("New syllabus version saved successfully", {
 						icon: "success"
 					});
@@ -63,7 +63,7 @@ const Main = injectContent(() => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			const willEdit = await swal({
 				title: "Are you sure?",
-				text: "Once saved, you will be creating a new syllabus version",
+				text: "Update a PREVIOUS syllabus version",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
@@ -71,7 +71,7 @@ const Main = injectContent(() => {
 			if (willEdit) {
 				try {
 					const data = await actions.editSyllabus();
-					swal("New syllabus version was edited successfully", {
+					swal("Syllabus version " + store.info.version + " update successfully", {
 						icon: "success"
 					});
 				} catch (error) {
@@ -158,11 +158,14 @@ const Main = injectContent(() => {
 									<button className="btn btn-warning btn-sm mr-2" onClick={() => actions.clear()}>
 										<i className="fas fa-save" /> Clear
 									</button>
-									<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus()}>
-										<i className="fas fa-save" /> Save
-									</button>
+									{store.info.version != "" &&
+										store.info.version && (
+											<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus()}>
+												<i className="fas fa-save" /> Save
+											</button>
+										)}
 									<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus()}>
-										<i className="fas fa-save" /> Save as...
+										<i className="fas fa-save" /> Save as new...
 									</button>
 									<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.download()}>
 										<i className="fas fa-file-download" /> Export

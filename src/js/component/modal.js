@@ -52,6 +52,16 @@ export const SyllabusDetails = ({ onConfirm }) => {
 		setState(true);
 		setProfile(course), actions.setCourseSlug(course);
 	};
+	useEffect(
+		() => {
+			if (store.info.version && store.info.version != "") {
+				setState(true);
+				setVersion(store.info.version);
+			}
+		},
+		[store.info]
+	);
+
 	return (
 		<div>
 			<div className="row">
@@ -84,7 +94,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 								actions.getApiSyllabus(e.target.value);
 								setVersion(e.target.value);
 							}}
-							value={store.info.value}>
+							value={store.info.version}>
 							<option key={0} value={null} selected disabled>
 								Select version
 							</option>
