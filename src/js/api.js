@@ -82,19 +82,22 @@ class Wrapper {
 			this.calculatePending();
 
 			this.fetch(path, opts)
-				.then(resp => {
+				.then(async resp => {
 					if (resp.status === 401) {
-						swal({
+						const answer = await swal({
 							title: "Token expired!",
-							text: "Please, generate a new one and refresh the page",
+							buttons: ["Ignore", "Login"],
+							text: "Please login to continue",
 							icon: "warning"
 						});
+						console.log("Answer", answer);
+						if (answer) window.location.href = `https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`;
 					}
 					this.pending[method][path] = false;
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
 
-					if (resp.status == 200) return resp.json();
+					if (resp.status == 200) return await resp.json();
 					else {
 						this._logError(resp);
 						if (resp.status == 403)
@@ -106,14 +109,15 @@ class Wrapper {
 							reject({ msg: "Unauthorized", code: 401 });
 							if (this.options.onLogout) this.options.onLogout();
 						} else if (resp.status == 400)
-							resp.json()
-								.then(err => reject({ msg: err.msg || err, code: 400 }))
-								.catch(() =>
-									reject({
-										msg: "Invalid Argument",
-										code: 400
-									})
-								);
+							try {
+								const err = await resp.json();
+								reject({ msg: err.msg || err, code: 400 });
+							} catch (err) {
+								reject({
+									msg: "Invalid Argument",
+									code: 400
+								});
+							}
 						else
 							reject({
 								msg: "There was an error, try again later",

@@ -48,9 +48,10 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
 	const [state, setState] = useState(false);
-	const handleClick = course => {
+	const handleChange = course => {
 		setState(true);
-		setProfile(course), actions.setCourseSlug(course);
+		setProfile(course);
+		actions.setCourseSlug(course);
 	};
 	useEffect(
 		() => {
@@ -76,7 +77,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 				</div>
 				<div className="col-6">
 					<div className="input-group mb-3">
-						<select className="form-control" onChange={e => handleClick(e.target.value)} value={profile}>
+						<select className="form-control" onChange={e => handleChange(e.target.value)} value={profile}>
 							<option key={0} value={null} selected disabled>
 								Select profile
 							</option>
@@ -92,10 +93,10 @@ export const SyllabusDetails = ({ onConfirm }) => {
 							className={"form-control  " + (state !== false ? "" : "d-none")}
 							onChange={e => {
 								actions.getApiSyllabus(e.target.value);
-								setVersion(e.target.value);
+								actions.setProfile({ version: store.info.version });
 							}}
 							value={store.info.version}>
-							<option key={0} value={null} selected disabled>
+							<option key={0} value={null}>
 								Select version
 							</option>
 							{store.syllabus !== null && store.syllabus.length > 0 ? (
