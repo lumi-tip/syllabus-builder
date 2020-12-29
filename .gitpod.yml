@@ -1,5 +1,8 @@
-tasks:
-- command: npm i breathecode-cli -g && npm i now -g
 ports:
   - port: 8080
     onOpen: open-browser
+tasks:
+  - command: >
+      npm i vercel -g &&
+      npm install &&
+      npm run start

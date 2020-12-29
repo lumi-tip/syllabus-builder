@@ -63,7 +63,7 @@ const Main = injectContent(() => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			const willEdit = await swal({
 				title: "Are you sure?",
-				text: "Update a PREVIOUS syllabus version",
+				text: "Update a PREVIOUS version " + store.info.version,
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
@@ -145,18 +145,20 @@ const Main = injectContent(() => {
 					</div>
 					<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
 						<Notifier />
-						{store.info.label &&
-							store.info.label != "" && (
-								<div>
-									{store.info.label}: {store.info.slug}
-								</div>
-							)}
-
-						<div className="text-right mb-2 mt-3">
+						<div className="text-right p-3 position-sticky sticky-top bg-light" style={{ margin: "-15px" }}>
+							<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
+								<i className="fas fa-plus" /> Add new day
+							</button>
 							{store.days.length > 0 && (
 								<>
-									<button className="btn btn-warning btn-sm mr-2" onClick={() => actions.clear()}>
-										<i className="fas fa-save" /> Clear
+									{store.info.label &&
+										store.info.label != "" && (
+											<div className="float-left">
+												{store.info.label}: {store.info.slug}
+											</div>
+										)}
+									<button className="btn btn-danger btn-sm mr-2" onClick={() => actions.clear()}>
+										<i className="fas fa-ban" /> Clear
 									</button>
 									{store.info.version != "" &&
 										store.info.version && (
@@ -173,9 +175,6 @@ const Main = injectContent(() => {
 								</>
 							)}
 
-							<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
-								<i className="fas fa-plus" /> Add new day
-							</button>
 							<button
 								className="btn btn-dark btn-sm mr-2"
 								onClick={() => {
@@ -207,6 +206,7 @@ const Main = injectContent(() => {
 								<i className="fas fa-bars" /> Load
 							</button>
 						</div>
+						<div className="hbar" />
 						{sortedDays.map((d, i) => (
 							<Day
 								key={d.id.toString() + d.position.toString()}

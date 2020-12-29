@@ -47,24 +47,28 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [profile, setProfile] = useState(store.info.profile);
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
-	const [state, setState] = useState(false);
+	const [opened, setOpened] = useState(false);
 	const handleChange = course => {
-		setState(true);
+		setOpened(true);
 		setProfile(course);
 		actions.setCourseSlug(course);
 	};
 	useEffect(
 		() => {
 			if (store.info.version && store.info.version != "") {
-				setState(true);
+				setOpened(true);
 				setVersion(store.info.version);
+			}
+			if (store.info.label && store.info.label != "") {
+				setOpened(true);
+				setLabel(store.info.label);
 			}
 		},
 		[store.info]
 	);
 
 	return (
-		<div>
+		<div className="mb-3">
 			<div className="row">
 				<div className="col">
 					<input
@@ -90,7 +94,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 							})}
 						</select>
 						<select
-							className={"form-control  " + (state !== false ? "" : "d-none")}
+							className={"form-control  " + (opened !== false ? "" : "d-none")}
 							onChange={e => {
 								actions.getApiSyllabus(e.target.value);
 								actions.setProfile({ version: store.info.version });
@@ -124,20 +128,17 @@ export const SyllabusDetails = ({ onConfirm }) => {
 					/>
 				</div>
 			</div>
-			<div className="row">
+			<div className="row my-2">
 				<div className="col-12 text-center">
 					<button
-						className="btn btn-success mr-2"
+						className="btn btn-success w-100"
 						onClick={() =>
 							onConfirm({
 								value: true,
 								data: { profile, description: desc, label, slug: profile + ".v" + version, version }
 							})
 						}>
-						Save
-					</button>
-					<button className="btn btn-light" onClick={() => onConfirm(false)}>
-						Cancel
+						<i className="fas fa-save" /> Save and collapse
 					</button>
 				</div>
 			</div>

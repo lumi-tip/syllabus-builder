@@ -100,7 +100,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
-						placeholder="Add a description for the dstudents..."
+						placeholder="Add a description for the students..."
 						onChange={description => actions.days().update(_data.id, { ..._data, description })}
 						initialValue={_data.description}
 					/>

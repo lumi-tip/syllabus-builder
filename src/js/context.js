@@ -441,6 +441,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 							])
 						}),
 					update: (id, day) => {
+						console.log("Updating day", day);
 						const store = getStore();
 						setStore({
 							days: store.days.map(d => {
