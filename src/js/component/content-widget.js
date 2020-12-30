@@ -55,7 +55,13 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 					overflow: "auto"
 				}}>
 				{pieces
-					.filter(p => !searchToken.toLowerCase() || p.title.toLowerCase().includes(searchToken))
+					.filter(
+						p =>
+							!searchToken.toLowerCase() ||
+							(p.slug && p.slug.includes(searchToken)) ||
+							(p.title && p.title.toLowerCase().includes(searchToken)) ||
+							(p.info && p.info.name && p.info.name.toLowerCase().includes(searchToken))
+					)
 					.filter(p => {
 						if (tagToken && tagToken !== "") {
 							if (type === "lesson") return p.tags ? p.tags.includes(tagToken.toLowerCase()) : false;
