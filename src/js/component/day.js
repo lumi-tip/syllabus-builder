@@ -25,10 +25,10 @@ const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 				{pieces.length == 0 && <small className="p-0">No content</small>}
 				{pieces.info !== undefined
 					? pieces.map(p => {
-							return <ContentPiece key={p.info.slug} type={p.type} data={p.info} onDelete={() => onDelete(p.info)} />;
+							return <ContentPiece key={p.info.slug} type={p.type} status={p.status} data={p.info} onDelete={() => onDelete(p.info)} />;
 					  })
 					: pieces.map(p => {
-							return <ContentPiece key={p.slug} type={p.type} data={p} onDelete={() => onDelete(p)} />;
+							return <ContentPiece key={p.slug} type={p.type} data={p} status={p.status} onDelete={() => onDelete(p)} />;
 					  })}
 			</ul>
 		</div>

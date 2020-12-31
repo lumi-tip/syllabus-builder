@@ -69,6 +69,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 										const newStore = {
 											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
+												// e.status = entity.status || "published";
 												return e;
 											})
 										};
