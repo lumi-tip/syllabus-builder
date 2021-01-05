@@ -87,7 +87,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					const content = JSON.parse(data.content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
-					const { days, profile, label, description } = content.json;
+					console.log("content", content);
+					const { days, profile, label, description } = content.json || content;
 					setStore({
 						days: days.map((d, i) => {
 							return {
