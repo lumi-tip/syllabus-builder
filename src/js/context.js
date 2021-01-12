@@ -191,8 +191,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 										slug: e.slug
 									})),
 									quizzes: d.quizzes.map(e => ({
-										title: e.title,
-										slug: e.slug
+										title: e.info.name,
+										slug: e.info.slug
 									})),
 									lessons: d.lessons.map(e => ({
 										title: e.title,
