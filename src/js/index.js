@@ -21,6 +21,7 @@ const Main = injectContent(() => {
 	const [state, setState] = useState(false);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	const confirmSaveSillabus = async () => {
+		console.log("Saving 1...");
 		if (store.info.slug !== "" && store.days.length > 0) {
 			const willSave = await swal({
 				title: "Are you sure?",
@@ -30,12 +31,15 @@ const Main = injectContent(() => {
 				dangerMode: true
 			});
 			if (willSave) {
+				console.log("Saving 2...");
 				try {
+					console.log("Saving...");
 					const data = await actions.saveSyllabus().then(s => actions.setInfo({ version: s.version }));
 					swal("New syllabus version saved successfully", {
 						icon: "success"
 					});
 				} catch (error) {
+					console.error("Error: ", error);
 					swal(error.message || error, {
 						icon: "error"
 					});
