@@ -118,7 +118,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
-										? d.quizzes.map(l => {
+										? d.quizzes.filter(f => f.slug != undefined).map(l => {
 												l.type = "quiz";
 												return l;
 										  })

@@ -205,7 +205,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 						actions.pieces().out(item, {
 							id: _data.id,
 							quizzes: _data.quizzes.filter(l => {
-								typeof item.info.slug !== "undefined" ? l.info.slug !== item.info.slug : item.info.slug;
+								if (item.info == undefined) return false;
+								if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+								return false;
 							})
 						});
 					}}
