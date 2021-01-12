@@ -89,6 +89,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 			</h3>
 			{editExtended && (
 				<ExtendedInstructions
+					dayNumber={_data.position}
 					defaultValue={_data.extended_instructions}
 					onSave={extended_instructions => {
 						actions.days().update(_data.id, { ..._data, extended_instructions });
@@ -106,8 +107,15 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
 						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
-					<small className="text-right d-block" onClick={() => setEditExtended(true)}>
-						<a href="#">Ext. teacher instructions</a>
+					<small className="text-right d-block">
+						<a
+							href="#"
+							onClick={e => {
+								e.preventDefault();
+								setEditExtended(true);
+							}}>
+							Ext. teacher instructions
+						</a>
 					</small>
 				</div>
 				<div className="col-6 pl-1">

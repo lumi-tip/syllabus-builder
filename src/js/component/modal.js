@@ -155,7 +155,7 @@ SyllabusDetails.defaultProps = {
 	profiles: []
 };
 
-export const ExtendedInstructions = ({ onSave, onCancel, defaultValue }) => {
+export const ExtendedInstructions = ({ onSave, onCancel, defaultValue, dayNumber }) => {
 	const [value, setValue] = React.useState(defaultValue);
 	const [height, setHeight] = React.useState();
 	useEffect(() => {
@@ -171,7 +171,7 @@ export const ExtendedInstructions = ({ onSave, onCancel, defaultValue }) => {
 					</div>
 					<div className="modal-footer">
 						<button onClick={() => onSave && onSave(value)} type="button" className="btn btn-primary">
-							Save Instructions
+							Save Day {dayNumber} Instructions
 						</button>
 						<button onClick={() => onCancel && onCancel()} type="button" className="btn btn-secondary" data-dismiss="modal">
 							Cancel
@@ -185,7 +185,8 @@ export const ExtendedInstructions = ({ onSave, onCancel, defaultValue }) => {
 ExtendedInstructions.propTypes = {
 	defaultValue: PropTypes.string,
 	onSave: PropTypes.func.required,
-	onCancel: PropTypes.func
+	onCancel: PropTypes.func,
+	dayNumber: PropTypes.number
 };
 ExtendedInstructions.defaultProps = {
 	defaultValue: "Hello *World*!"
