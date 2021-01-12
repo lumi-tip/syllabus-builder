@@ -1,7 +1,13 @@
 @import "~bootstrap/scss/bootstrap.scss";
 
 .pointer{ cursor: pointer; }
-
+.extended-instructions{
+    .modal-dialog{
+        max-width: 100vw;
+        height: 100vh;
+        margin: auto;
+    }
+}
 ul li{ list-style: none; }
 li.content-piece{ 
     font-size: 12px; display: inline-block; background: #BDBDBD; padding: 3px; 

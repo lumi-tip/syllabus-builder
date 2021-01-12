@@ -3,7 +3,7 @@ import PropTypes, { object } from "prop-types";
 import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
-
+import { ExtendedInstructions } from "./modal";
 const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
@@ -49,6 +49,7 @@ Column.defaultProps = {
 const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [_data, setData] = useState(data);
+	const [editExtended, setEditExtended] = useState(false);
 	const [concept, setConcept] = useState("");
 
 	useEffect(
@@ -86,6 +87,16 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					initialValue={_data.label}
 				/>
 			</h3>
+			{editExtended && (
+				<ExtendedInstructions
+					defaultValue={_data.extended_instructions}
+					onSave={extended_instructions => {
+						actions.days().update(_data.id, { ..._data, extended_instructions });
+						setEditExtended(false);
+					}}
+					onCancel={() => setEditExtended(false)}
+				/>
+			)}
 			<div className="row no-gutters">
 				<div className="col-6 pl-1">
 					<SmartInput
@@ -95,6 +106,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
 						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
+					<small className="text-right d-block" onClick={() => setEditExtended(true)}>
+						<a href="#">Ext. teacher instructions</a>
+					</small>
 				</div>
 				<div className="col-6 pl-1">
 					<SmartInput

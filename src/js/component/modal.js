@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ContentContext } from "../context.js";
+import SmartInput from "./smart-input";
+import MDEditor from "@uiw/react-md-editor";
 import PropTypes from "prop-types";
 
 export const UploadSyllabus = ({ onConfirm }) => {
@@ -151,4 +153,40 @@ SyllabusDetails.propTypes = {
 };
 SyllabusDetails.defaultProps = {
 	profiles: []
+};
+
+export const ExtendedInstructions = ({ onSave, onCancel, defaultValue }) => {
+	const [value, setValue] = React.useState(defaultValue);
+	const [height, setHeight] = React.useState();
+	useEffect(() => {
+		const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+		setHeight(vh - 80);
+	}, []);
+	return (
+		<div className="modal show d-block extended-instructions" tabIndex="-1" role="dialog">
+			<div className="modal-dialog" role="document">
+				<div className="modal-content">
+					<div className="modal-body p-0">
+						<MDEditor value={value} onChange={setValue} height={height} />
+					</div>
+					<div className="modal-footer">
+						<button onClick={() => onSave && onSave(value)} type="button" className="btn btn-primary">
+							Save Instructions
+						</button>
+						<button onClick={() => onCancel && onCancel()} type="button" className="btn btn-secondary" data-dismiss="modal">
+							Cancel
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+ExtendedInstructions.propTypes = {
+	defaultValue: PropTypes.string,
+	onSave: PropTypes.func.required,
+	onCancel: PropTypes.func
+};
+ExtendedInstructions.defaultProps = {
+	defaultValue: "Hello *World*!"
 };
