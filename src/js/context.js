@@ -82,13 +82,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			upload: data => {
 				//if its not a url
-				const { projects } = getStore();
+				const { projects, info } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
-					console.log("content", content);
-					const { days, profile, label, description } = content.json || content;
+
+					let { days, profile, label, description, weeks } = content.json || content;
+					if (Array.isArray(weeks) && !Array.isArray(days)) days = [].concat.apply([], weeks.map(w => w.days));
 					setStore({
 						days: days.map((d, i) => {
 							return {
@@ -125,7 +126,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.quizzes = [])
 							};
 						}),
-						info: { slug: profile, profile, label, description, version: content.version }
+						info: { slug: profile, profile, label, description, version: content.version || info.version }
 					});
 				} else
 					new Promise((resolve, reject) => {
@@ -239,8 +240,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 									})),
 									quizzes: d.quizzes.map(e => ({
 										info: {
-											title: e.info.name,
-											slug: e.info.slug
+											title: e.info != undefined ? e.info.name : e.title,
+											slug: e.info != undefined ? e.info.slug : e.slug
 										}
 									})),
 									lessons: d.lessons.map(e => ({
@@ -381,11 +382,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-			getApiSyllabus: async version => {
+			getApiSyllabus: async (profile, version) => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/full-stack/syllabus/" + version, {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + profile + "/syllabus/" + version, {
 					headers: {
+						//"Cache-Control": "no-cache",
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}
@@ -441,7 +443,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 							])
 						}),
 					update: (id, day) => {
-						console.log("Updating day", day);
 						const store = getStore();
 						setStore({
 							days: store.days.map(d => {
@@ -455,7 +456,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						setStore({
 							days: store.days
 								.filter(d => d.id != id)
-								.sort((a, b) => (a.position > b.position ? -1 : 1))
+								// .sort((a, b) => (a.position < b.position ? -1 : 1))
 								.map((d, i) => {
 									return { ...d, position: i + 1 };
 								})

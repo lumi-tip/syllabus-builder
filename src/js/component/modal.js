@@ -98,8 +98,8 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						<select
 							className={"form-control  " + (opened !== false ? "" : "d-none")}
 							onChange={e => {
-								actions.getApiSyllabus(e.target.value);
-								actions.setProfile({ version: store.info.version });
+								actions.getApiSyllabus(profile, e.target.value);
+								//actions.setProfile({ version: store.info.version });
 							}}
 							value={store.info.version}>
 							<option key={0} value={null}>

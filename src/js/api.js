@@ -90,7 +90,6 @@ class Wrapper {
 							text: "Please login to continue",
 							icon: "warning"
 						});
-						console.log("Answer", answer);
 						if (answer) window.location.href = `https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`;
 					}
 					this.pending[method][path] = false;

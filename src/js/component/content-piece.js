@@ -22,7 +22,6 @@ const ContentPiece = ({ data, onDelete, status, previewLink, withWarning }) => {
 		}
 
 		const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
-		// console.log("the url: ", url);
 		return url;
 	};
 	// data.type == "quiz" && console.log(data);
@@ -35,10 +34,8 @@ const ContentPiece = ({ data, onDelete, status, previewLink, withWarning }) => {
 
 	let _status = "published";
 	if (data.type === "lesson" || data.type === "project") {
-		console.log(data.type, data.status, typeof data.status);
 		_status = data.status && data.status != "undefined" ? data.status : status;
 	}
-	// console.log(title);
 	return (
 		<li className="content-piece" ref={drag}>
 			{title}

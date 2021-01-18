@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import ContentPiece from "./content-piece.js";
 
-const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) => {
+const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight, loading }) => {
 	const [searchToken, setSearchToken] = useState("");
 	const [tagToken, setTagToken] = useState(null);
 	const [collapsed, setCollapsed] = useState(true);
@@ -21,7 +21,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, contentHeight }) =>
 						onChange={e => setSearchToken(e.target.value)}
 						value={searchToken}
 					/>
-					{onRefresh && <i onClick={() => onRefresh()} className="fas fa-sync fa-xs float-right" />}
+					{onRefresh && <i onClick={() => onRefresh()} className={"fas fa-sync fa-xs float-right " + (loading ? "loading" : "")} />}
 					{type == "project" && (
 						<select className="form-control" onChange={e => setTagToken(e.target.value)} value={tagToken}>
 							<option key={0} value={""}>
@@ -82,6 +82,7 @@ ContentWidget.propTypes = {
 	type: PropTypes.string,
 	onRefresh: PropTypes.func,
 	className: PropTypes.string,
+	loading: PropTypes.bool,
 	contentHeight: PropTypes.string
 };
 
@@ -90,6 +91,7 @@ ContentWidget.defaultProps = {
 	className: "",
 	contentHeight: "",
 	onRefresh: null,
+	loading: false,
 	pieces: []
 };
 export default ContentWidget;
