@@ -209,23 +209,28 @@ const Main = injectContent(() => {
 						</div>
 						<div className="hbar" />
 						{sortedDays.map((d, i) => (
-							<Day
-								key={d.id.toString() + d.position.toString()}
-								data={d}
-								onMoveUp={() => {
-									const other = store.days.find(_day => _day.position === d.position - 1);
-									actions.days().update(d.id, { ...d, position: d.position - 1 });
-									actions.days().update(other.id, { ...other, position: other.position + 1 });
-								}}
-								onMoveDown={() => {
-									const other = store.days.find(_day => _day.position === d.position + 1);
-									actions.days().update(d.id, { ...d, position: d.position + 1 });
-									actions.days().update(other.id, { ...other, position: other.position - 1 });
-								}}
-								onDelete={id => {
-									actions.days().delete(id);
-								}}
-							/>
+							<div key={d.id.toString() + d.position.toString()}>
+								<Day
+									key={d.id.toString() + d.position.toString()}
+									data={d}
+									onMoveUp={() => {
+										const other = store.days.find(_day => _day.position === d.position - 1);
+										actions.days().update(d.id, { ...d, position: d.position - 1 });
+										actions.days().update(other.id, { ...other, position: other.position + 1 });
+									}}
+									onMoveDown={() => {
+										const other = store.days.find(_day => _day.position === d.position + 1);
+										actions.days().update(d.id, { ...d, position: d.position + 1 });
+										actions.days().update(other.id, { ...other, position: other.position - 1 });
+									}}
+									onDelete={id => {
+										actions.days().delete(id);
+									}}
+								/>
+								<div className="text-center">
+									<i onClick={() => actions.days().add(i + 1)} className="fas fa-plus-circle pointer text-secondary" />
+								</div>
+							</div>
 						))}
 					</div>
 				</div>

@@ -167,7 +167,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDrop={item =>
 						actions.pieces().in(item, {
 							id: _data.id,
-							lessons: _data.lessons.concat([item.data])
+							lessons: _data.lessons
+								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+								.concat([item.data])
 						})
 					}
 					onDelete={item =>
@@ -184,7 +186,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDrop={item =>
 						actions.pieces().in(item, {
 							id: _data.id,
-							replits: _data.replits.concat([item.data])
+							replits: _data.replits
+								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+								.concat([item.data])
 						})
 					}
 					onDelete={item =>
@@ -201,7 +205,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDrop={item =>
 						actions.pieces().in(item, {
 							id: _data.id,
-							assignments: _data.assignments.concat([item.data])
+							assignments: _data.assignments
+								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+								.concat([item.data])
 						})
 					}
 					onDelete={item =>
@@ -220,7 +226,13 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					onDrop={item => {
 						actions.pieces().in(item, {
 							id: _data.id,
-							quizzes: _data.quizzes.concat([item.data])
+							quizzes: _data.quizzes
+								.filter(l => {
+									if (item.info == undefined) return false;
+									if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+									return false;
+								})
+								.concat([item.data])
 						});
 					}}
 					onDelete={item => {

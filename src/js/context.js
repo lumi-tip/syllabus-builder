@@ -7,6 +7,17 @@ const urls = url;
 
 export const ContentContext = React.createContext({});
 
+const newDay = (id, position) => ({
+	id,
+	position,
+	label: "",
+	"key-concepts": [],
+	lessons: [],
+	assignments: [],
+	replits: [],
+	quizzes: []
+});
+
 API.setOptions({
 	assetsPath:
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
@@ -427,20 +438,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 			days: () => {
 				const store = getStore();
 				return {
-					add: () =>
+					add: (index = null) =>
 						setStore({
-							days: store.days.concat([
-								{
-									id: store.days.length + 1,
-									position: store.days.length + 1,
-									label: "",
-									"key-concepts": [],
-									lessons: [],
-									assignments: [],
-									replits: [],
-									quizzes: []
+							days: (() => {
+								// id: store.days.length + 1,
+								// position: store.days.length + 1,
+								let _days = [];
+								let extra = 0;
+								for (let i = 0; i <= store.days.length; i++) {
+									if (index == i) {
+										_days.push(newDay(i + 1, i + 1));
+										extra = 1;
+									}
+									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
 								}
-							])
+								if (index === null) _days.push(newDay(store.days.length + 1, store.days.length + 1));
+								return _days;
+							})()
 						}),
 					update: (id, day) => {
 						const store = getStore();

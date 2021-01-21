@@ -28,6 +28,13 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 		[debouncedValue]
 	);
 
+	useEffect(
+		() => {
+			setValue(initialValue);
+		},
+		[initialValue]
+	);
+
 	if (type === "textarea")
 		return (
 			<textarea
