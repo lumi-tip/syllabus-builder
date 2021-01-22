@@ -23,7 +23,7 @@ API.setOptions({
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
-	apiPathV2: "https://8000-e7f7c9f7-d9b4-41e7-9e9e-c5399f297d9a.ws-us03.gitpod.io/v1"
+	apiPathV2: "https://breathecode.herokuapp.com/v1"
 });
 const mapEntity = {
 	lesson: "lessons",

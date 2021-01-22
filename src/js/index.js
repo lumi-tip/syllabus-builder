@@ -112,7 +112,6 @@ const Main = injectContent(() => {
 			</div>
 		);
 
-	console.log("store", store);
 	return (
 		<>
 			<DndProvider backend={Backend}>
