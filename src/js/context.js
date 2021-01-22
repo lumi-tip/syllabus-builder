@@ -51,12 +51,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 			replits: [],
 			quizzes: [],
 			syllabus: [],
-			courses: []
+			courses: [],
+			academies: []
 		},
 
 		actions: {
 			setStore: _store => setStore(_store),
 			getStore: () => getStore(),
+			getMe: async () => {
+				const data = await API.getMe();
+				setStore({
+					academies: data.roles.map(r => r.academy)
+				});
+			},
 			fetch: (models, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
 				const promises = models.map(
@@ -441,18 +448,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 					add: (index = null) =>
 						setStore({
 							days: (() => {
-								// id: store.days.length + 1,
-								// position: store.days.length + 1,
 								let _days = [];
 								let extra = 0;
-								for (let i = 0; i <= store.days.length; i++) {
-									if (index == i) {
+								for (let i = 0; i < store.days.length; i++) {
+									if (index && index == i) {
 										_days.push(newDay(i + 1, i + 1));
 										extra = 1;
 									}
 									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
 								}
-								if (index === null) _days.push(newDay(store.days.length + 1, store.days.length + 1));
+								if (index === null || index === store.days.length) _days.push(newDay(store.days.length + 1, store.days.length + 1));
 								return _days;
 							})()
 						}),

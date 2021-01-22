@@ -10,6 +10,7 @@ import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import { Notifier, Notify } from "bc-react-notifier";
 import swal from "sweetalert";
+import { useEffect } from "react";
 
 //include your index.scss file into the bundle
 
@@ -99,6 +100,10 @@ const Main = injectContent(() => {
 			});
 		}
 	};
+
+	useEffect(() => {
+		actions.getMe();
+	}, []);
 
 	if (!API_KEY)
 		return (

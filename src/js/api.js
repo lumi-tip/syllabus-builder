@@ -43,6 +43,9 @@ class Wrapper {
 	_logError(error) {
 		if (this.options._debug) console.error(error);
 	}
+	getMe() {
+		return this.get(this.options.apiPathV2 + "/auth/user/me");
+	}
 	setOptions(options) {
 		this.options = Object.assign(this.options, options);
 	}
@@ -53,7 +56,7 @@ class Wrapper {
 		let token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
-		if (path.includes("syllabus") || path.includes("course")) token = "Token " + apiKey;
+		if (path.includes("syllabus") || path.includes("course") || path.includes("/auth/user/me")) token = "Token " + apiKey;
 
 		let opts = {
 			method,
