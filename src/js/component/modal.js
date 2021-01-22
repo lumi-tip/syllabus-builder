@@ -47,14 +47,11 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [label, setLabel] = useState(store.info.label);
 	const [profile, setProfile] = useState(store.info.profile);
+	const [academy, setAcademy] = useState(store.info.academy_author);
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
 	const [opened, setOpened] = useState(false);
-	const handleChange = course => {
-		setOpened(true);
-		setProfile(course);
-		actions.setCourseSlug(course);
-	};
+
 	useEffect(
 		() => {
 			if (store.info.version && store.info.version != "") {
@@ -72,7 +69,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	return (
 		<div className="mb-3">
 			<div className="row">
-				<div className="col">
+				<div className="col-5">
 					<input
 						type="text"
 						className="form-control"
@@ -81,10 +78,36 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						onChange={e => setLabel(e.target.value)}
 					/>
 				</div>
-				<div className="col-6">
+				<div className="col-7">
 					<div className="input-group mb-3">
-						<select className="form-control" onChange={e => handleChange(e.target.value)} value={profile}>
-							<option key={0} value={null} selected disabled>
+						<select
+							className="form-control"
+							onChange={e => {
+								setOpened(true);
+								setAcademy(e.target.value);
+								if (profile) actions.getSyllabisVersions(e.target.value, profile);
+							}}
+							value={profile}>
+							<option key={0} value={null}>
+								Select an academy
+							</option>
+							{store.academies.map((a, i) => {
+								return (
+									<option key={i} value={a.id}>
+										{a.name}
+									</option>
+								);
+							})}
+						</select>
+						<select
+							className="form-control"
+							onChange={e => {
+								setOpened(true);
+								setProfile(e.target.value);
+								if (academy) actions.getSyllabisVersions(academy, e.target.value);
+							}}
+							value={profile}>
+							<option key={0} value={null}>
 								Select profile
 							</option>
 							{store.profiles.map((course, i) => {
@@ -98,7 +121,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						<select
 							className={"form-control  " + (opened !== false ? "" : "d-none")}
 							onChange={e => {
-								actions.getApiSyllabus(profile, e.target.value);
+								actions.getApiSyllabus(academy, profile, e.target.value);
 								//actions.setProfile({ version: store.info.version });
 							}}
 							value={store.info.version}>
@@ -137,7 +160,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						onClick={() =>
 							onConfirm({
 								value: true,
-								data: { profile, description: desc, label, slug: profile + ".v" + version, version }
+								data: { profile, description: desc, label, slug: profile + ".v" + version, version, academy_author: academy }
 							})
 						}>
 						<i className="fas fa-save" /> Save and collapse

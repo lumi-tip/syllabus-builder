@@ -383,10 +383,10 @@ class Wrapper {
 		};
 	}
 	profile() {
-		let url = this.options.apiPath;
+		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/profiles/");
+				return this.get(url + "/coursework/course");
 			},
 			get: id => {
 				return this.get(url + "/profile/" + id);

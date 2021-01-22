@@ -111,6 +111,8 @@ const Main = injectContent(() => {
 				Click here to <a href={`https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`}>log in</a>
 			</div>
 		);
+
+	console.log("store", store);
 	return (
 		<>
 			<DndProvider backend={Backend}>

@@ -23,7 +23,7 @@ API.setOptions({
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
-	apiPathV2: "https://breathecode.herokuapp.com/v1"
+	apiPathV2: "https://8000-e7f7c9f7-d9b4-41e7-9e9e-c5399f297d9a.ws-us03.gitpod.io/v1"
 });
 const mapEntity = {
 	lesson: "lessons",
@@ -43,7 +43,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				slug: "",
 				version: "",
 				profile: null,
-				description: ""
+				description: "",
+				academy_author: null
 			},
 			profiles: [],
 			lessons: [],
@@ -182,7 +183,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					});
 			},
 			setInfo: data => {
-				setStore({ info: { ...data } });
+				const store = getStore();
+				setStore({ info: { ...store.info, ...data } });
 				window.location.hash = data.slug;
 			},
 			download: () => {
@@ -274,7 +276,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					),
 					headers: {
 						"Content-type": "application/json",
-						Authorization: "Token " + apiKey
+						Authorization: "Token " + apiKey,
+						Academy: store.info.academy_author
 					}
 				});
 				if (resp.status < 200 || resp.status > 299) {
@@ -344,7 +347,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					),
 					headers: {
 						"Content-type": "application/json",
-						Authorization: "Token " + apiKey
+						Authorization: "Token " + apiKey,
+						Academy: store.info.academy_author
 					}
 				});
 				if (resp.status < 200 || resp.status > 299) {
@@ -400,10 +404,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-			getApiSyllabus: async (profile, version) => {
+			getApiSyllabus: async (academy, profile, version) => {
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + profile + "/syllabus/" + version, {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + profile + "/academy/" + academy + "/syllabus/" + version, {
 					headers: {
 						//"Cache-Control": "no-cache",
 						"Content-type": "application/json",
@@ -422,11 +426,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				return await actions.upload({ content: data });
 			},
-			setCourseSlug: async courseSlug => {
+			getSyllabisVersions: async (academyId, courseSlug) => {
 				const store = getStore();
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/syllabus", {
+				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/academy/" + academyId + "/syllabus", {
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
@@ -440,7 +444,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw Error("There was an error saving the syllabus");
 					}
 				}
-				setStore({ ...store, syllabus: data });
+				setStore({ ...store, info: { ...store.info, academy_author: academyId, profile: courseSlug }, syllabus: data });
 			},
 			days: () => {
 				const store = getStore();
