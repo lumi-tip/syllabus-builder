@@ -4,6 +4,8 @@ import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
 import { ExtendedInstructions } from "./modal";
+import swal from "sweetalert";
+
 const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
@@ -164,14 +166,26 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					heading="Lessons"
 					type="lesson"
 					pieces={_data.lessons}
-					onDrop={item =>
-						actions.pieces().in(item, {
-							id: _data.id,
-							lessons: _data.lessons
-								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
-								.concat([item.data])
-						})
-					}
+					onDrop={async item => {
+						const exists = actions.days().findPiece(item, "lessons");
+						let confirm = true;
+						if (exists) {
+							confirm = await swal({
+								title: "Are you sure?",
+								text: `This ${item.type} is already added to this syllabus`,
+								icon: "warning",
+								buttons: true,
+								dangerMode: true
+							});
+						}
+						if (confirm)
+							actions.pieces().in(item, {
+								id: _data.id,
+								lessons: _data.lessons
+									.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+									.concat([item.data])
+							});
+					}}
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
@@ -183,14 +197,26 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					heading="Replits"
 					type="replit"
 					pieces={_data.replits}
-					onDrop={item =>
-						actions.pieces().in(item, {
-							id: _data.id,
-							replits: _data.replits
-								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
-								.concat([item.data])
-						})
-					}
+					onDrop={async item => {
+						const exists = actions.days().findPiece(item, "replits");
+						let confirm = true;
+						if (exists) {
+							confirm = await swal({
+								title: "Are you sure?",
+								text: `This ${item.type} is already added to this syllabus`,
+								icon: "warning",
+								buttons: true,
+								dangerMode: true
+							});
+						}
+						if (confirm)
+							actions.pieces().in(item, {
+								id: _data.id,
+								replits: _data.replits
+									.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+									.concat([item.data])
+							});
+					}}
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
@@ -202,14 +228,26 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					heading="Projects"
 					type="project"
 					pieces={_data.assignments}
-					onDrop={item =>
-						actions.pieces().in(item, {
-							id: _data.id,
-							assignments: _data.assignments
-								.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
-								.concat([item.data])
-						})
-					}
+					onDrop={async item => {
+						const exists = actions.days().findPiece(item, "assignments");
+						let confirm = true;
+						if (exists) {
+							confirm = await swal({
+								title: "Are you sure?",
+								text: `This ${item.type} is already added to this syllabus`,
+								icon: "warning",
+								buttons: true,
+								dangerMode: true
+							});
+						}
+						if (confirm)
+							actions.pieces().in(item, {
+								id: _data.id,
+								assignments: _data.assignments
+									.filter(l => (typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug))
+									.concat([item.data])
+							});
+					}}
 					onDelete={item =>
 						actions.pieces().out(item, {
 							id: _data.id,
@@ -223,17 +261,29 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete }) => {
 					heading="Quizzes"
 					type="quiz"
 					pieces={_data.quizzes}
-					onDrop={item => {
-						actions.pieces().in(item, {
-							id: _data.id,
-							quizzes: _data.quizzes
-								.filter(l => {
-									if (item.info == undefined) return false;
-									if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-									return false;
-								})
-								.concat([item.data])
-						});
+					onDrop={async item => {
+						const exists = actions.days().findPiece(item, "quizzes");
+						let confirm = true;
+						if (exists) {
+							confirm = await swal({
+								title: "Are you sure?",
+								text: `This ${item.type} is already added to this syllabus`,
+								icon: "warning",
+								buttons: true,
+								dangerMode: true
+							});
+						}
+						if (confirm)
+							actions.pieces().in(item, {
+								id: _data.id,
+								quizzes: _data.quizzes
+									.filter(l => {
+										if (item.info == undefined) return false;
+										if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+										return false;
+									})
+									.concat([item.data])
+							});
 					}}
 					onDelete={item => {
 						actions.pieces().out(item, {

@@ -50,21 +50,25 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [academy, setAcademy] = useState(store.info.academy_author);
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
-	const [opened, setOpened] = useState(false);
-
+	console.log("store", store);
 	useEffect(
 		() => {
 			if (store.info.version && store.info.version != "") {
-				setOpened(true);
 				setVersion(store.info.version);
 			}
+			if (store.info.academy && store.info.academy != "") {
+				setAcademy(store.info.academy);
+			}
 			if (store.info.label && store.info.label != "") {
-				setOpened(true);
 				setLabel(store.info.label);
 			}
 		},
 		[store.info]
 	);
+
+	const shouldBeOpened = () => {
+		return academy && academy != "" && (profile && profile != "");
+	};
 
 	return (
 		<div className="mb-3">
@@ -83,11 +87,10 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						<select
 							className="form-control"
 							onChange={e => {
-								setOpened(true);
 								setAcademy(e.target.value);
 								if (profile) actions.getSyllabisVersions(e.target.value, profile);
 							}}
-							value={profile}>
+							value={academy}>
 							<option key={0} value={null}>
 								Select an academy
 							</option>
@@ -102,7 +105,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						<select
 							className="form-control"
 							onChange={e => {
-								setOpened(true);
 								setProfile(e.target.value);
 								if (academy) actions.getSyllabisVersions(academy, e.target.value);
 							}}
@@ -119,8 +121,9 @@ export const SyllabusDetails = ({ onConfirm }) => {
 							})}
 						</select>
 						<select
-							className={"form-control  " + (opened !== false ? "" : "d-none")}
+							className={"form-control  " + (shouldBeOpened() ? "" : "d-none")}
 							onChange={e => {
+								console.log("academy", academy);
 								actions.getApiSyllabus(academy, profile, e.target.value);
 								//actions.setProfile({ version: store.info.version });
 							}}

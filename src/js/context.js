@@ -24,6 +24,7 @@ API.setOptions({
 		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
 	apiPathV2: "https://breathecode.herokuapp.com/v1"
+	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
 const mapEntity = {
 	lesson: "lessons",
@@ -217,7 +218,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									})),
 									lessons: d.lessons.map(e => ({
 										title: e.title,
-										slug: e.slug
+										slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
 									}))
 								}))
 							},
@@ -266,7 +267,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									})),
 									lessons: d.lessons.map(e => ({
 										title: e.title,
-										slug: e.slug
+										slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
 									}))
 								}))
 							}
@@ -277,7 +278,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey,
-						Academy: store.info.academy_author
+						Academy: parseInt(store.info.academy_author)
 					}
 				});
 				if (resp.status < 200 || resp.status > 299) {
@@ -405,6 +406,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 			},
 			getApiSyllabus: async (academy, profile, version) => {
+				const store = getStore();
+				setStore({ ...store, info: { ...store.info, academy_author: academy, profile, version } });
+
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + profile + "/academy/" + academy + "/syllabus/" + version, {
@@ -473,6 +477,22 @@ const getState = ({ getStore, getActions, setStore }) => {
 								else return { ...d, ...day };
 							})
 						});
+					},
+					findPiece: (piece, type) => {
+						const store = getStore();
+						for (let i = 0; i < store.days.length; i++) {
+							const day = store.days[i];
+							let _found = false;
+							if (type === "quiz")
+								_found = day[type].find(
+									p =>
+										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								);
+							else _found = day[type].find(p => p.slug === piece.data.slug);
+
+							if (_found) return true;
+						}
+						return false;
 					},
 					delete: id => {
 						const store = getStore();

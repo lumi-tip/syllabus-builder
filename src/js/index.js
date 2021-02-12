@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import "bootstrap";
 import "jquery";
 import "../styles/index.scss";
-import { Day, ContentWidget, UploadSyllabus, SyllabusDetails } from "./component";
+import { Day, ContentWidget, UploadSyllabus, SyllabusDetails, Sidebar } from "./component";
 import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
@@ -116,40 +116,7 @@ const Main = injectContent(() => {
 		<>
 			<DndProvider backend={Backend}>
 				<div className="row no-gutters">
-					<div className="left-side col-4 col-md-3 bg-light pt-0">
-						<div className="content lessons">
-							<ContentWidget
-								type="lesson"
-								contentHeight="calc(22vh - 50px)"
-								pieces={store.lessons}
-								onRefresh={() => actions.fetch(["lesson"], true)}
-							/>
-						</div>
-						<div className="content replits">
-							<ContentWidget
-								type="replit"
-								contentHeight="calc(22vh - 50px)"
-								pieces={store.replits}
-								onRefresh={() => actions.fetch(["replit"], true)}
-							/>
-						</div>
-						<div className="content projects">
-							<ContentWidget
-								type="project"
-								contentHeight="calc(22vh - 50px)"
-								pieces={store.projects}
-								onRefresh={() => actions.fetch(["project"], true)}
-							/>
-						</div>
-						<div className="content quizzes">
-							<ContentWidget
-								type="quiz"
-								contentHeight="calc(22vh - 50px)"
-								pieces={store.quizzes}
-								onRefresh={() => actions.fetch(["quiz"])}
-							/>
-						</div>
-					</div>
+					<Sidebar content={store} onRefresh={type => actions.fetch([type], true)} />
 					<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
 						<Notifier />
 						<div className="text-right p-3 position-sticky sticky-top bg-light" style={{ margin: "-15px" }}>
