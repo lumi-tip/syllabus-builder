@@ -75,21 +75,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 								API[entity]()
 									.all()
 									.then(_data => {
-										const data = _data.data || _data;
-										if (mapEntity[entity] === "replits") {
-											const replitsData = [Object.values(data)];
-											const newReplitStore = {
-												[mapEntity[entity]]: replitsData[0].map(e => {
-													e.type = "replit";
-													return e;
-												})
-											};
-											setStore(newReplitStore);
-										}
+										let data = _data.data || _data;
+										if (mapEntity[entity] === "replits" && !Array.isArray(data)) data = [Object.values(data)];
 										const newStore = {
 											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
-												// e.status = entity.status || "published";
 												return e;
 											})
 										};
@@ -188,93 +178,61 @@ const getState = ({ getStore, getActions, setStore }) => {
 				setStore({ info: { ...store.info, ...data } });
 				window.location.hash = data.slug;
 			},
-			download: () => {
+			serialize: newVersion => {
 				const store = getStore();
-				var dataStr =
-					"data:text/json;charset=utf-8," +
-					encodeURIComponent(
-						JSON.stringify(
-							{
-								...store.info,
-								slug: undefined,
-								days: store.days.map(d => ({
-									...d,
-									projects: undefined,
-									project:
-										d.assignments.length == 0
-											? undefined
-											: {
-													title: d.assignments[0].title,
-													instructions: `${urls.project}${d.assignments[0].slug}`
-											  },
-									assignments: d.assignments.map(p => p.slug),
-									replits: d.replits.map(e => ({
-										title: e.title,
-										slug: e.slug
-									})),
-									quizzes: d.quizzes.map(e => ({
-										title: e.info != undefined ? e.info.name : e.title,
-										slug: e.info != undefined ? e.info.slug : e.slug
-									})),
-									lessons: d.lessons.map(e => ({
-										title: e.title,
-										slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
-									}))
-								}))
-							},
-							null,
-							"   "
-						)
-					);
+				let payload = {
+					...store.info,
+					days: store.days.map(d => ({
+						...d,
+						projects: undefined,
+						project:
+							d.assignments.length == 0
+								? undefined
+								: {
+										title: d.assignments[0].title,
+										instructions: `${urls.project}${d.assignments[0].slug}`
+								  },
+						assignments: d.assignments.map(p => p.slug),
+						replits: d.replits.map(e => ({
+							title: e.info != undefined ? e.info.title : e.title,
+							slug: e.info != undefined ? e.info.slug : e.slug
+						})),
+						quizzes: d.quizzes.map(e => ({
+							title: e.info != undefined ? e.info.name : e.title,
+							slug: e.info != undefined ? e.info.slug : e.slug
+						})),
+						lessons: d.lessons.map(e => ({
+							title: e.title,
+							slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
+						}))
+					}))
+				};
+				payload = { json: payload };
+				if (newVersion) payload.slug = undefined;
+				return payload;
+			},
+			download: () => {
+				const actions = getActions();
+				const store = getStore();
+				var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(actions.serialize(), null, "   "));
 				var dlAnchorElem = document.getElementById("downloadAnchorElem");
 				dlAnchorElem.setAttribute("href", dataStr);
 				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".json" : "syllabus.json");
 				dlAnchorElem.click();
 			},
-			saveSyllabus: async () => {
+			saveSyllabus: async (newVersion = false) => {
+				const store = getStore();
+				const actions = getActions();
+				if (!newVersion && store.info.version == "null") throw Error("Please pick a syllabus version");
+				else if (store.info.version === "new") newVersion = true;
+				const url = newVersion
+					? API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus"
+					: API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version;
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const store = getStore();
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus", {
-					method: "POST",
-					body: JSON.stringify(
-						{
-							slug: undefined,
-							json: {
-								...store.info,
-								days: store.days.map(d => ({
-									...d,
-									projects: undefined,
-									project:
-										d.assignments.length == 0
-											? undefined
-											: {
-													title: d.assignments[0].title,
-													instructions: `${urls.project}${d.assignments[0].slug}`
-											  },
-									assignments: d.assignments.map(p => p.slug),
-									replits: d.replits.map(e => ({
-										info: {
-											title: e.title,
-											slug: e.slug
-										}
-									})),
-									quizzes: d.quizzes.map(e => ({
-										info: {
-											title: e.info != undefined ? e.info.name : e.title,
-											slug: e.info != undefined ? e.info.slug : e.slug
-										}
-									})),
-									lessons: d.lessons.map(e => ({
-										title: e.title,
-										slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
-									}))
-								}))
-							}
-						},
-						null,
-						"   "
-					),
+				const resp = await fetch(url, {
+					method: newVersion ? "POST" : "PUT",
+					body: JSON.stringify(actions.serialize(newVersion), null, "   "),
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey,
@@ -284,7 +242,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (resp.status < 200 || resp.status > 299) {
 					if (resp.status > 399 && resp.status < 500) {
 						const data = await resp.json();
-						throw Error(data.details);
+						if (typeof data === "object") {
+							if (data.detail || data.details) throw Error(data.detail || data.details);
+							for (let atr in data) {
+								throw Error(`Field "${atr}": ${data[atr][0]}`);
+							}
+						} else {
+							throw Error(data.toString());
+						}
 					} else {
 						throw Error("There was an error saving the syllabus");
 					}
@@ -304,63 +269,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 						description: ""
 					}
 				});
-			},
-			editSyllabus: async () => {
-				const params = new URLSearchParams(window.location.search);
-				const apiKey = params.get("token");
-				const store = getStore();
-				const actions = getActions();
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version, {
-					method: "PUT",
-					body: JSON.stringify(
-						{
-							slug: undefined,
-							json: {
-								...store.info,
-								days: store.days.map(d => ({
-									...d,
-									projects: undefined,
-									project:
-										d.assignments.length == 0
-											? undefined
-											: {
-													title: d.assignments[0].title,
-													instructions: `${urls.project}${d.assignments[0].slug}`
-											  },
-									assignments: d.assignments.map(p => p.slug),
-									replits: d.replits.map(e => ({
-										title: e.title,
-										slug: e.slug
-									})),
-									quizzes: d.quizzes.map(e => ({
-										title: e.info != undefined ? e.info.name : e.title,
-										slug: e.info != undefined ? e.info.slug : e.slug
-									})),
-									lessons: d.lessons.map(e => ({
-										title: e.title,
-										slug: e.slug
-									}))
-								}))
-							}
-						},
-						null,
-						"   "
-					),
-					headers: {
-						"Content-type": "application/json",
-						Authorization: "Token " + apiKey,
-						Academy: store.info.academy_author
-					}
-				});
-				if (resp.status < 200 || resp.status > 299) {
-					if (resp.status > 399 && resp.status < 500) {
-						const data = await resp.json();
-						throw Error(data.details);
-					} else {
-						throw Error("There was an error saving the syllabus");
-					}
-				}
-				return await resp;
 			},
 			pieces: function() {
 				const store = getStore();
@@ -407,7 +315,22 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getApiSyllabus: async (academy, profile, version) => {
 				const store = getStore();
-				setStore({ ...store, info: { ...store.info, academy_author: academy, profile, version } });
+				const _store = { ...store, info: { ...store.info, academy_author: academy, profile, version } };
+				setStore(_store);
+
+				// ignore version, academy or profile null
+				if (
+					!version ||
+					version == "" ||
+					version == "null" ||
+					!academy ||
+					academy == "" ||
+					academy == "null" ||
+					!profile ||
+					profile == "" ||
+					profile == "null"
+				)
+					return;
 
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
@@ -422,9 +345,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const actions = getActions();
 				if (resp.status < 200 || resp.status > 299) {
 					if (resp.status > 399 && resp.status < 500) {
-						throw Error(data.details);
+						throw Error(data.detail || data.details);
 					} else {
-						throw Error("There was an error saving the syllabus");
+						throw Error("There was an error fetching the syllabus");
 					}
 				}
 
@@ -443,7 +366,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const data = await resp.json();
 				if (resp.status < 200 || resp.status > 299) {
 					if (resp.status > 399 && resp.status < 500) {
-						throw Error(data.details);
+						throw Error(data.detail || data.details);
 					} else {
 						throw Error("There was an error saving the syllabus");
 					}
@@ -531,6 +454,7 @@ export function injectContent(Child) {
 			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
 
 			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "courseV2"]), 1000);
+			window.store = state.store;
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>

@@ -50,7 +50,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [academy, setAcademy] = useState(store.info.academy_author);
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
-	console.log("store", store);
+
 	useEffect(
 		() => {
 			if (store.info.version && store.info.version != "") {
@@ -123,12 +123,10 @@ export const SyllabusDetails = ({ onConfirm }) => {
 						<select
 							className={"form-control  " + (shouldBeOpened() ? "" : "d-none")}
 							onChange={e => {
-								console.log("academy", academy);
-								actions.getApiSyllabus(academy, profile, e.target.value);
-								//actions.setProfile({ version: store.info.version });
+								if (academy) actions.getApiSyllabus(academy, profile, e.target.value);
 							}}
 							value={store.info.version}>
-							<option key={0} value={null}>
+							<option key={0} value={"null"}>
 								Select version
 							</option>
 							{store.syllabus !== null && store.syllabus.length > 0 ? (

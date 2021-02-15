@@ -25,15 +25,17 @@ const Main = injectContent(() => {
 		if (store.info.slug !== "" && store.days.length > 0) {
 			const willSave = await swal({
 				title: "Are you sure?",
-				text: "Creating a NEW syllabus version?",
+				text: `Creating a NEW syllabus version for ${store.info.slug} academy ${store.info.academy_author}?`,
 				icon: "warning",
 				buttons: true,
 				dangerMode: true
 			});
 			if (willSave) {
 				try {
-					const data = await actions.saveSyllabus().then(s => actions.setInfo({ version: s.version }));
-					swal("New syllabus version saved successfully", {
+					//                              ⬇ true means new version number
+					const data = await actions.saveSyllabus(true);
+					actions.setInfo({ version: data.version });
+					swal(`New syllabus ${data.json.slug} v${data.version} saved successfully`, {
 						icon: "success"
 					});
 				} catch (error) {
@@ -72,12 +74,14 @@ const Main = injectContent(() => {
 			});
 			if (willEdit) {
 				try {
-					const data = await actions.editSyllabus();
+					//                                      ↓ false means saving under the same version
+					const data = await actions.saveSyllabus(false);
 					swal("Syllabus version " + store.info.version + " update successfully", {
 						icon: "success"
 					});
 				} catch (error) {
-					swal(error.message || error, {
+					console.error("Error updating syllabus: ", error);
+					swal(error.message || error.msg || error, {
 						icon: "error"
 					});
 				}

@@ -26,11 +26,11 @@ const Column = ({ heading, onDrop, pieces, type, onDelete }) => {
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
 				{pieces.info !== undefined
-					? pieces.map(p => {
-							return <ContentPiece key={p.info.slug} type={p.type} status={p.status} data={p.info} onDelete={() => onDelete(p.info)} />;
+					? pieces.map((p, i) => {
+							return <ContentPiece key={i} type={p.type} status={p.status} data={p.info} onDelete={() => onDelete(p.info)} />;
 					  })
-					: pieces.map(p => {
-							return <ContentPiece key={p.slug} type={p.type} data={p} status={p.status} onDelete={() => onDelete(p)} />;
+					: pieces.map((p, i) => {
+							return <ContentPiece key={i} type={p.type} data={p} status={p.status} onDelete={() => onDelete(p)} />;
 					  })}
 			</ul>
 		</div>

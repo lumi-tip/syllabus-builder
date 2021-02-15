@@ -24,13 +24,15 @@ const ContentPiece = ({ data, onDelete, status, previewLink, withWarning }) => {
 		const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
 		return url;
 	};
-	// data.type == "quiz" && console.log(data);
 	let title = "";
 	if (data && typeof data !== "undefined") {
 		if (typeof data.title !== "undefined") title = data.title;
 		else if (typeof data.info !== "undefined") title = data.info.name || data.info.title || data.info.slug;
 	}
-	if (title == "") title = "Undefined title";
+	if (title == "") {
+		console.error("There is undefined title for: ", data);
+		title = "Undefined title";
+	}
 
 	let _status = "published";
 	if (data.type === "lesson" || data.type === "project") {
