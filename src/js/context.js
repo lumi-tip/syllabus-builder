@@ -217,7 +217,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(actions.serialize().json, null, "   "));
 				var dlAnchorElem = document.getElementById("downloadAnchorElem");
 				dlAnchorElem.setAttribute("href", dataStr);
-				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".json" : "syllabus.json");
+				dlAnchorElem.setAttribute("download", store.info.slug ? store.info.slug + ".v" + store.info.version + ".json" : "syllabus.json");
 				dlAnchorElem.click();
 			},
 			saveSyllabus: async (newVersion = false) => {
