@@ -76,7 +76,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.all()
 									.then(_data => {
 										let data = _data.data || _data;
-										if (mapEntity[entity] === "replits" && !Array.isArray(data)) data = [Object.values(data)];
+										if (mapEntity[entity] === "replits" && !Array.isArray(data)) data = Object.values(data);
 										const newStore = {
 											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
