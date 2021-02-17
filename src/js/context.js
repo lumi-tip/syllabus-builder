@@ -13,7 +13,7 @@ const newDay = (id, position) => ({
 	label: "",
 	"key-concepts": [],
 	lessons: [],
-	assignments: [],
+	projects: [],
 	replits: [],
 	quizzes: []
 });
@@ -120,7 +120,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 												return l;
 										  })
 										: (d.replits = []),
-								assignments:
+								//from the json it comes like an assignment, but its really a project
+								projects:
 									d.assignments !== undefined
 										? d.assignments.map(p => {
 												const project = projects.find(_pro => _pro.slug === p);
@@ -159,7 +160,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 											position: i + 1,
 											lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
 											replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
-											assignments: d.assignments
+											projects: d.assignments
 												? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
 												: [],
 											quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
@@ -186,24 +187,35 @@ const getState = ({ getStore, getActions, setStore }) => {
 						...d,
 						projects: undefined,
 						project:
-							d.assignments.length == 0
+							d.projects.length == 0
 								? undefined
 								: {
-										title: d.assignments[0].title,
-										instructions: `${urls.project}${d.assignments[0].slug}`
+										title: d.projects[0].title,
+										instructions: `${urls.project}${d.projects[0].slug}`
 								  },
-						assignments: d.assignments.map(p => p.slug),
+						assignments: d.projects.map(p => ({
+							slug: p.slug,
+							title: p.title,
+							url: p.url,
+							required: p.required
+						})),
 						replits: d.replits.map(e => ({
 							title: e.info != undefined ? e.info.title : e.title,
-							slug: e.info != undefined ? e.info.slug : e.slug
+							slug: e.info != undefined ? e.info.slug : e.slug,
+							url: e.info != undefined ? e.info.url : e.url,
+							required: e.info != undefined ? e.info.required : e.required
 						})),
 						quizzes: d.quizzes.map(e => ({
 							title: e.info != undefined ? e.info.name : e.title,
-							slug: e.info != undefined ? e.info.slug : e.slug
+							slug: e.info != undefined ? e.info.slug : e.slug,
+							url: e.info != undefined ? e.info.url : e.url,
+							required: e.info != undefined ? e.info.required : e.required
 						})),
 						lessons: d.lessons.map(e => ({
 							title: e.title,
-							slug: e.slug.substr(e.slug.indexOf("]") + 1) //remove status like [draft]
+							slug: e.slug.substr(e.slug.indexOf("]") + 1), //remove status like [draft]
+							url: e.info != undefined ? e.info.url : e.url,
+							required: e.info != undefined ? e.info.required : e.required
 						}))
 					}))
 				};
@@ -278,10 +290,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					out: (piece, day) => {
-						this.pieces().add(piece);
+						this.pieces().addOrReplace(piece);
 						this.days().update(day.id, day);
 					},
-					add: piece => {
+					addOrReplace: piece => {
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
@@ -400,6 +412,22 @@ const getState = ({ getStore, getActions, setStore }) => {
 								else return { ...d, ...day };
 							})
 						});
+					},
+					replacePiece: (piece, type) => {
+						const store = getStore();
+						for (let i = 0; i < store.days.length; i++) {
+							const day = store.days[i];
+							let _found = false;
+							if (type === "quiz")
+								_found = day[type].find(
+									p =>
+										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								);
+							else _found = day[type].find(p => p.slug === piece.data.slug);
+
+							if (_found) return true;
+						}
+						return false;
 					},
 					findPiece: (piece, type) => {
 						const store = getStore();

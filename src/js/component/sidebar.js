@@ -1,12 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { ContentWidget } from "./";
-let widgets = [
-	{ type: "lesson", storeName: "lessons" },
-	{ type: "replit", storeName: "replits" },
-	{ type: "quiz", storeName: "quizzes" },
-	{ type: "project", storeName: "projects" }
-];
+import { mappers } from "./utils";
+
 const Sidebar = ({ content, onRefresh }) => {
 	const [expandedItem, setExpanded] = React.useState(null);
 	return (
@@ -16,7 +12,7 @@ const Sidebar = ({ content, onRefresh }) => {
 					Show all widgets
 				</button>
 			)}
-			{widgets.filter(w => !expandedItem || w.type === expandedItem).map(w => (
+			{mappers.filter(w => !expandedItem || w.type === expandedItem).map(w => (
 				<div key={w.type} className={`content ${w.storeName}`}>
 					<ContentWidget
 						type={w.type}

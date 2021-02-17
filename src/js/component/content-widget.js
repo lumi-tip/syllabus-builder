@@ -55,7 +55,6 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 							return true;
 						})
 						.map((l, i) => {
-							console.log("piece: ", l);
 							return <ContentPiece withWarning key={i} data={l} status={l.status} previewLink={true} />;
 						})}
 				</ul>
