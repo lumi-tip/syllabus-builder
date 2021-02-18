@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
-import { url } from "./constants/constans";
-
-const urls = url;
+import { urls } from "./component/utils";
 
 export const ContentContext = React.createContext({});
 

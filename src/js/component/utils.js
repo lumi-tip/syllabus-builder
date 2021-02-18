@@ -1,3 +1,22 @@
+export const urls = {
+	lesson: "https://content.breatheco.de/lesson/",
+	project: "https://projects.breatheco.de/project/",
+	quiz: "https://assets.breatheco.de/apis/quiz/",
+	replit: "https://assets.breatheco.de/apis/registry/all"
+};
+
+export const getLink = data => {
+	let slug = "";
+	if (data.type !== "quiz") {
+		slug = data.type === "replit" ? data.value : data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
+	} else {
+		slug = data.info.slug;
+	}
+
+	const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
+	return url;
+};
+
 export const getTitle = data => {
 	let title = "";
 	if (data && typeof data !== "undefined") {

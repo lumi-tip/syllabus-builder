@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { getLink } from "../utils";
 
 const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	const [data, setData] = useState({});
@@ -70,6 +71,9 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 						</div>
 					</div>
 					<div className="modal-footer">
+						<a href={getLink(data)} target="_blank" rel="noopener noreferrer">
+							Open in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
+						</a>
 						<button className="btn btn-primary">Save Content Piece</button>
 						<button onClick={() => onCancel && onCancel()} type="button" className="btn btn-secondary" data-dismiss="modal">
 							Cancel

@@ -1,31 +1,19 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
-import { url } from "../constants/constans";
 import { Tooltip } from "react-lightweight-tooltip";
 import EditContentPiece from "./modals/EditContentPiece";
-import { getTitle, getStatus } from "./utils";
+import { getTitle, getStatus, getLink, urls } from "./utils";
 
-const urls = url;
 const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning }) => {
 	const [editMode, setEditMode] = useState(false);
-	let slug = "";
+
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type, data, status },
 		collect: monitor => ({
 			isDragging: !!monitor.isDragging()
 		})
 	});
-	const link = data => {
-		if (data.type !== "quiz") {
-			slug = data.type === "replit" ? data.value : data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
-		} else {
-			slug = data.info.slug;
-		}
-
-		const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
-		return url;
-	};
 
 	let _title = getTitle(data);
 	let _status = getStatus(data);
@@ -42,7 +30,7 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 				)}
 			{onDelete && <i onClick={() => onDelete(data)} className="fas fa-trash-alt pointer p-1" />}
 			{onEdit && <i onClick={() => setEditMode(true)} className="fas fa-pencil-alt pointer p-1" />}
-			{previewLink && <i onClick={() => window.open(link(data))} className="fas fa-external-link-square-alt pointer p-1 text-secondary" />}
+			{previewLink && <i onClick={() => window.open(getLink(data))} className="fas fa-external-link-square-alt pointer p-1 text-secondary" />}
 		</li>
 	);
 };
