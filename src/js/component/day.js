@@ -30,7 +30,10 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			{editMode && (
 				<EditContentPiece
 					defaultValue={{ custom: true, type }}
-					onSave={_d => setEditMode(false) || onEdit(_d)}
+					onSave={_d => {
+						setEditMode(false);
+						onEdit(_d);
+					}}
 					onCancel={() => setEditMode(false)}
 				/>
 			)}

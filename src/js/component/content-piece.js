@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
 import { Tooltip } from "react-lightweight-tooltip";
 import EditContentPiece from "./modals/EditContentPiece";
-import { getTitle, getStatus, getLink, urls } from "./utils";
+import { getTitle, getStatus, getLink } from "./utils";
 
 const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning }) => {
 	const [editMode, setEditMode] = useState(false);
@@ -30,7 +30,12 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 				)}
 			{onDelete && <i onClick={() => onDelete(data)} className="fas fa-trash-alt pointer p-1" />}
 			{onEdit && <i onClick={() => setEditMode(true)} className="fas fa-pencil-alt pointer p-1" />}
-			{previewLink && <i onClick={() => window.open(getLink(data))} className="fas fa-external-link-square-alt pointer p-1 text-secondary" />}
+			{previewLink && (
+				<i
+					onClick={() => getLink(data).then(url => window.open(url))}
+					className="fas fa-external-link-square-alt pointer p-1 text-secondary"
+				/>
+			)}
 		</li>
 	);
 };

@@ -107,6 +107,10 @@ const Main = injectContent(() => {
 
 	useEffect(() => {
 		actions.getMe();
+
+		window.onbeforeunload = function() {
+			return "Are you sure you want to exit?";
+		};
 	}, []);
 
 	if (!API_KEY)

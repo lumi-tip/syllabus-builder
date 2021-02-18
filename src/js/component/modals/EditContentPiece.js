@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { getLink } from "../utils";
 
 const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
-	const [data, setData] = useState({});
+	const [data, setData] = useState(null);
 
 	useEffect(
 		() => {
@@ -12,6 +12,8 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 		},
 		[defaultValue]
 	);
+
+	if (!data) return "Loading...";
 
 	return (
 		<div className="modal show d-block edit-piece" tabIndex="-1" role="dialog">
@@ -71,7 +73,16 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 						</div>
 					</div>
 					<div className="modal-footer">
-						<a href={getLink(data)} target="_blank" rel="noopener noreferrer">
+						<a
+							href="#"
+							onClick={e => {
+								e.preventDefault();
+								getLink(data)
+									.then(url => window.open(url))
+									.catch(error => console.error("Error fetching piece url", error));
+							}}
+							target="_blank"
+							rel="noopener noreferrer">
 							Open in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
 						</a>
 						<button className="btn btn-primary">Save Content Piece</button>
