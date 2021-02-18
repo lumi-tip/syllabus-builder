@@ -76,7 +76,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.all()
 									.then(_data => {
 										let data = _data.data || _data;
-										if (mapEntity[entity] === "replits" && !Array.isArray(data)) data = Object.values(data);
+										if (!Array.isArray(data)) data = Object.values(data);
 										const newStore = {
 											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
 												e.type = entity;
@@ -124,7 +124,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 								projects:
 									d.assignments !== undefined
 										? d.assignments.map(p => {
-												const project = projects.find(_pro => _pro.slug === p);
+												const project = projects.find(
+													_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p)
+												);
 												return project;
 										  })
 										: (d.assignments = []),
