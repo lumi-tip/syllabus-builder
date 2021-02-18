@@ -11,6 +11,7 @@ import Backend from "react-dnd-html5-backend";
 import { Notifier, Notify } from "bc-react-notifier";
 import swal from "sweetalert";
 import { useEffect } from "react";
+import { ExtendedInstructions } from "./component/modal";
 
 //include your index.scss file into the bundle
 
@@ -20,6 +21,7 @@ const API_KEY = params.get("token");
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 	const [state, setState] = useState(false);
+	const [editExtendedDay, setEditExtendedDay] = useState(null);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	const confirmSaveSillabus = async () => {
 		if (store.info.slug !== "" && store.days.length > 0) {
@@ -120,6 +122,19 @@ const Main = injectContent(() => {
 			</div>
 		);
 
+	if (editExtendedDay)
+		return (
+			<ExtendedInstructions
+				dayNumber={editExtendedDay.position}
+				defaultValue={editExtendedDay.extended_instructions}
+				onSave={extended_instructions => {
+					actions.days().update(editExtendedDay.id, { ...editExtendedDay, extended_instructions });
+					setEditExtendedDay(null);
+				}}
+				onCancel={() => setEditExtendedDay(null)}
+			/>
+		);
+
 	return (
 		<>
 			<DndProvider backend={Backend}>
@@ -139,7 +154,18 @@ const Main = injectContent(() => {
 												{store.info.label}: {store.info.slug}
 											</div>
 										)}
-									<button className="btn btn-danger btn-sm mr-2" onClick={() => actions.clear()}>
+									<button
+										className="btn btn-danger btn-sm mr-2"
+										onClick={async () => {
+											const yes = await swal({
+												title: "Are you sure?",
+												text: "Make sure to save or download first or you will loose your progress",
+												icon: "warning",
+												buttons: true,
+												dangerMode: true
+											});
+											if (yes) actions.clear();
+										}}>
 										<i className="fas fa-ban" /> Clear
 									</button>
 									{store.info.version != "" &&
@@ -194,6 +220,7 @@ const Main = injectContent(() => {
 								<Day
 									key={d.id.toString() + d.position.toString()}
 									data={d}
+									onEditInstructions={() => setEditExtendedDay(d)}
 									onMoveUp={() => {
 										const other = store.days.find(_day => _day.position === d.position - 1);
 										actions.days().update(d.id, { ...d, position: d.position - 1 });
