@@ -52,7 +52,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			quizzes: [],
 			syllabus: [],
 			courses: [],
-			academies: []
+			academies: [],
+			report: []
 		},
 
 		actions: {
@@ -88,13 +89,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 						})
 				);
 			},
+			report: () => {
+				return {
+					add: (type, message, item) => {
+						const store = getStore();
+						setStore({ report: store.report.concat({ type, message, item }) });
+					},
+					clear: () => {
+						setStore({ report: [] });
+					}
+				};
+			},
 			upload: data => {
 				//if its not a url
+				const actions = getActions();
 				const { projects, info } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					const content = JSON.parse(data.content);
 					const pieces = data.content.split(",");
 					const version = pieces.length === 3 ? pieces[1] : "";
+
+					actions.report().clear(); //clear noticications
 
 					let { days, profile, label, description, weeks } = content.json || content;
 					if (Array.isArray(weeks) && !Array.isArray(days)) days = [].concat.apply([], weeks.map(w => w.days));
@@ -125,6 +140,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 												const project = projects.find(
 													_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p)
 												);
+												if (project === undefined) {
+													actions.report().add("error", `Invalid project ${p.slug || p}`, p);
+													return { type: "project", slug: p, title: "Invalid project" };
+												}
+
 												return project;
 										  })
 										: (d.assignments = []),
@@ -273,6 +293,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
 				setStore({
 					days: [],
+					report: [],
 					info: {
 						label: "",
 						slug: "",
@@ -481,7 +502,7 @@ export function injectContent(Child) {
 			const previousStore = localStorage.getItem("syllabus-" + slug);
 			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
 
-			setTimeout(() => state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "courseV2"]), 1000);
+			state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "courseV2"]);
 			window.store = state.store;
 		}, []);
 		return (
