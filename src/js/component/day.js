@@ -74,16 +74,13 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	const [_data, setData] = useState(data);
 	const [concept, setConcept] = useState("");
 
-	useEffect(
-		() => {
-			let updated = false;
-			for (let key in data) {
-				if (data[key] != _data[key]) updated = true;
-			}
-			if (updated) setData(data);
-		},
-		[data]
-	);
+	useEffect(() => {
+		let updated = false;
+		for (let key in data) {
+			if (data[key] != _data[key]) updated = true;
+		}
+		if (updated) setData(data);
+	}, [data]);
 
 	return (
 		<div className="day bg-light position-relative">

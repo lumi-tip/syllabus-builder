@@ -77,10 +77,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
 										const newStore = {
-											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
-												e.type = entity;
-												return e;
-											})
+											[mapEntity[entity]]: data
+												.filter(e => typeof e.lang === "undefined" || e.lang == "en")
+												.map(e => {
+													e.type = entity;
+													return e;
+												})
 										};
 										setStore(newStore);
 										resolve(data);
@@ -105,14 +107,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const actions = getActions();
 				const { projects, info } = getStore();
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
-					const content = JSON.parse(data.content);
-					const pieces = data.content.split(",");
-					const version = pieces.length === 3 ? pieces[1] : "";
-
+					let content = JSON.parse(data.content);
+					let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
 					actions.report().clear(); //clear noticications
 
-					let { days, profile, label, description, weeks } = content.json || content;
-					if (Array.isArray(weeks) && !Array.isArray(days)) days = [].concat.apply([], weeks.map(w => w.days));
+					let { days, profile, label, description, weeks } = json || content;
+					if (Array.isArray(weeks) && !Array.isArray(days))
+						days = [].concat.apply(
+							[],
+							weeks.map(w => w.days)
+						);
 					setStore({
 						days: days.map((d, i) => {
 							return {
@@ -137,8 +141,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 								projects:
 									d.assignments !== undefined
 										? d.assignments.map(p => {
-												const project = projects.find(
-													_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p)
+												const project = projects.find(_pro =>
+													p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
 												);
 												if (project === undefined) {
 													actions.report().add("error", `Invalid project ${p.slug || p}`, p);
@@ -150,10 +154,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
-										? d.quizzes.filter(f => f.slug != undefined).map(l => {
-												l.type = "quiz";
-												return l;
-										  })
+										? d.quizzes
+												.filter(f => f.slug != undefined)
+												.map(l => {
+													l.type = "quiz";
+													return l;
+												})
 										: (d.quizzes = [])
 							};
 						}),
@@ -258,8 +264,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (!newVersion && store.info.version == "null") throw Error("Please pick a syllabus version");
 				else if (store.info.version === "new") newVersion = true;
 				const url = newVersion
-					? API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus"
-					: API.options.apiPathV2 + "/coursework/course/" + store.info.profile + "/syllabus/" + store.info.version;
+					? API.options.apiPathV2 + "/admissions/certificate/" + store.info.profile + "/academy/" + store.info.academy_author + "/syllabus"
+					: API.options.apiPathV2 +
+					  "/admissions/certificate/" +
+					  store.info.profile +
+					  "/academy/" +
+					  store.info.academy_author +
+					  "/syllabus/" +
+					  store.info.version;
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const resp = await fetch(url, {
@@ -318,11 +330,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
-										.filter(
-											p =>
-												typeof piece.info.slug !== undefined
-													? p.info.slug !== piece.info.slug
-													: p.info.slug !== piece.data.info.slug
+										.filter(p =>
+											typeof piece.info.slug !== undefined
+												? p.info.slug !== piece.info.slug
+												: p.info.slug !== piece.data.info.slug
 										)
 										.concat(piece)
 							  })
@@ -333,11 +344,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					delete: piece => {
 						piece.type === "quiz"
 							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(
-										p =>
-											typeof piece.data.info.slug === undefined
-												? p.info.slug !== piece.slug
-												: p.info.slug !== piece.data.info.slug
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p =>
+										typeof piece.data.info.slug === undefined ? p.info.slug !== piece.slug : p.info.slug !== piece.data.info.slug
 									)
 							  })
 							: setStore({
@@ -367,13 +375,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + profile + "/academy/" + academy + "/syllabus/" + version, {
-					headers: {
-						//"Cache-Control": "no-cache",
-						"Content-type": "application/json",
-						Authorization: "Token " + apiKey
+				const resp = await fetch(
+					API.options.apiPathV2 + "/admissions/certificate/" + profile + "/academy/" + academy + "/syllabus/" + version,
+					{
+						headers: {
+							//"Cache-Control": "no-cache",
+							"Content-type": "application/json",
+							Authorization: "Token " + apiKey
+						}
 					}
-				});
+				);
 				const data = await resp.text();
 				const actions = getActions();
 				if (resp.status < 200 || resp.status > 299) {
@@ -388,9 +399,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getSyllabisVersions: async (academyId, courseSlug) => {
 				const store = getStore();
+				const actions = getActions();
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/coursework/course/" + courseSlug + "/academy/" + academyId + "/syllabus", {
+				const resp = await fetch(API.options.apiPathV2 + "/admissions/certificate/" + courseSlug + "/academy/" + academyId + "/syllabus", {
 					headers: {
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
@@ -440,9 +452,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 							const day = store.days[i];
 							let _found = false;
 							if (type === "quiz")
-								_found = day[type].find(
-									p =>
-										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								_found = day[type].find(p =>
+									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
 
@@ -456,9 +467,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 							const day = store.days[i];
 							let _found = false;
 							if (type === "quiz")
-								_found = day[type].find(
-									p =>
-										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								_found = day[type].find(p =>
+									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
 
@@ -502,7 +512,7 @@ export function injectContent(Child) {
 			const previousStore = localStorage.getItem("syllabus-" + slug);
 			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
 
-			state.actions.fetch(["lesson", "quiz", "project", "replit", "profile", "courseV2"]);
+			state.actions.fetch(["lesson", "quiz", "project", "replit"]);
 			window.store = state.store;
 		}, []);
 		return (

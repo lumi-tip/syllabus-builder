@@ -8,6 +8,8 @@ class Wrapper {
 			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
 			apiPathV2: typeof process != "undefined" ? process.env.API_URL_V2 : null,
 			_debug: typeof process != "undefined" ? process.env.DEBUG : false,
+			academy: null,
+			token: "",
 			getToken: (type = "api") => {
 				return type == "api" ? this.apiPath : this.assetsPath;
 			},
@@ -56,12 +58,12 @@ class Wrapper {
 		let token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
-		if (path.includes("syllabus") || path.includes("course") || path.includes("/auth/user/me")) token = "Token " + apiKey;
+		if (path.includes("syllabus") || path.includes("certificate") || path.includes("/auth/user/me")) token = "Token " + apiKey;
 
 		let opts = {
 			method,
 			cache: "no-cache",
-			headers: { "Content-Type": "application/json" }
+			headers: { "Content-Type": "application/json", Academy: this.options.academy }
 		};
 
 		if (token) {
@@ -386,7 +388,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/coursework/course");
+				return this.get(url + "/admissions/certificate");
 			},
 			get: id => {
 				return this.get(url + "/profile/" + id);
@@ -406,7 +408,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/coursework/course");
+				return this.get(url + "/admissions/certificate");
 			}
 		};
 	}

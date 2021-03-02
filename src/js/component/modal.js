@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ContentContext } from "../context.js";
 import SmartInput from "./smart-input";
+import API from "../api.js";
 import MDEditor from "@uiw/react-md-editor";
 import PropTypes from "prop-types";
 
@@ -51,23 +52,20 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
 
-	useEffect(
-		() => {
-			if (store.info.version && store.info.version != "") {
-				setVersion(store.info.version);
-			}
-			if (store.info.academy && store.info.academy != "") {
-				setAcademy(store.info.academy);
-			}
-			if (store.info.label && store.info.label != "") {
-				setLabel(store.info.label);
-			}
-		},
-		[store.info]
-	);
+	useEffect(() => {
+		if (store.info.version && store.info.version != "") {
+			setVersion(store.info.version);
+		}
+		if (store.info.academy && store.info.academy != "") {
+			setAcademy(store.info.academy);
+		}
+		if (store.info.label && store.info.label != "") {
+			setLabel(store.info.label);
+		}
+	}, [store.info]);
 
 	const shouldBeOpened = () => {
-		return academy && academy != "" && (profile && profile != "");
+		return academy && academy != "" && profile && profile != "";
 	};
 
 	return (
@@ -88,7 +86,9 @@ export const SyllabusDetails = ({ onConfirm }) => {
 							className="form-control"
 							onChange={e => {
 								setAcademy(e.target.value);
+								API.setOptions({ academy: e.target.value });
 								if (profile) actions.getSyllabisVersions(e.target.value, profile);
+								else actions.fetch(["profile"]);
 							}}
 							value={academy}>
 							<option key={0} value={null}>

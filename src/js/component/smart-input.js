@@ -5,15 +5,12 @@ const ENTER_KEY = 13;
 
 const useDebounce = (value, delay) => {
 	const [debouncedValue, setDebouncedValue] = useState(value);
-	useEffect(
-		() => {
-			const timer = setTimeout(() => setDebouncedValue(value), delay);
-			return () => {
-				clearTimeout(timer);
-			};
-		},
-		[value, delay || 500]
-	);
+	useEffect(() => {
+		const timer = setTimeout(() => setDebouncedValue(value), delay);
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [value, delay || 500]);
 	return debouncedValue;
 };
 
@@ -21,19 +18,13 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 	const [value, setValue] = useState(initialValue);
 	const debouncedValue = useDebounce(value, WAIT_INTERVAL);
 
-	useEffect(
-		() => {
-			onChange(debouncedValue);
-		},
-		[debouncedValue]
-	);
+	useEffect(() => {
+		onChange(debouncedValue);
+	}, [debouncedValue]);
 
-	useEffect(
-		() => {
-			setValue(initialValue);
-		},
-		[initialValue]
-	);
+	useEffect(() => {
+		setValue(initialValue);
+	}, [initialValue]);
 
 	if (type === "textarea")
 		return (
