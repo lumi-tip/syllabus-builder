@@ -5,10 +5,13 @@ import { getLink } from "../utils";
 const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	const [data, setData] = useState(null);
 
-	useEffect(() => {
-		if (defaultValue.custom !== true && defaultValue.mandatory === undefined) defaultValue.mandatory = true;
-		if (typeof defaultValue == "object") setData(defaultValue.info || defaultValue);
-	}, [defaultValue]);
+	useEffect(
+		() => {
+			if (defaultValue.custom !== true && defaultValue.mandatory === undefined) defaultValue.mandatory = true;
+			if (typeof defaultValue == "object") setData(defaultValue.info || defaultValue);
+		},
+		[defaultValue]
+	);
 
 	if (!data) return "Loading...";
 

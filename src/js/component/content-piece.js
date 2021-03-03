@@ -22,11 +22,12 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 		<li className="content-piece" ref={drag}>
 			{editMode && <EditContentPiece defaultValue={data} onSave={_d => setEditMode(false) || onEdit(_d)} onCancel={() => setEditMode(false)} />}
 			{_title}
-			{withWarning && _status != "published" && (
-				<Tooltip content={`${_status} (needs to be published)`}>
-					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
-				</Tooltip>
-			)}
+			{withWarning &&
+				_status != "published" && (
+					<Tooltip content={`${_status} (needs to be published)`}>
+						<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
+					</Tooltip>
+				)}
 			{onDelete && <i onClick={() => onDelete(data)} className="fas fa-trash-alt pointer p-1" />}
 			{onEdit && <i onClick={() => setEditMode(true)} className="fas fa-pencil-alt pointer p-1" />}
 			{previewLink && (

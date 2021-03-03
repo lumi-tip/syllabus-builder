@@ -58,14 +58,15 @@ class Wrapper {
 		let token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
-		if (path.includes("syllabus") || path.includes("certificate") || path.includes("/auth/user/me")) token = "Token " + apiKey;
 
 		let opts = {
 			method,
 			cache: "no-cache",
-			headers: { "Content-Type": "application/json", Academy: this.options.academy }
+			headers: { "Content-Type": "application/json" }
 		};
 
+		if (path.includes("syllabus") || path.includes("certificate") || path.includes("/auth/user/me")) token = "Token " + apiKey;
+		if (path.includes("heroku")) opts.headers = { ...opts.headers, Academy: this.options.academy };
 		if (token) {
 			opts.headers["Authorization"] = token;
 		}

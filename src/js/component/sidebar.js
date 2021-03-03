@@ -12,19 +12,17 @@ const Sidebar = ({ content, onRefresh }) => {
 					Show all widgets
 				</button>
 			)}
-			{mappers
-				.filter(w => !expandedItem || w.type === expandedItem)
-				.map(w => (
-					<div key={w.type} className={`content ${w.storeName}`}>
-						<ContentWidget
-							type={w.type}
-							isExpanded={expandedItem === w.type}
-							onCollapse={() => setExpanded(expandedItem === w.type ? null : w.type)}
-							pieces={content[w.storeName]}
-							onRefresh={() => onRefresh(w.type)}
-						/>
-					</div>
-				))}
+			{mappers.filter(w => !expandedItem || w.type === expandedItem).map(w => (
+				<div key={w.type} className={`content ${w.storeName}`}>
+					<ContentWidget
+						type={w.type}
+						isExpanded={expandedItem === w.type}
+						onCollapse={() => setExpanded(expandedItem === w.type ? null : w.type)}
+						pieces={content[w.storeName]}
+						onRefresh={() => onRefresh(w.type)}
+					/>
+				</div>
+			))}
 		</div>
 	);
 };

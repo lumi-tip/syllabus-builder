@@ -77,12 +77,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
 										const newStore = {
-											[mapEntity[entity]]: data
-												.filter(e => typeof e.lang === "undefined" || e.lang == "en")
-												.map(e => {
-													e.type = entity;
-													return e;
-												})
+											[mapEntity[entity]]: data.filter(e => typeof e.lang === "undefined" || e.lang == "en").map(e => {
+												e.type = entity;
+												return e;
+											})
 										};
 										setStore(newStore);
 										resolve(data);
@@ -112,11 +110,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					actions.report().clear(); //clear noticications
 
 					let { days, profile, label, description, weeks } = json || content;
-					if (Array.isArray(weeks) && !Array.isArray(days))
-						days = [].concat.apply(
-							[],
-							weeks.map(w => w.days)
-						);
+					if (Array.isArray(weeks) && !Array.isArray(days)) days = [].concat.apply([], weeks.map(w => w.days));
 					setStore({
 						days: days.map((d, i) => {
 							return {
@@ -141,8 +135,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 								projects:
 									d.assignments !== undefined
 										? d.assignments.map(p => {
-												const project = projects.find(_pro =>
-													p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
+												const project = projects.find(
+													_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p)
 												);
 												if (project === undefined) {
 													actions.report().add("error", `Invalid project ${p.slug || p}`, p);
@@ -154,12 +148,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
-										? d.quizzes
-												.filter(f => f.slug != undefined)
-												.map(l => {
-													l.type = "quiz";
-													return l;
-												})
+										? d.quizzes.filter(f => f.slug != undefined).map(l => {
+												l.type = "quiz";
+												return l;
+										  })
 										: (d.quizzes = [])
 							};
 						}),
@@ -330,10 +322,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
-										.filter(p =>
-											typeof piece.info.slug !== undefined
-												? p.info.slug !== piece.info.slug
-												: p.info.slug !== piece.data.info.slug
+										.filter(
+											p =>
+												typeof piece.info.slug !== undefined
+													? p.info.slug !== piece.info.slug
+													: p.info.slug !== piece.data.info.slug
 										)
 										.concat(piece)
 							  })
@@ -344,8 +337,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 					delete: piece => {
 						piece.type === "quiz"
 							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p =>
-										typeof piece.data.info.slug === undefined ? p.info.slug !== piece.slug : p.info.slug !== piece.data.info.slug
+									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(
+										p =>
+											typeof piece.data.info.slug === undefined
+												? p.info.slug !== piece.slug
+												: p.info.slug !== piece.data.info.slug
 									)
 							  })
 							: setStore({
@@ -452,8 +448,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 							const day = store.days[i];
 							let _found = false;
 							if (type === "quiz")
-								_found = day[type].find(p =>
-									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								_found = day[type].find(
+									p =>
+										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
 
@@ -467,8 +464,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 							const day = store.days[i];
 							let _found = false;
 							if (type === "quiz")
-								_found = day[type].find(p =>
-									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
+								_found = day[type].find(
+									p =>
+										typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
 
