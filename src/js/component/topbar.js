@@ -51,12 +51,11 @@ export const TopBar = () => {
 							}}>
 							<i className="fas fa-ban" /> Clear
 						</button>
-						{store.info.version != "" &&
-							store.info.version && (
-								<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus(store, actions)}>
-									<i className="fas fa-save" /> Save
-								</button>
-							)}
+						{store.info.version != "" && store.info.version && (
+							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus(store, actions)}>
+								<i className="fas fa-save" /> Save
+							</button>
+						)}
 						<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus(store, actions)}>
 							<i className="fas fa-save" /> Save as new...
 						</button>

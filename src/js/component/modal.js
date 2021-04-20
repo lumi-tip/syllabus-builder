@@ -52,20 +52,17 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [desc, setDesc] = useState(store.info.description);
 	const [version, setVersion] = useState(store.info.version);
 
-	useEffect(
-		() => {
-			if (store.info.version && store.info.version != "") {
-				setVersion(store.info.version);
-			}
-			if (store.info.academy && store.info.academy != "") {
-				setAcademy(store.info.academy);
-			}
-			if (store.info.label && store.info.label != "") {
-				setLabel(store.info.label);
-			}
-		},
-		[store.info]
-	);
+	useEffect(() => {
+		if (store.info.version && store.info.version != "") {
+			setVersion(store.info.version);
+		}
+		if (store.info.academy && store.info.academy != "") {
+			setAcademy(store.info.academy);
+		}
+		if (store.info.label && store.info.label != "") {
+			setLabel(store.info.label);
+		}
+	}, [store.info]);
 
 	const shouldBeOpened = () => {
 		return academy && academy != "" && profile && profile != "";

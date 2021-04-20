@@ -74,16 +74,13 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	const [_data, setData] = useState(data);
 	const [concept, setConcept] = useState("");
 
-	useEffect(
-		() => {
-			let updated = false;
-			for (let key in data) {
-				if (data[key] != _data[key]) updated = true;
-			}
-			if (updated) setData(data);
-		},
-		[data]
-	);
+	useEffect(() => {
+		let updated = false;
+		for (let key in data) {
+			if (data[key] != _data[key]) updated = true;
+		}
+		if (updated) setData(data);
+	}, [data]);
 
 	return (
 		<div className="day bg-light position-relative">
@@ -141,9 +138,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				</div>
 				<div className="col-12 mx-1 bg-white-light rounded">
 					{_data["key-concepts"] !== undefined &&
-						_data["key-concepts"].map(c => {
+						_data["key-concepts"].map((c, i) => {
 							return (
-								<span key={c} className="badge badge-dark mx-1">
+								<span key={i} className="badge badge-dark mx-1">
 									{c}{" "}
 									<i
 										onClick={() =>
@@ -172,9 +169,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				</div>
 			</div>
 			<div className="row no-gutters">
-				{mappers.map(m => (
+				{mappers.map((m, i) => (
 					<Column
-						key={m.storeName}
+						key={i}
 						heading={m.storeName}
 						type={m.type}
 						pieces={_data[m.storeName]}
