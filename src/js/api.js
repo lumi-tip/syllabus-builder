@@ -239,18 +239,18 @@ class Wrapper {
 		};
 	}
 	project() {
-		let url = this.options.assetsPath;
+		let url = this.options.apiPathV2;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/project/registry/all");
+				return this.get(url + "/registry/asset?type=project");
 			}
 		};
 	}
 	replit() {
-		let url = this.options.assetsPath;
+		let url = this.options.apiPathV2;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/registry/all");
+				return this.get(url + "/registry/asset?type=exercise");
 			}
 		};
 	}
