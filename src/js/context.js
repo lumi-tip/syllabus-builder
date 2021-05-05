@@ -76,9 +76,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
+
 										const newStore = {
 											[mapEntity[entity]]: data
-												.filter(e => typeof e.lang === "undefined" || e.lang == "en")
+												.filter(e => {
+													console.log("entity", entity);
+													return (
+														typeof e.lang === "undefined" ||
+														e.lang == "us" ||
+														e.lang == "en" ||
+														["project", "replit", "exercise"].includes(entity)
+													);
+												})
 												.map(e => {
 													e.type = entity;
 													return e;
