@@ -7,11 +7,13 @@ import { UploadSyllabus, SyllabusDetails } from "./modal";
 export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
+	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	return (
-		<div className="topbar text-right p-3 position-sticky sticky-top bg-light" style={{ margin: "-15px" }}>
+		<div className="topbar text-right p-3 position-sticky sticky-top bg-light">
+			{openSyllabusDetails && <SyllabusDetails onConfirm={() => setOpenSyllabusDetails(false)} />}
 			<div className="d-flex">
 				<p className="mt-0 p-0 text-left w-100">
-					{store.info.label && store.info.label != "" ? `${store.info.label}:${store.info.slug}` : "No syllabus selected"}
+					{store.info.slug && store.info.slug != "" ? `${store.info.slug}:v${store.info.version}` : "No syllabus selected"}
 				</p>
 				<div
 					style={{ width: "100px" }}
@@ -35,7 +37,7 @@ export const TopBar = () => {
 				<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
 					<i className="fas fa-plus" /> Add new day
 				</button>
-				{store.days.length > 0 && (
+				{store.days.length > 0 && store.info.slug && store.info.slug != "" && (
 					<>
 						<button
 							className="btn btn-danger btn-sm mr-2"
@@ -80,19 +82,7 @@ export const TopBar = () => {
 					}}>
 					<i className="fas fa-file-upload" /> Import
 				</button>
-				<button
-					className="btn btn-dark btn-sm"
-					onClick={() => {
-						let noti = Notify.add(
-							"info",
-							SyllabusDetails,
-							answer => {
-								if (answer.value) actions.setInfo(answer.data);
-								noti.remove();
-							},
-							9999999999999
-						);
-					}}>
+				<button className="btn btn-dark btn-sm" onClick={() => setOpenSyllabusDetails(true)}>
 					<i className="fas fa-bars" /> Load
 				</button>
 			</div>

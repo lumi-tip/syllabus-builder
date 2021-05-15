@@ -14,7 +14,7 @@ const useDebounce = (value, delay) => {
 	return debouncedValue;
 };
 
-const SmartInput = ({ className, placeholder, onChange, initialValue, type, style }) => {
+const SmartInput = ({ className, placeholder, onChange, initialValue, type, style, ...rest }) => {
 	const [value, setValue] = useState(initialValue);
 	const debouncedValue = useDebounce(value, WAIT_INTERVAL);
 
@@ -29,6 +29,7 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 	if (type === "textarea")
 		return (
 			<textarea
+				{...rest}
 				key="key"
 				className={className}
 				style={style}
@@ -47,6 +48,7 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 	else if (type === "text")
 		return (
 			<input
+				{...rest}
 				type="text"
 				style={style}
 				className={className}

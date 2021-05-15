@@ -1,0 +1,18 @@
+.extended-instructions{
+    .modal-dialog{
+        max-width: 100vw;
+        height: 100vh;
+        margin: auto;
+    }
+}
+.syllabus-details{
+    .modal-dialog{
+        max-width: 700px;
+        margin: auto;
+        margin-top: 50vh;
+        transform: translateY(-50%) !important;
+        .modal-content{
+            padding: 10px;
+        }
+    }
+}

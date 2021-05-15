@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import ContentPiece from "./content-piece.js";
 
 const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse }) => {
-	const [searchToken, setSearchToken] = useState("");
 	const [tagToken, setTagToken] = useState(null);
 
 	return (
@@ -12,24 +11,16 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 				<div>No {type.toLowerCase()} to show</div>
 			) : (
 				<div className="d-flex" style={{ overflow: "hidden" }}>
-					{isExpanded ? (
-						<input
-							className="transparent ml-1 w-100"
-							placeholder={`Search ${type}...`}
-							onChange={e => setSearchToken(e.target.value)}
-							value={searchToken}
-						/>
-					) : (
-						<h3
-							className="w-100"
-							style={{ fontSize: "18px" }}
-							onClick={() => {
-								onCollapse();
-							}}>
-							{type + " "}
-						</h3>
+					{!isExpanded && (
+						<button className="btn btn-sm btn-dark w-100 text-left text-capitalize mb-2" onClick={() => onCollapse()}>
+							{type + " "} <div className="badge badge-light bg-small float-right mt-1">{pieces.length} found</div>
+						</button>
 					)}
-					{onRefresh && <i onClick={() => onRefresh()} className={"fas fa-sync fa-xs float-right " + (loading ? "loading" : "")} />}
+					{onRefresh && (
+						<button className="btn btn-sm btn-dark" onClick={() => onRefresh()}>
+							<i className={"fas fa-sync fa-xs float-right " + (loading ? "loading" : "")} />
+						</button>
+					)}
 				</div>
 			)}
 			{isExpanded && (
@@ -39,13 +30,6 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 						overflow: "auto"
 					}}>
 					{pieces
-						.filter(
-							p =>
-								!searchToken.toLowerCase() ||
-								(p.slug && p.slug.includes(searchToken)) ||
-								(p.title && p.title.toLowerCase().includes(searchToken)) ||
-								(p.info && p.info.name && p.info.name.toLowerCase().includes(searchToken))
-						)
 						.filter(p => {
 							if (tagToken && tagToken !== "") {
 								if (type === "lesson") return p.tags ? p.tags.includes(tagToken.toLowerCase()) : false;

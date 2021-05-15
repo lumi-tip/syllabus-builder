@@ -13,7 +13,8 @@ const newDay = (id, position) => ({
 	lessons: [],
 	projects: [],
 	replits: [],
-	quizzes: []
+	quizzes: [],
+	technologies: []
 });
 
 API.setOptions({
@@ -27,24 +28,26 @@ API.setOptions({
 const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
+	technology: "technologies",
 	replit: "replits",
 	quiz: "quizzes",
 	profile: "profiles",
 	syllabu: "syllabus",
 	courseV2: "courses"
 };
+const defaultSyllabusInfo = {
+	label: "",
+	slug: "",
+	version: "",
+	profile: null,
+	description: "",
+	academy_author: null
+};
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			days: [],
-			info: {
-				label: "",
-				slug: "",
-				version: "",
-				profile: null,
-				description: "",
-				academy_author: null
-			},
+			info: defaultSyllabusInfo,
 			profiles: [],
 			lessons: [],
 			projects: [],
@@ -53,6 +56,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			syllabus: [],
 			courses: [],
 			academies: [],
+			technologies: [],
 			report: []
 		},
 
@@ -80,7 +84,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 										const newStore = {
 											[mapEntity[entity]]: data
 												.filter(e => {
-													console.log("entity", entity);
 													return (
 														typeof e.lang === "undefined" ||
 														e.lang == "us" ||
@@ -132,6 +135,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								...d,
 								id: i + 1,
 								position: i + 1,
+								technologies: d.technologies || [],
 								lessons:
 									d.lessons !== undefined
 										? d.lessons.map(l => {
@@ -171,9 +175,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 												})
 										: (d.quizzes = [])
 							};
-						}),
-						info: { slug: profile, profile, label, description, version: content.version || info.version }
+						})
 					});
+					actions.setInfo({ slug: profile, profile, label, description, version: content.version || info.version });
 				} else
 					new Promise((resolve, reject) => {
 						return fetch(data)
@@ -193,6 +197,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 											...d,
 											id: i + 1,
 											position: i + 1,
+											technologies: d.technologies || [],
 											lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
 											replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
 											projects: d.assignments
@@ -203,7 +208,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 										}));
 								const pieces = data.split(",");
 								const version = pieces.length === 3 ? pieces[1] : "";
-								setStore({ days, info: { slug: profile, profile, label, description, version } });
+								setStore({ days });
+								actions.setInfo({ slug: profile, profile, label, description, version });
 								resolve(json);
 							})
 							.catch(error => reject(error));
@@ -429,6 +435,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 				setStore({ ...store, info: { ...store.info, academy_author: academyId, profile: courseSlug }, syllabus: data });
 			},
+			cleanSyllabus: async ({ academy = null, profile = null }) => {
+				const store = getStore();
+				setStore({
+					...store,
+					info: { ...defaultSyllabusInfo, academy_author: academy, profile },
+					syllabus: profile ? store.syllabus : null,
+					profiles: academy ? store.profiles : []
+				});
+			},
 			days: () => {
 				const store = getStore();
 				return {
@@ -521,9 +536,11 @@ export function injectContent(Child) {
 		useEffect(() => {
 			const slug = window.location.hash.replace("#", "");
 			const previousStore = localStorage.getItem("syllabus-" + slug);
-			if (typeof previousStore === "string" && previousStore != "") state.actions.setStore(JSON.parse(previousStore));
+			if (typeof previousStore === "string" && previousStore != "") {
+				state.actions.setStore(JSON.parse(previousStore));
+			}
 
-			state.actions.fetch(["lesson", "quiz", "project", "replit"]);
+			state.actions.fetch(["lesson", "quiz", "project", "replit", "technology"]);
 			window.store = state.store;
 		}, []);
 		return (

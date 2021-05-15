@@ -431,6 +431,14 @@ class Wrapper {
 			}
 		};
 	}
+	technology() {
+		let url = this.options.apiPathV2;
+		return {
+			all: () => {
+				return this.get(url + "/registry/technology");
+			}
+		};
+	}
 	catalog() {
 		let url = this.options.apiPath;
 		return {

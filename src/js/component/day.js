@@ -4,6 +4,7 @@ import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
 import swal from "sweetalert";
+import Select from "react-select";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
 
@@ -69,6 +70,14 @@ Column.defaultProps = {
 	type: null
 };
 
+const selectStyles = {
+	container: (provided, state) => ({
+		...provided,
+		display: "inline-block",
+		width: "200px"
+	})
+};
+
 const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [_data, setData] = useState(data);
@@ -102,7 +111,8 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				<SmartInput
 					className="transparent"
 					style={{ width: "300px" }}
-					placeholder="Write the date label..."
+					placeholder="Today's topic (very short)..."
+					maxLength={14}
 					onChange={label => actions.days().update(_data.id, { ..._data, label })}
 					initialValue={_data.label}
 				/>
@@ -134,6 +144,36 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 						placeholder="Add a description for the students..."
 						onChange={description => actions.days().update(_data.id, { ..._data, description })}
 						initialValue={_data.description}
+					/>
+				</div>
+				<div className="col-12 mx-1 bg-white-light rounded">
+					{_data["technologies"] !== undefined &&
+						_data["technologies"].map((t, i) => {
+							return (
+								<span key={i} className="badge badge-dark mx-1">
+									{t.title || t.label || t}{" "}
+									<i
+										onClick={() =>
+											actions.days().update(_data.id, {
+												..._data,
+												["technologies"]: _data["technologies"].filter(tech => tech.slug != t.slug)
+											})
+										}
+										className="fas fa-trash-alt pointer p-1"
+									/>
+								</span>
+							);
+						})}
+					<Select
+						styles={selectStyles}
+						label="Add technologies"
+						onChange={t => {
+							console.log("_data", _data);
+							actions
+								.days()
+								.update(_data.id, { ..._data, ["technologies"]: _data["technologies"].concat([{ slug: t.value, title: t.label }]) });
+						}}
+						options={store.technologies.map(t => ({ value: t.slug, label: t.title }))}
 					/>
 				</div>
 				<div className="col-12 mx-1 bg-white-light rounded">

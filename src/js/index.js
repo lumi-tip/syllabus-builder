@@ -62,9 +62,9 @@ const Main = injectContent(() => {
 	return (
 		<>
 			<DndProvider backend={Backend}>
-				<div className="row no-gutters">
+				<div className="d-flex">
 					<Sidebar content={store} onRefresh={type => actions.fetch([type], true)} />
-					<div className="right-side offset-4 offset-md-3 col-8 col-md-9 p-3 pt-0">
+					<div className="timeline">
 						<Notifier />
 						<TopBar />
 						<div className="hbar" />

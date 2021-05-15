@@ -13,7 +13,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	if (!data) return "Loading...";
 
 	return (
-		<div className="modal show d-block edit-piece" tabIndex="-1" role="dialog">
+		<div className="modal show d-block edit-piece" tabIndex="-1" role="dialog" onMouseDown={e => e.stopPropagation()}>
 			<div className="modal-dialog" role="document">
 				<form
 					className="modal-content"
@@ -55,7 +55,13 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 								value={data.url}
 								onChange={e => setData({ ...data, url: e.target.value })}
 							/>
-							<small className="form-text text-muted">Only if not in the registry already</small>
+							<small className="form-text text-muted">
+								{data.url && data.url != "" ? (
+									<span className="alert alert-warning p-1">⚠️ Will open in a new window</span>
+								) : (
+									"Only if not in the registry already"
+								)}
+							</small>
 						</div>
 						<div className="form-group">
 							<div className="form-check">
