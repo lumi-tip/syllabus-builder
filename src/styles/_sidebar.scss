@@ -5,7 +5,37 @@
     background: #272727;
     color: white;
     padding: 10px;
+    height: 100vh;
     .back-btn{
         width: 85px;
     }
+    .inner-sidebar{
+        position: absolute !important;
+        overflow-y: auto;
+        height: 100vh;
+        &::-webkit-scrollbar {
+            width: 10px;
+          }
+        
+          &::-webkit-scrollbar-track {
+            background: rgb(179, 177, 177);
+            border-radius: 10px;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: rgb(223, 195, 70);
+            border-radius: 10px;
+          }
+        
+          &::-webkit-scrollbar-thumb:hover {
+            background: rgb(100, 100, 100);
+            border-radius: 10px;
+          }
+        
+          &::-webkit-scrollbar-thumb:active {
+            background: rgb(68, 68, 68);
+            border-radius: 10px;
+        }
+    }
+    
 }

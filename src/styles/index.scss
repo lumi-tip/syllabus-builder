@@ -15,7 +15,7 @@ li.content-piece{
 li.content-piece:hover{  background: #ededed; }
 
 .bg-white-light{ background: rgba(255,255,255,0.7) !important;}
-input, textarea{ font-size: 12px; }
+input, textarea{ font-size: 14px; }
 input.transparent, textarea.transparent{
     background: none;
     border: none;
@@ -50,13 +50,24 @@ input.transparent, textarea.transparent{
     }
 }
 .day{
+    color: #303030;
     border-radius: 5px;
     margin-bottom: 5px;
+    background: #e4e4e4;
+    input, textarea{
+        width: 200px;
+        border-radius: 5px;
+    }
     h3{ font-size: 18px; padding: 5px 5px 0px 25px; }
-    h4{ font-size: 16px; padding: 5px 5px 0px 5px; }
+    h4{ font-size: 16px; padding: 5px 5px 0px 5px; color: $gray-900; }
     .drag-up,.drag-down{ left: 0; position: absolute; background: black; color: white; padding: 0px 3px; z-index: 2; }
     .drag-up{ top: 0; border-radius: 5px 0px 0px 0px; }
     .drag-down{ bottom: 0; border-radius: 0px 0px 0px 5px; }
+    .column{
+        padding: 5px;
+        width: 25%;
+        margin: 2px;
+    }
 }
 .bcnotifier{
     display: none;

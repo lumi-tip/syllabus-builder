@@ -8,6 +8,12 @@ import Select from "react-select";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
 
+const icons = {
+	lesson: "fas fa-book",
+	replit: "fas fa-dumbbell",
+	project: "fas fa-laptop-code",
+	quiz: "fas fa-clipboard-check"
+};
 const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 	const [editMode, setEditMode] = useState(false);
 	const [{ isOver, canDrop }, drop] = useDrop({
@@ -23,9 +29,9 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 	return (
 		<div
 			ref={drop}
-			className="col-3"
+			className="column rounded"
 			style={{
-				background: canDrop ? "#cce0d2" : isOver && !canDrop ? "red" : "inherit"
+				background: canDrop ? "#cce0d2" : isOver && !canDrop ? "red" : "white"
 			}}>
 			{editMode && (
 				<EditContentPiece
@@ -37,8 +43,13 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 					onCancel={() => setEditMode(false)}
 				/>
 			)}
-			<i onClick={() => setEditMode(true)} className="fas fa-plus fa-xs pointer p-1 float-right" />
-			<h4>{heading} </h4>
+			<button className="btn btn-sm btn-dark pointer float-right" style={{ padding: "0px 5px" }} onClick={() => setEditMode(true)}>
+				<i className="fas fa-plus fa-xs" />
+			</button>
+			<h4 className="text-capitalize">
+				<i className={icons[type] + " mr-1"}></i>
+				{heading}
+			</h4>
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
 				{pieces.map((p, i) => {
@@ -81,6 +92,7 @@ const selectStyles = {
 const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [_data, setData] = useState(data);
+	const [addNewTech, setAddNewTech] = useState(false);
 	const [concept, setConcept] = useState("");
 
 	useEffect(() => {
@@ -92,7 +104,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	}, [data]);
 
 	return (
-		<div className="day bg-light position-relative">
+		<div className="day position-relative">
 			{_data.position > 1 && (
 				<div className={"drag-up pointer"} onClick={() => onMoveUp()}>
 					<i className="fas fa-chevron-up" />
@@ -122,11 +134,11 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
-						placeholder="Add a description for the teacher..."
+						placeholder="Type a description for the teacher..."
 						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
 						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
-					<small className="text-right d-block">
+					<small className="text-right d-block" style={{ marginTop: "-8px" }}>
 						<a
 							href="#"
 							onClick={e => {
@@ -141,12 +153,12 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
-						placeholder="Add a description for the students..."
+						placeholder="Type a description for the students..."
 						onChange={description => actions.days().update(_data.id, { ..._data, description })}
 						initialValue={_data.description}
 					/>
 				</div>
-				<div className="col-12 mx-1 bg-white-light rounded">
+				<div className="col-12 mx-1 rounded">
 					{_data["technologies"] !== undefined &&
 						_data["technologies"].map((t, i) => {
 							return (
@@ -164,19 +176,30 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								</span>
 							);
 						})}
-					<Select
-						styles={selectStyles}
-						label="Add technologies"
-						onChange={t => {
-							console.log("_data", _data);
-							actions
-								.days()
-								.update(_data.id, { ..._data, ["technologies"]: _data["technologies"].concat([{ slug: t.value, title: t.label }]) });
-						}}
-						options={store.technologies.map(t => ({ value: t.slug, label: t.title }))}
-					/>
+					{addNewTech ? (
+						<Select
+							styles={selectStyles}
+							label="Add technologies"
+							onChange={t => {
+								console.log("_data", _data);
+								actions.days().update(_data.id, {
+									..._data,
+									["technologies"]: _data["technologies"].concat([{ slug: t.value, title: t.label }])
+								});
+								setAddNewTech(false);
+							}}
+							options={store.technologies.map(t => ({ value: t.slug, label: t.title }))}
+						/>
+					) : (
+						<button className="btn btn-sm btn-dark" style={{ fontSize: "10px" }} onClick={() => setAddNewTech(true)}>
+							add technologies <i className="fas fa-plus fa-xs pointer p-1" />
+						</button>
+					)}
 				</div>
-				<div className="col-12 mx-1 bg-white-light rounded">
+				<div className="mx-1" style={{ margin: "3px 0px" }}>
+					<p className="d-inline">
+						<i className="fas fa-exclamation-triangle"></i> Key Concepts:{" "}
+					</p>
 					{_data["key-concepts"] !== undefined &&
 						_data["key-concepts"].map((c, i) => {
 							return (
@@ -195,8 +218,8 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 						})}
 					<input
 						type="text"
-						placeholder={"Add a Key Concept"}
-						className="transparent"
+						className="bg-white-light rounded border-0"
+						placeholder={"Start typing and press enter"}
 						value={concept}
 						onChange={e => setConcept(e.target.value)}
 						onKeyPress={e => {
@@ -208,7 +231,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					/>
 				</div>
 			</div>
-			<div className="row no-gutters">
+			<div className="d-flex">
 				{mappers.map((m, i) => (
 					<Column
 						key={i}
@@ -262,7 +285,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				))}
 			</div>
 			<div className="row no-gutters">
-				<div className="col-12 px-1">
+				<div className="col-12 px-1" style={{ marginTop: "3px" }}>
 					<SmartInput
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
