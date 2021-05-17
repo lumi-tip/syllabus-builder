@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
 import { urls } from "./component/utils";
+import { ToastProvider } from "react-toast-notifications";
 
 export const ContentContext = React.createContext({});
 
@@ -71,7 +72,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			fetch: (models, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
-				const promises = models.map(
+				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
 							if (forceUpdate || !Array.isArray(mapEntity[entity] || mapEntity[entity].length == 0))
@@ -545,7 +546,9 @@ export function injectContent(Child) {
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>
-				<Child {...props} />
+				<ToastProvider placement="bottom-right" autoDismiss={true}>
+					<Child {...props} />
+				</ToastProvider>
 			</ContentContext.Provider>
 		);
 	};

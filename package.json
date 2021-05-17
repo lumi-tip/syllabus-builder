@@ -78,6 +78,7 @@
 		"react-polyfills": "0.0.1",
 		"react-scroll": "^1.8.1",
 		"react-select": "^4.3.1",
+		"react-toast-notifications": "^2.4.4",
 		"sweetalert": "^2.1.2"
 	}
 }
