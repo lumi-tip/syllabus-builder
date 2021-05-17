@@ -21,7 +21,7 @@ const API_KEY = params.get("token");
 
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
-	const [state, setState] = useState(false);
+	const [sidebarWidth, setSidebarWidth] = useState("350px");
 	const [editExtendedDay, setEditExtendedDay] = useState(null);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 
@@ -63,8 +63,8 @@ const Main = injectContent(() => {
 		<>
 			<DndProvider backend={Backend}>
 				<div className="d-flex">
-					<Sidebar content={store} onRefresh={type => actions.fetch([type], true)} />
-					<div className="timeline">
+					<Sidebar content={store} width={sidebarWidth} onRefresh={type => actions.fetch([type], true)} />
+					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
 						<Notifier />
 						<TopBar />
 						<div className="hbar" />
