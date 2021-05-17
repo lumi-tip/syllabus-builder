@@ -71,7 +71,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	};
 
 	return (
-		<div className="modal show d-block syllabus-details" tabIndex="-1" role="dialog">
+		<div className="modal show d-block syllabus-details" tabIndex="-1" role="dialog" style={{ background: "rgba(0,0,0,0.5)" }}>
 			<div className="modal-dialog" role="document">
 				<div className="modal-content">
 					<div className="modal-body p-0">

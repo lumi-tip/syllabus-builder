@@ -13,7 +13,12 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	if (!data) return "Loading...";
 
 	return (
-		<div className="modal show d-block edit-piece" tabIndex="-1" role="dialog" onMouseDown={e => e.stopPropagation()}>
+		<div
+			className="modal show d-block edit-piece"
+			tabIndex="-1"
+			role="dialog"
+			onMouseDown={e => e.stopPropagation()}
+			style={{ background: "rgba(0,0,0,0.5)" }}>
 			<div className="modal-dialog" role="document">
 				<form
 					className="modal-content"
@@ -86,7 +91,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 							}}
 							target="_blank"
 							rel="noopener noreferrer">
-							Open in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
+							Test in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
 						</a>
 						<button className="btn btn-primary">Save Content Piece</button>
 						<button onClick={() => onCancel && onCancel()} type="button" className="btn btn-secondary" data-dismiss="modal">
