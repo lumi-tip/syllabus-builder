@@ -13,7 +13,12 @@ const Sidebar = ({ content, onRefresh, width }) => {
 		<div className="sidebar position-fixed" style={{ width }}>
 			{currentType ? (
 				<div className="d-flex mb-2">
-					<button className="btn btn-sm btn-dark br-0 back-btn" onClick={() => setCurrentType(null)}>
+					<button
+						className="btn btn-sm btn-dark br-0 back-btn"
+						onClick={() => {
+							setSearchToken("");
+							setCurrentType(null);
+						}}>
 						<i className="fas fa-angle-left"></i> Back
 					</button>
 					<input
