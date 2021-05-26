@@ -4,6 +4,7 @@ import { useDrag } from "react-dnd";
 import { Tooltip } from "react-lightweight-tooltip";
 import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
+import swal from "sweetalert";
 
 const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning }) => {
 	const [editMode, setEditMode] = useState(false);
@@ -27,8 +28,22 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
 				</Tooltip>
 			)}
-			{onDelete && <i onClick={() => onDelete(data)} className="fas fa-trash-alt pointer p-1" />}
 			{onEdit && <i onClick={() => setEditMode(true)} className="fas fa-pencil-alt pointer p-1" />}
+			{onDelete && (
+				<i
+					onClick={async () => {
+						const confirm = await swal({
+							title: "Are you sure?",
+							text: `Do you want to remove this content from the syllabus?`,
+							icon: "warning",
+							buttons: true,
+							dangerMode: true
+						});
+						if (confirm) onDelete(data);
+					}}
+					className="fas fa-trash-alt pointer p-1"
+				/>
+			)}
 			{previewLink && (
 				<i
 					onClick={() => getLink(data).then(url => window.open(url))}

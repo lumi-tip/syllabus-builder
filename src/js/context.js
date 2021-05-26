@@ -238,17 +238,20 @@ const getState = ({ getStore, getActions, setStore }) => {
 						assignments: d.projects.map(p => ({
 							slug: p.slug,
 							title: p.title,
+							target: p.target,
 							url: p.url,
 							required: p.required
 						})),
 						replits: d.replits.map(e => ({
 							title: e.info != undefined ? e.info.title : e.title,
 							slug: e.info != undefined ? e.info.slug : e.slug,
+							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
 							required: e.info != undefined ? e.info.required : e.required
 						})),
 						quizzes: d.quizzes.map(e => ({
 							title: e.info != undefined ? e.info.name : e.title,
+							target: e.info != undefined ? e.info.target : e.target,
 							slug: e.info != undefined ? e.info.slug : e.slug,
 							url: e.info != undefined ? e.info.url : e.url,
 							required: e.info != undefined ? e.info.required : e.required
@@ -256,6 +259,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						lessons: d.lessons.map(e => ({
 							title: e.title,
 							slug: e.slug.substr(e.slug.indexOf("]") + 1), //remove status like [draft]
+							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
 							required: e.info != undefined ? e.info.required : e.required
 						}))

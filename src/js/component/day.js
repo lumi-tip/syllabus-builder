@@ -35,7 +35,7 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			}}>
 			{editMode && (
 				<EditContentPiece
-					defaultValue={{ custom: true, type }}
+					defaultValue={{ custom: true, type, target: "blank" }}
 					onSave={_d => {
 						setEditMode(false);
 						onEdit(_d);
