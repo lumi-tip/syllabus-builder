@@ -34,7 +34,7 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
-				<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
+				<button className="btn btn-dark btn-sm mr-2" onClick={() => addNewDay(store, actions)}>
 					<i className="fas fa-plus" /> Add new day
 				</button>
 				{store.days.length > 0 && store.info.slug && store.info.slug != "" && (
@@ -88,6 +88,27 @@ export const TopBar = () => {
 			</div>
 		</div>
 	);
+};
+
+const addNewDay = (store, actions) => {
+	swal({
+		title: "New Day",
+		text: "You can add a brand new day or import a day from another syllabus",
+		buttons: {
+			import: "Import from another syllabus",
+			new: "Add a new day"
+		}
+	}).then(value => {
+		switch (value) {
+			case "new":
+				actions.days().add();
+				break;
+			case "import":
+				break;
+			default:
+				break;
+		}
+	});
 };
 
 const confirmEditSillabus = async (store, actions) => {

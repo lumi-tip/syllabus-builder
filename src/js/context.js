@@ -23,7 +23,7 @@ API.setOptions({
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
-	apiPathV2: "https://breathecode.herokuapp.com/v1"
+	apiPathV2: "https://breathecode-test.herokuapp.com/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
 const mapEntity = {
@@ -210,6 +210,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								const pieces = data.split(",");
 								const version = pieces.length === 3 ? pieces[1] : "";
 								setStore({ days });
+								console.log(days);
 								actions.setInfo({ slug: profile, profile, label, description, version });
 								resolve(json);
 							})
