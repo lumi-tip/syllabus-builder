@@ -58,7 +58,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			courses: [],
 			academies: [],
 			technologies: [],
-			report: []
+			report: [],
+			imported_days: []
 		},
 
 		actions: {
@@ -81,7 +82,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
-
+										console.log(data);
 										const newStore = {
 											[mapEntity[entity]]: data
 												.filter(e => {
@@ -114,6 +115,65 @@ const getState = ({ getStore, getActions, setStore }) => {
 						setStore({ report: [] });
 					}
 				};
+			},
+			import: data => {
+				const actions = getActions();
+				const { projects } = getStore();
+				let content = JSON.parse(data.content);
+				let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
+
+				let { days, weeks } = json || content;
+				if (Array.isArray(weeks) && !Array.isArray(days))
+					days = [].concat.apply(
+						[],
+						weeks.map(w => w.days)
+					);
+				setStore({
+					imported_days: days.map((d, i) => {
+						return {
+							...d,
+							id: i + 1,
+							position: i + 1,
+							technologies: d.technologies || [],
+							lessons:
+								d.lessons !== undefined
+									? d.lessons.map(l => {
+											l.type = "lesson";
+											return l;
+									  })
+									: (d.lessons = []),
+							replits:
+								d.replits !== undefined
+									? d.replits.map(l => {
+											l.type = "replit";
+											return l;
+									  })
+									: (d.replits = []),
+							//from the json it comes like an assignment, but its really a project
+							projects:
+								d.assignments !== undefined
+									? d.assignments.map(p => {
+											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
+											if (project === undefined) {
+												actions.report().add("error", `Invalid project ${p.slug || p}`, p);
+												return { type: "project", slug: p, title: "Invalid project" };
+											}
+
+											return project;
+									  })
+									: (d.assignments = []),
+							quizzes:
+								d.quizzes !== undefined
+									? d.quizzes
+											.filter(f => f.slug != undefined)
+											.map(l => {
+												l.type = "quiz";
+												return l;
+											})
+									: (d.quizzes = [])
+						};
+					})
+				});
 			},
 			upload: data => {
 				//if its not a url
@@ -419,6 +479,48 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 
 				return await actions.upload({ content: data });
+			},
+			getApiSyllabusForNewDay: async (academy, profile, version) => {
+				const store = getStore();
+				const _store = { ...store, info: { ...store.info, academy_author: academy, profile, version } };
+				setStore(_store);
+
+				// ignore version, academy or profile null
+				if (
+					!version ||
+					version == "" ||
+					version == "null" ||
+					!academy ||
+					academy == "" ||
+					academy == "null" ||
+					!profile ||
+					profile == "" ||
+					profile == "null"
+				)
+					return;
+
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
+				const resp = await fetch(
+					API.options.apiPathV2 + "/admissions/certificate/" + profile + "/academy/" + academy + "/syllabus/" + version,
+					{
+						headers: {
+							//"Cache-Control": "no-cache",
+							"Content-type": "application/json",
+							Authorization: "Token " + apiKey
+						}
+					}
+				);
+				const data = await resp.text();
+				const actions = getActions();
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						throw Error(data.detail || data.details);
+					} else {
+						throw Error("There was an error fetching the syllabus");
+					}
+				}
+				return await actions.import({ content: data });
 			},
 			getSyllabisVersions: async (academyId, courseSlug) => {
 				const store = getStore();
