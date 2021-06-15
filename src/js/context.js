@@ -554,6 +554,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			days: () => {
 				const store = getStore();
+				const actions = getActions();
 				return {
 					add: (index = null) =>
 						setStore({
@@ -568,6 +569,61 @@ const getState = ({ getStore, getActions, setStore }) => {
 									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
 								}
 								if (index === null || index === store.days.length) _days.push(newDay(store.days.length + 1, store.days.length + 1));
+								return _days;
+							})()
+						}),
+					import: (imported = null) =>
+						setStore({
+							days: (() => {
+								let _days = [...store.days];
+								let count = 0;
+								if (imported !== null) {
+									imported.map(d => {
+										count += 1;
+										_days.push({
+											...d,
+											id: store.days.length + count,
+											position: store.days.length + count,
+											technologies: d.technologies || [],
+											lessons:
+												d.lessons !== undefined
+													? d.lessons.map(l => {
+															l.type = "lesson";
+															return l;
+													  })
+													: (d.lessons = []),
+											replits:
+												d.replits !== undefined
+													? d.replits.map(l => {
+															l.type = "replit";
+															return l;
+													  })
+													: (d.replits = []),
+											projects:
+												d.assignments !== undefined
+													? d.assignments.map(p => {
+															const project = store.projects.find(_pro =>
+																p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
+															);
+															if (project === undefined) {
+																actions.report().add("error", `Invalid project ${p.slug || p}`, p);
+																return { type: "project", slug: p, title: "Invalid project" };
+															}
+															return project;
+													  })
+													: (d.assignments = []),
+											quizzes:
+												d.quizzes !== undefined
+													? d.quizzes
+															.filter(f => f.slug != undefined)
+															.map(l => {
+																l.type = "quiz";
+																return l;
+															})
+													: (d.quizzes = [])
+										});
+									});
+								}
 								return _days;
 							})()
 						}),

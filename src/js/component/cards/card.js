@@ -1,8 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ContentContext } from "../../context";
-const Card = ({ store }) => {
-	console.log(store.imported_days);
+const Card = ({ store, actions, setSelectedDays, selectedDays }) => {
+	const onChange = (e, d) => {
+		if (!e.target.checked) {
+			setSelectedDays(selectedDays.filter(x => x.id !== d.id));
+		} else setSelectedDays([...selectedDays, d]);
+	};
 	return (
 		<>
 			<div style={{ overflowY: "scroll", width: "100%", height: "500px" }}>
@@ -12,7 +15,12 @@ const Card = ({ store }) => {
 						store.imported_days.map(d => (
 							<div className="col-12 mb-1" key={d.id}>
 								<div className="card">
-									<div className="card-header">
+									<div className="card-header d-flex justify-content-between">
+										<div className="input-group-prepend">
+											<div className="input-group-text">
+												<input type="checkbox" onChange={e => onChange(e, d)} />
+											</div>
+										</div>
 										<p className="p-0 mb-0">{d.label}</p>
 									</div>
 									<div className="card-body">
@@ -186,7 +194,7 @@ const Card = ({ store }) => {
 													{d.assignments &&
 														d.assignments.map((k, i) => (
 															<p className="p-1 mb-1" key={i}>
-																{k}
+																{k.title !== undefined ? k.title : k}
 															</p>
 														))}
 												</div>
@@ -213,7 +221,7 @@ const Card = ({ store }) => {
 													{d.technologies &&
 														d.technologies.map((k, i) => (
 															<p className="p-1 mb-1" key={i}>
-																{k}
+																{k.title !== undefined ? k.title : k}
 															</p>
 														))}
 												</div>
@@ -230,8 +238,10 @@ const Card = ({ store }) => {
 };
 
 Card.propTypes = {
-	onClick: PropTypes.func,
-	store: PropTypes.object
+	setSelectedDays: PropTypes.func,
+	selectedDays: PropTypes.array,
+	store: PropTypes.object,
+	actions: PropTypes.object
 };
 
 export default Card;

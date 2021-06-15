@@ -9,6 +9,7 @@ const NewDayModal = ({ onConfirm, store, actions }) => {
 	const [version, setVersion] = useState(store.info.slug && store.info.slug != "" ? store.info.version : null);
 	const [newDay, setNewDay] = useState(false);
 	const [showDays, setShowDays] = useState(false);
+	const [selectedDays, setSelectedDays] = useState([]);
 
 	useEffect(() => {
 		if (store.info.slug && store.info.slug != "") {
@@ -145,13 +146,19 @@ const NewDayModal = ({ onConfirm, store, actions }) => {
 										</div>
 									</div>
 								</div>
-								{showDays ? <Card store={store} /> : null}
+								{showDays ? <Card store={store} setSelectedDays={setSelectedDays} selectedDays={selectedDays} /> : null}
 							</div>
 							<div className="modal-footer">
 								<button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => onConfirm(false)}>
 									Close
 								</button>
-								<button type="button" className="btn btn-primary" onClick={""}>
+								<button
+									type="button"
+									className="btn btn-primary"
+									onClick={() => {
+										actions.days().import(selectedDays);
+										onConfirm(false);
+									}}>
 									Confirm
 								</button>
 							</div>
