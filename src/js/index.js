@@ -13,6 +13,7 @@ import swal from "sweetalert";
 import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
+import NewDay from "./component/modals/NewDayModal";
 
 //include your index.scss file into the bundle
 
@@ -23,6 +24,8 @@ const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
 	const [sidebarWidth, setSidebarWidth] = useState("350px");
 	const [editExtendedDay, setEditExtendedDay] = useState(null);
+	const [openNewDay, setOpenNewDay] = useState(false);
+	const [index, setIndex] = useState(0);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 
 	useEffect(() => {
@@ -67,6 +70,7 @@ const Main = injectContent(() => {
 						<Notifier />
 						<TopBar />
 						<div className="hbar" />
+						{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} index={index} />}
 						{sortedDays.map((d, i) => (
 							<div id={"day" + d.id.toString()} key={d.id.toString() + d.position.toString()}>
 								<Day
@@ -88,7 +92,13 @@ const Main = injectContent(() => {
 									}}
 								/>
 								<div className="text-center">
-									<i onClick={() => actions.days().add(i + 1)} className="fas fa-plus-circle pointer text-secondary" />
+									<i
+										onClick={() => {
+											setOpenNewDay(true);
+											setIndex(i);
+										}}
+										className="fas fa-plus-circle pointer text-secondary"
+									/>
 								</div>
 							</div>
 						))}

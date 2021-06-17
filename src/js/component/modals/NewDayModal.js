@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import API from "../../api";
 import Card from "../cards/card";
 
-const NewDayModal = ({ onConfirm, store, actions }) => {
+const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 	const [profile, setProfile] = useState(store.info.profile);
 	const [academy, setAcademy] = useState(store.info.academy_author);
 	const [version, setVersion] = useState(store.info.slug && store.info.slug != "" ? store.info.version : null);
@@ -49,7 +49,8 @@ const NewDayModal = ({ onConfirm, store, actions }) => {
 									type="button"
 									className="btn btn-primary"
 									onClick={() => {
-										actions.days().add();
+										console.log(index);
+										actions.days().add(index);
 										onConfirm(false);
 									}}>
 									Add a new day
@@ -156,7 +157,8 @@ const NewDayModal = ({ onConfirm, store, actions }) => {
 									type="button"
 									className="btn btn-primary"
 									onClick={() => {
-										actions.days().import(selectedDays);
+										console.log(index, selectedDays);
+										actions.days().add(index, selectedDays);
 										onConfirm(false);
 									}}>
 									Confirm
@@ -173,7 +175,8 @@ NewDayModal.propTypes = {
 	profiles: PropTypes.array,
 	onConfirm: PropTypes.func,
 	store: PropTypes.object,
-	actions: PropTypes.object
+	actions: PropTypes.object,
+	index: PropTypes.any
 };
 NewDayModal.defaultProps = {
 	profiles: []
