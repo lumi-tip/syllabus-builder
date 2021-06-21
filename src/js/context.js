@@ -613,6 +613,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					},
 					findPiece: (piece, type) => {
 						const store = getStore();
+						console.log(piece, type);
 						for (let i = 0; i < store.days.length; i++) {
 							const day = store.days[i];
 							let _found = false;

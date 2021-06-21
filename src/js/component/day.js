@@ -251,8 +251,21 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									title: "Are you sure?",
 									text: `This ${item.type} is already added to this syllabus`,
 									icon: "warning",
-									buttons: true,
+									buttons: {
+										duplicate: "Duplicate",
+										replace: "Replace item",
+										cancel: true
+									},
 									dangerMode: true
+								}).then(value => {
+									switch (value) {
+										case "duplicate":
+											return true;
+										case "replace":
+											return false;
+										default:
+											break;
+									}
 								});
 							}
 							if (confirm)
