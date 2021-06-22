@@ -23,8 +23,8 @@ API.setOptions({
 	assetsPath:
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
-	apiPath: "https://api.breatheco.de"
-	//apiPathV2: process.env.REACT_APP_API_HOST + "/v1"
+	apiPath: "https://api.breatheco.de",
+	apiPathV2: process.env.API_URL + "/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
 const mapEntity = {
