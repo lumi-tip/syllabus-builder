@@ -405,10 +405,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					out: (piece, day) => {
+						console.log(day, piece);
 						this.pieces().addOrReplace(piece);
 						this.days().update(day.id, day);
 					},
 					addOrReplace: piece => {
+						console.log("executed addOrReplace");
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
@@ -559,22 +561,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return {
 					add: (index = null, imported = []) => {
 						if (!Array.isArray(imported) || imported.length === 0) imported = [newDay()];
-						console.log(index);
 						setStore({
 							days: (() => {
 								let _days = [];
 								let extra = 0;
 								for (let i = 0; i < store.days.length; i++) {
-									console.log(i);
 									if (index !== null && index + 1 == i) {
 										imported.forEach(d => {
 											extra += 1;
 											_days.push(newDay(extra + i, extra + i, d));
-											console.log(d, extra + i, "extra imported");
 										});
 									}
 									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
-									console.log(extra + i + 1, "rest of days");
 								}
 								if (index === null || index + 1 === store.days.length) {
 									let count = store.days.length;
@@ -606,7 +604,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
-
 							if (_found) return true;
 						}
 						return false;
@@ -622,8 +619,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
-
-							if (_found) return true;
+							console.log();
+							if (_found) return { found: true, day: { ..._found, id: day.id } };
 						}
 						return false;
 					},
