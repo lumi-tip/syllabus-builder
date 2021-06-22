@@ -6,16 +6,17 @@ import { ToastProvider } from "react-toast-notifications";
 
 export const ContentContext = React.createContext({});
 
-const newDay = (id, position) => ({
-	id,
-	position,
+const newDay = (id = 0, position = 0, seed = {}) => ({
 	label: "",
 	"key-concepts": [],
 	lessons: [],
 	projects: [],
 	replits: [],
 	quizzes: [],
-	technologies: []
+	technologies: [],
+	...seed,
+	id,
+	position
 });
 
 API.setOptions({
@@ -23,7 +24,7 @@ API.setOptions({
 		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
 		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
-	apiPathV2: "https://breathecode.herokuapp.com/v1"
+	apiPathV2: process.env.API_URL + "/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
 const mapEntity = {
@@ -58,7 +59,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			courses: [],
 			academies: [],
 			technologies: [],
-			report: []
+			report: [],
+			imported_days: []
 		},
 
 		actions: {
@@ -81,7 +83,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
-
+										console.log(data);
 										const newStore = {
 											[mapEntity[entity]]: data
 												.filter(e => {
@@ -114,6 +116,65 @@ const getState = ({ getStore, getActions, setStore }) => {
 						setStore({ report: [] });
 					}
 				};
+			},
+			import: data => {
+				const actions = getActions();
+				const { projects } = getStore();
+				let content = JSON.parse(data.content);
+				let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
+
+				let { days, weeks } = json || content;
+				if (Array.isArray(weeks) && !Array.isArray(days))
+					days = [].concat.apply(
+						[],
+						weeks.map(w => w.days)
+					);
+				setStore({
+					imported_days: days.map((d, i) => {
+						return {
+							...d,
+							id: i + 1,
+							position: i + 1,
+							technologies: d.technologies || [],
+							lessons:
+								d.lessons !== undefined
+									? d.lessons.map(l => {
+											l.type = "lesson";
+											return l;
+									  })
+									: (d.lessons = []),
+							replits:
+								d.replits !== undefined
+									? d.replits.map(l => {
+											l.type = "replit";
+											return l;
+									  })
+									: (d.replits = []),
+							//from the json it comes like an assignment, but its really a project
+							projects:
+								d.assignments !== undefined
+									? d.assignments.map(p => {
+											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
+											if (project === undefined) {
+												actions.report().add("error", `Invalid project ${p.slug || p}`, p);
+												return { type: "project", slug: p, title: "Invalid project" };
+											}
+
+											return project;
+									  })
+									: (d.assignments = []),
+							quizzes:
+								d.quizzes !== undefined
+									? d.quizzes
+											.filter(f => f.slug != undefined)
+											.map(l => {
+												l.type = "quiz";
+												return l;
+											})
+									: (d.quizzes = [])
+						};
+					})
+				});
 			},
 			upload: data => {
 				//if its not a url
@@ -210,6 +271,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								const pieces = data.split(",");
 								const version = pieces.length === 3 ? pieces[1] : "";
 								setStore({ days });
+								console.log(days);
 								actions.setInfo({ slug: profile, profile, label, description, version });
 								resolve(json);
 							})
@@ -343,10 +405,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					out: (piece, day) => {
+						console.log(day, piece);
 						this.pieces().addOrReplace(piece);
 						this.days().update(day.id, day);
 					},
 					addOrReplace: piece => {
+						console.log("executed addOrReplace");
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
@@ -419,6 +483,48 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				return await actions.upload({ content: data });
 			},
+			getApiSyllabusForNewDay: async (academy, profile, version) => {
+				const store = getStore();
+				const _store = { ...store, info: { ...store.info, academy_author: academy, profile, version } };
+				setStore(_store);
+
+				// ignore version, academy or profile null
+				if (
+					!version ||
+					version == "" ||
+					version == "null" ||
+					!academy ||
+					academy == "" ||
+					academy == "null" ||
+					!profile ||
+					profile == "" ||
+					profile == "null"
+				)
+					return;
+
+				const params = new URLSearchParams(window.location.search);
+				const apiKey = params.get("token");
+				const resp = await fetch(
+					API.options.apiPathV2 + "/admissions/certificate/" + profile + "/academy/" + academy + "/syllabus/" + version,
+					{
+						headers: {
+							//"Cache-Control": "no-cache",
+							"Content-type": "application/json",
+							Authorization: "Token " + apiKey
+						}
+					}
+				);
+				const data = await resp.text();
+				const actions = getActions();
+				if (resp.status < 200 || resp.status > 299) {
+					if (resp.status > 399 && resp.status < 500) {
+						throw Error(data.detail || data.details);
+					} else {
+						throw Error("There was an error fetching the syllabus");
+					}
+				}
+				return await actions.import({ content: data });
+			},
 			getSyllabisVersions: async (academyId, courseSlug) => {
 				const store = getStore();
 				const actions = getActions();
@@ -451,23 +557,34 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			days: () => {
 				const store = getStore();
+				const actions = getActions();
 				return {
-					add: (index = null) =>
+					add: (index = null, imported = []) => {
+						if (!Array.isArray(imported) || imported.length === 0) imported = [newDay()];
 						setStore({
 							days: (() => {
 								let _days = [];
 								let extra = 0;
 								for (let i = 0; i < store.days.length; i++) {
-									if (index && index == i) {
-										_days.push(newDay(i + 1, i + 1));
-										extra = 1;
+									if (index !== null && index + 1 == i) {
+										imported.forEach(d => {
+											extra += 1;
+											_days.push(newDay(extra + i, extra + i, d));
+										});
 									}
 									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
 								}
-								if (index === null || index === store.days.length) _days.push(newDay(store.days.length + 1, store.days.length + 1));
+								if (index === null || index + 1 === store.days.length) {
+									let count = store.days.length;
+									imported.forEach(d => {
+										count += 1;
+										_days.push(newDay(count, count, d));
+									});
+								}
 								return _days;
 							})()
-						}),
+						});
+					},
 					update: (id, day) => {
 						const store = getStore();
 						setStore({
@@ -487,13 +604,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
-
 							if (_found) return true;
 						}
 						return false;
 					},
 					findPiece: (piece, type) => {
 						const store = getStore();
+						console.log(piece, type);
 						for (let i = 0; i < store.days.length; i++) {
 							const day = store.days[i];
 							let _found = false;
@@ -502,8 +619,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
-
-							if (_found) return true;
+							console.log();
+							if (_found) return { found: true, day: { ..._found, id: day.id } };
 						}
 						return false;
 					},

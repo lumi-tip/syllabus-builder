@@ -244,15 +244,52 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								.update(_data.id, { ..._data, [m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item) })
 						}
 						onDrop={async item => {
+							console.log(item);
 							const exists = actions.days().findPiece(item, m.storeName);
 							let confirm = true;
-							if (exists) {
+							if (exists.found) {
 								confirm = await swal({
 									title: "Are you sure?",
 									text: `This ${item.type} is already added to this syllabus`,
 									icon: "warning",
-									buttons: true,
+									buttons: {
+										duplicate: "Duplicate",
+										replace: "Replace item",
+										cancel: true
+									},
 									dangerMode: true
+								}).then(value => {
+									switch (value) {
+										case "duplicate":
+											return true;
+										case "replace":
+											actions.pieces().in(item, {
+												id: _data.id,
+												[m.storeName]: _data[m.storeName]
+													.filter(l => {
+														if (item.type === "quiz") {
+															if (item.info == undefined) return false;
+															if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+															return false;
+														} else
+															return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+													})
+													.concat([item.data])
+											});
+											actions.pieces().out(item.data, {
+												id: exists.day.id,
+												[m.storeName]: _data[m.storeName].filter(l => {
+													if (item.type === "quiz") {
+														if (item.info == undefined) return false;
+														if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+														return false;
+													} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+												})
+											});
+											return false;
+										default:
+											break;
+									}
 								});
 							}
 							if (confirm)

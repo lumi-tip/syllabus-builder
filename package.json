@@ -28,6 +28,7 @@
 		"babel-plugin-transform-class-properties": "^6.24.1",
 		"bc-console": "0.0.2",
 		"css-loader": "^2.1.1",
+		"dotenv-webpack": "^7.0.3",
 		"eslint": "^4.19.1",
 		"eslint-loader": "^2.0.0",
 		"eslint-plugin-react": "^7.7.0",
@@ -63,6 +64,7 @@
 	},
 	"dependencies": {
 		"@babel/plugin-transform-runtime": "^7.12.1",
+		"@sweetalert/with-react": "^0.1.1",
 		"@uiw/react-md-editor": "^2.1.1",
 		"bc-react-notifier": "^1.1.6",
 		"bootstrap": "^4.1.3",

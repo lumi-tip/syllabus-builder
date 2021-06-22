@@ -1,16 +1,19 @@
 import React, { useContext, useState } from "react";
 import { ContentContext } from "../context.js";
-import swal from "sweetalert";
+import swal from "@sweetalert/with-react";
 import { Notify } from "bc-react-notifier";
 import { UploadSyllabus, SyllabusDetails } from "./modal";
+import NewDay from "../component/modals/NewDayModal";
 
 export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
+	const [openNewDay, setOpenNewDay] = useState(false);
 	return (
 		<div className="topbar text-right p-3 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={() => setOpenSyllabusDetails(false)} />}
+			{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} />}
 			<div className="d-flex">
 				<p className="mt-0 p-0 text-left w-100">
 					{store.info.slug && store.info.slug != "" ? `${store.info.slug}:v${store.info.version}` : "No syllabus selected"}
@@ -34,7 +37,7 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
-				<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().add()}>
+				<button className="btn btn-dark btn-sm mr-2" onClick={() => setOpenNewDay(true)}>
 					<i className="fas fa-plus" /> Add new day
 				</button>
 				{store.days.length > 0 && store.info.slug && store.info.slug != "" && (
