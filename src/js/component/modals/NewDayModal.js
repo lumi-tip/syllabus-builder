@@ -11,17 +11,6 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 	const [showDays, setShowDays] = useState(false);
 	const [selectedDays, setSelectedDays] = useState([]);
 
-	useEffect(() => {
-		if (store.info.slug && store.info.slug != "") {
-			if (store.info.version && store.info.version != "") {
-				setVersion(store.info.version);
-			}
-			if (store.info.academy && store.info.academy != "") {
-				setAcademy(store.info.academy);
-			}
-		}
-	}, [store.info]);
-
 	const shouldBeOpened = () => {
 		return academy && academy != "" && profile && profile != "";
 	};
@@ -72,7 +61,7 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 													if (e.target.value && e.target.value != "null") {
 														API.setOptions({ academy: e.target.value });
 														setAcademy(e.target.value);
-														if (profile) actions.getSyllabisVersions(e.target.value, profile);
+														if (profile) actions.getSyllabisVersions(e.target.value, profile, true);
 														else actions.fetch(["profile"]);
 													} else {
 														setAcademy(null);
@@ -98,7 +87,7 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 													onChange={e => {
 														if (academy && e.target.value && e.target.value != "null") {
 															setProfile(e.target.value);
-															actions.getSyllabisVersions(academy, e.target.value);
+															actions.getSyllabisVersions(academy, e.target.value, true);
 														} else {
 															setProfile(null);
 															setVersion(null);
