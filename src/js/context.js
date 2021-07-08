@@ -83,7 +83,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.then(_data => {
 										let data = _data.data || _data;
 										if (!Array.isArray(data)) data = Object.values(data);
-										console.log(data);
 										const newStore = {
 											[mapEntity[entity]]: data
 												.filter(e => {
@@ -156,8 +155,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 									? d.assignments.map(p => {
 											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
 											if (project === undefined) {
-												actions.report().add("error", `Invalid project ${p.slug || p}`, p);
-												return { type: "project", slug: p, title: "Invalid project" };
+												if (typeof p === "object") {
+													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+													return { ...p, type: "project" };
+												} else {
+													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+													return { type: "project", slug: p, title: "Invalid project" };
+												}
 											}
 
 											return project;
@@ -220,8 +224,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 													p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
 												);
 												if (project === undefined) {
-													actions.report().add("error", `Invalid project ${p.slug || p}`, p);
-													return { type: "project", slug: p, title: "Invalid project" };
+													if (typeof p === "object") {
+														actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+														return { ...p, type: "project" };
+													} else {
+														actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+														return { type: "project", slug: p, title: "Invalid project" };
+													}
 												}
 
 												return project;
@@ -271,7 +280,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								const pieces = data.split(",");
 								const version = pieces.length === 3 ? pieces[1] : "";
 								setStore({ days });
-								console.log(days);
+
 								actions.setInfo({ slug: profile, profile, label, description, version });
 								resolve(json);
 							})
@@ -302,28 +311,28 @@ const getState = ({ getStore, getActions, setStore }) => {
 							title: p.title,
 							target: p.target,
 							url: p.url,
-							required: p.required
+							mandatory: p.mandatory
 						})),
 						replits: d.replits.map(e => ({
 							title: e.info != undefined ? e.info.title : e.title,
 							slug: e.info != undefined ? e.info.slug : e.slug,
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							required: e.info != undefined ? e.info.required : e.required
+							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
 						})),
 						quizzes: d.quizzes.map(e => ({
 							title: e.info != undefined ? e.info.name : e.title,
 							target: e.info != undefined ? e.info.target : e.target,
 							slug: e.info != undefined ? e.info.slug : e.slug,
 							url: e.info != undefined ? e.info.url : e.url,
-							required: e.info != undefined ? e.info.required : e.required
+							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
 						})),
 						lessons: d.lessons.map(e => ({
 							title: e.title,
 							slug: e.slug.substr(e.slug.indexOf("]") + 1), //remove status like [draft]
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							required: e.info != undefined ? e.info.required : e.required
+							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
 						}))
 					}))
 				};
@@ -405,12 +414,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					out: (piece, day) => {
-						console.log(day, piece);
 						this.pieces().addOrReplace(piece);
 						this.days().update(day.id, day);
 					},
 					addOrReplace: piece => {
-						console.log("executed addOrReplace");
 						piece.type === "quiz"
 							? setStore({
 									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
@@ -610,7 +617,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					},
 					findPiece: (piece, type) => {
 						const store = getStore();
-						console.log(piece, type);
+
 						for (let i = 0; i < store.days.length; i++) {
 							const day = store.days[i];
 							let _found = false;
@@ -619,7 +626,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
 								);
 							else _found = day[type].find(p => p.slug === piece.data.slug);
-							console.log();
+
 							if (_found) return { found: true, day: { ..._found, id: day.id } };
 						}
 						return false;
