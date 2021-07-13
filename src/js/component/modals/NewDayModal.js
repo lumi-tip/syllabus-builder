@@ -4,9 +4,9 @@ import API from "../../api";
 import Card from "../cards/card";
 
 const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
-	const [profile, setProfile] = useState(store.info.profile);
-	const [academy, setAcademy] = useState(store.info.academy_author);
-	const [version, setVersion] = useState(store.info.slug && store.info.slug != "" ? store.info.version : null);
+	const [profile, setProfile] = useState(null);
+	const [academy, setAcademy] = useState(null);
+	const [version, setVersion] = useState(null);
 	const [newDay, setNewDay] = useState(false);
 	const [showDays, setShowDays] = useState(false);
 	const [selectedDays, setSelectedDays] = useState([]);
@@ -120,8 +120,8 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 												<option key={0} value={"null"}>
 													Select version
 												</option>
-												{store.syllabus !== null && store.syllabus.length > 0 ? (
-													store.syllabus.map((syllabu, i) => {
+												{store.imported_syllabus !== null && store.imported_syllabus.length > 0 ? (
+													store.imported_syllabus.map((syllabu, i) => {
 														return (
 															<option key={i} value={syllabu.version}>
 																{syllabu.version}

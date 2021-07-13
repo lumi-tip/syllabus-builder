@@ -60,7 +60,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			academies: [],
 			technologies: [],
 			report: [],
-			imported_days: []
+			imported_days: [],
+			imported_syllabus: []
 		},
 
 		actions: {
@@ -548,7 +549,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw Error("There was an error saving the syllabus");
 					}
 				}
+				console.log(data);
 				if (!readOnly) setStore({ ...store, info: { ...store.info, academy_author: academyId, profile: courseSlug }, syllabus: data });
+				else setStore({ imported_syllabus: data });
 			},
 			cleanSyllabus: async ({ academy = null, profile = null }) => {
 				const store = getStore();
