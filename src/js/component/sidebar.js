@@ -50,13 +50,14 @@ const Sidebar = ({ content, onRefresh, width }) => {
 							type={w.type}
 							isExpanded={w.type === currentType}
 							onCollapse={() => setCurrentType(w.type)}
-							pieces={content[w.storeName].filter(
-								p =>
+							pieces={content[w.storeName].filter(p => {
+								return (
 									!searchToken.toLowerCase() ||
-									(p.slug && p.slug.includes(searchToken)) ||
+									(p.slug && typeof p.slug === "object" ? p.slug.slug.includes(searchToken) : p.slug.includes(searchToken)) ||
 									(p.title && p.title.toLowerCase().includes(searchToken)) ||
 									(p.info && p.info.name && p.info.name.toLowerCase().includes(searchToken))
-							)}
+								);
+							})}
 						/>
 					</div>
 				))}

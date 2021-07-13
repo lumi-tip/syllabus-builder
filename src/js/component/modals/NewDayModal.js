@@ -38,7 +38,6 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 									type="button"
 									className="btn btn-primary"
 									onClick={() => {
-										console.log(index);
 										actions.days().add(index);
 										onConfirm(false);
 									}}>
@@ -146,7 +145,6 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 									type="button"
 									className="btn btn-primary"
 									onClick={() => {
-										console.log(index, selectedDays);
 										actions.days().add(index, selectedDays);
 										onConfirm(false);
 									}}>

@@ -181,7 +181,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							styles={selectStyles}
 							label="Add technologies"
 							onChange={t => {
-								console.log("_data", _data);
 								actions.days().update(_data.id, {
 									..._data,
 									["technologies"]: _data["technologies"].concat([{ slug: t.value, title: t.label }])
@@ -244,7 +243,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								.update(_data.id, { ..._data, [m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item) })
 						}
 						onDrop={async item => {
-							console.log(item);
 							const exists = actions.days().findPiece(item, m.storeName);
 							let confirm = true;
 							if (exists.found) {
