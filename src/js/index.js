@@ -71,6 +71,17 @@ const Main = injectContent(() => {
 						<TopBar />
 						<div className="hbar" />
 						{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} index={index} />}
+						{sortedDays.length === 0 && (
+							<div className="text-center">
+								<i
+									onClick={() => {
+										setOpenNewDay(true);
+										setIndex(null);
+									}}
+									className="fas fa-plus-circle pointer text-secondary"
+								/>
+							</div>
+						)}
 						{sortedDays.map((d, i) => (
 							<div id={"day" + d.id.toString()} key={d.id.toString() + d.position.toString()}>
 								<Day

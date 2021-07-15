@@ -9,11 +9,10 @@ export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
-	const [openNewDay, setOpenNewDay] = useState(false);
+	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 	return (
 		<div className="topbar text-right p-3 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={() => setOpenSyllabusDetails(false)} />}
-			{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} />}
 			<div className="d-flex">
 				<p className="mt-0 p-0 text-left w-100">
 					{store.info.slug && store.info.slug != "" ? `${store.info.slug}:v${store.info.version}` : "No syllabus selected"}
@@ -37,10 +36,7 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
-				<button className="btn btn-dark btn-sm mr-2" onClick={() => setOpenNewDay(true)}>
-					<i className="fas fa-plus" /> Add new day
-				</button>
-				{store.days.length > 0 && store.info.slug && store.info.slug != "" && (
+				{notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
 						<button
 							className="btn btn-danger btn-sm mr-2"
