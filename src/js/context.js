@@ -181,16 +181,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 				});
 			},
-			upload: data => {
+			upload: (data, overrideInfo = {}) => {
 				//if its not a url
 				const actions = getActions();
-				const { projects, info } = getStore();
+				const { projects, info } = { ...getStore(), info: overrideInfo };
+
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					let content = JSON.parse(data.content);
 					let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
 					actions.report().clear(); //clear noticications
 
-					let { days, profile, label, description, weeks } = json || content;
+					let { days, label, description, weeks } = json || content;
 					if (Array.isArray(weeks) && !Array.isArray(days))
 						days = [].concat.apply(
 							[],
@@ -249,7 +250,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 							};
 						})
 					});
-					actions.setInfo({ slug: profile, profile, label, description, version: content.version || info.version });
+					actions.setInfo({ slug: info.profile, profile: info.profile, label, description, version: info.version });
 				} else
 					new Promise((resolve, reject) => {
 						return fetch(data)
@@ -259,7 +260,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								} else throw new Error("There was an error code " + resp.status);
 							})
 							.then(json => {
-								let { days, profile, label, description, weeks } = json;
+								let { days, label, description, weeks } = json;
 								if (weeks)
 									days = weeks
 										.map(w => w.days)
@@ -278,11 +279,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 											quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
 											"key-concepts": d["key-concepts"] || []
 										}));
-								const pieces = data.split(",");
-								const version = pieces.length === 3 ? pieces[1] : "";
 								setStore({ days });
 
-								actions.setInfo({ slug: profile, profile, label, description, version });
+								actions.setInfo({ slug: info.profile, profile: info.profile, label, description, version: info.version });
 								resolve(json);
 							})
 							.catch(error => reject(error));
@@ -450,7 +449,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getApiSyllabus: async (academy, profile, version) => {
 				const store = getStore();
-				const _store = { ...store, info: { ...store.info, academy_author: academy, profile, version } };
+				const meta = { academy_author: academy, profile, version, slug: profile };
+				const _store = { ...store, info: { ...store.info, ...meta } };
 				setStore(_store);
 
 				// ignore version, academy or profile null
@@ -489,10 +489,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				}
 
-				return await actions.upload({ content: data });
+				return await actions.upload({ content: data }, _store.info);
 			},
 			getApiSyllabusForNewDay: async (academy, profile, version) => {
+<<<<<<< HEAD
 				console.log(profile);
+=======
+>>>>>>> fc6aee55a75be68a8ff72c3b5f68b88a14ea8d3b
 				// ignore version, academy or profile null
 				if (
 					!version ||
