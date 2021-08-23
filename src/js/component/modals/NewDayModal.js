@@ -11,14 +11,6 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 	const [showDays, setShowDays] = useState(false);
 	const [selectedDays, setSelectedDays] = useState([]);
 
-	console.log(store);
-	console.log(actions);
-	// console.log(label);
-	console.log(profile);
-	console.log(academy);
-	// console.log(desc);
-	console.log(version);
-
 	useEffect(() => {
 		if (store.info.slug && store.info.slug != "") {
 			if (store.info.version && store.info.version != "") {
