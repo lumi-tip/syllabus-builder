@@ -14,8 +14,11 @@ import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
 import NewDay from "./component/modals/NewDayModal";
+import getCurrentUrl from "./utils/get-current-url";
 
 //include your index.scss file into the bundle
+
+const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 
 const params = new URLSearchParams(window.location.search);
 const API_KEY = params.get("token");
@@ -30,17 +33,20 @@ const Main = injectContent(() => {
 
 	useEffect(() => {
 		actions.getMe();
-		window.onbeforeunload = function() {
-			return "Are you sure you want to exit?";
-		};
+		if (process.env.ENV !== "development")
+			window.onbeforeunload = function() {
+				return "Are you sure you want to exit?";
+			};
 	}, []);
 
-	if (!API_KEY)
+	if (!API_KEY) {
+		const callbackUrl = getCurrentUrl();
 		return (
 			<div>
-				Click here to <a href={`https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`}>log in</a>
+				Click here to <a href={`${apiUrl}/v1/auth/view/login?url=${callbackUrl}`}>log in</a>
 			</div>
 		);
+	}
 
 	const closeInstructions = editExtendedDay => {
 		setTimeout(() => {

@@ -84,7 +84,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 											if (e.target.value && e.target.value != "null") {
 												API.setOptions({ academy: e.target.value });
 												setAcademy(e.target.value);
-												if (profile) actions.getSyllabisVersions(e.target.value, profile);
+												if (profile) actions.getSyllabusVersions(e.target.value, profile);
 												else actions.fetch(["profile"]);
 											} else {
 												setAcademy(null);
@@ -111,7 +111,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 											onChange={e => {
 												if (academy && e.target.value && e.target.value != "null") {
 													setProfile(e.target.value);
-													actions.getSyllabisVersions(academy, e.target.value);
+													actions.getSyllabusVersions(academy, e.target.value);
 												} else {
 													setProfile(null);
 													setVersion(null);
@@ -136,7 +136,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 										onChange={e => {
 											if (academy && profile && e.target.value && e.target.value != "null") {
 												setVersion(e.target.value);
-												actions.getApiSyllabus(academy, profile, e.target.value);
+												actions.getApiSyllabusVersion(academy, profile, e.target.value);
 											} else {
 												setVersion(null);
 												actions.cleanSyllabus({ academy, profile });
