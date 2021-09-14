@@ -1,3 +1,3 @@
 # Syllabus Builder BreatheCode
 
-Buils a Syllabus
+Buils a Syllabus easily
