@@ -81,17 +81,18 @@ export const SyllabusDetails = ({ onConfirm }) => {
 									<select
 										className="form-control"
 										onChange={e => {
+											console.log("select changed", e.target.value);
 											if (e.target.value && e.target.value != "null") {
 												API.setOptions({ academy: e.target.value });
 												setAcademy(e.target.value);
-												if (profile) actions.getSyllabusVersions(e.target.value, profile);
-												else actions.fetch(["profile"]);
+												// if (profile) actions.getSyllabusVersion(e.target.value, profile);
+												// else actions.fetch(["profile"]);
 											} else {
 												setAcademy(null);
-												setProfile(null);
-												setVersion(null);
-												actions.cleanSyllabus();
 											}
+											setProfile(null);
+											setVersion(null);
+											actions.cleanSyllabus();
 										}}
 										value={academy}>
 										<option key={0} value={"null"}>
@@ -111,7 +112,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 											onChange={e => {
 												if (academy && e.target.value && e.target.value != "null") {
 													setProfile(e.target.value);
-													actions.getSyllabusVersions(academy, e.target.value);
+													actions.getSyllabisVersions(academy, e.target.value);
 												} else {
 													setProfile(null);
 													setVersion(null);
