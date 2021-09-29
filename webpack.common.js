@@ -1,8 +1,7 @@
-const webpack = require('webpack');
-const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
 var PrettierPlugin = require("prettier-webpack-plugin");
-const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: [
@@ -10,42 +9,36 @@ module.exports = {
   ],
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'public')
+    path: path.resolve(__dirname, 'public'),
+    publicPath: '/'
   },
   module: {
     rules: [
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: ['babel-loader', 'eslint-loader']
-        },
-        {
-          test: /\.(css|scss)$/, use: [{
-              loader: "style-loader" // creates style nodes from JS strings
-          }, {
-              loader: "css-loader" // translates CSS into CommonJS
-          }, {
-              loader: "sass-loader" // compiles Sass to CSS
-          }]
-        }, //css only files
-        { 
-          test: /\.(png|svg|jpg|gif)$/, use: {
-            loader: 'file-loader',
-            options: { name: '[name].[ext]' } 
-          }
-        }, //for images
-        { test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/, use: ['file-loader'] } //for fonts
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: ['babel-loader', 'eslint-loader']
+      },
+      {
+        test: /\.(css|scss)$/, use: [{
+            loader: "style-loader" // creates style nodes from JS strings
+        }, {
+            loader: "css-loader" // translates CSS into CommonJS
+        }, {
+            loader: "sass-loader" // compiles Sass to CSS
+        }]
+      }, //css only files
+      {
+        test: /\.(png|svg|jpg|gif)$/, use: {
+          loader: 'file-loader',
+          options: { name: '[name].[ext]' }
+        }
+      }, //for images
+      { test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/, use: ['file-loader'] } //for fonts
     ]
   },
   resolve: {
     extensions: ['*', '.js']
-  },
-  devtool: "source-map",
-  devServer: {
-    contentBase:  './dist',
-    hot: true,
-    disableHostCheck: true,
-    historyApiFallback: true
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
@@ -71,7 +64,6 @@ module.exports = {
       jsxBracketSameLine: true,
       semi: true,                 // Print semicolons at the ends of statements.
       encoding: 'utf-8'           // Which encoding scheme to use on files
-    }),
-    new Dotenv({ safe: true, systemvars: true })
+    })
   ]
 };
