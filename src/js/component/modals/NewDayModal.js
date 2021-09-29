@@ -60,6 +60,7 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 													if (e.target.value && e.target.value != "null") {
 														API.setOptions({ academy: e.target.value });
 														setAcademy(e.target.value);
+
 														if (profile) actions.getSyllabisVersions(e.target.value, profile, true);
 														else actions.fetch(["profile"]);
 													} else {
@@ -110,7 +111,7 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 												onChange={e => {
 													if (academy && profile && e.target.value && e.target.value != "null") {
 														setVersion(e.target.value);
-														actions.getApiSyllabusForNewDay(academy, profile, e.target.value);
+														actions.getApiSyllabusVersionForNewDay(academy, profile, e.target.value);
 														setShowDays(true);
 													} else {
 														setVersion(null);

@@ -355,23 +355,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (!newVersion && store.info.version == "null") throw Error("Please pick a syllabus version");
 				else if (store.info.version === "new") newVersion = true;
 				const url = newVersion
-					? API.options.apiPathV2 + "/admissions/certificate/" + store.info.profile + "/academy/" + store.info.academy_author + "/syllabus"
-					: API.options.apiPathV2 +
-					  "/admissions/certificate/" +
-					  store.info.profile +
-					  "/academy/" +
-					  store.info.academy_author +
-					  "/syllabus/" +
-					  store.info.version;
+					? API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version"
+					: API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version/" + store.info.version;
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const resp = await fetch(url, {
 					method: newVersion ? "POST" : "PUT",
 					body: JSON.stringify(actions.serialize(newVersion), null, "   "),
 					headers: {
+						Academy: parseInt(store.info.academy_author),
 						"Content-type": "application/json",
-						Authorization: "Token " + apiKey,
-						Academy: parseInt(store.info.academy_author)
+						Authorization: "Token " + apiKey
 					}
 				});
 				if (resp.status < 200 || resp.status > 299) {
@@ -447,7 +441,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-			getApiSyllabus: async (academy, profile, version) => {
+			getApiSyllabusVersion: async (academy, profile, version) => {
 				const store = getStore();
 				const meta = { academy_author: academy, profile, version, slug: profile };
 				const _store = { ...store, info: { ...store.info, ...meta } };
@@ -469,16 +463,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(
-					API.options.apiPathV2 + "/admissions/certificate/" + profile + "/academy/" + academy + "/syllabus/" + version,
-					{
-						headers: {
-							//"Cache-Control": "no-cache",
-							"Content-type": "application/json",
-							Authorization: "Token " + apiKey
-						}
+				const resp = await fetch(API.options.apiPathV2 + "/admissions/syllabus/" + profile + "/version/" + version, {
+					headers: {
+						Academy: parseInt(academy),
+						//"Cache-Control": "no-cache",
+						"Content-type": "application/json",
+						Authorization: "Token " + apiKey
 					}
-				);
+				});
 				const data = await resp.text();
 				const actions = getActions();
 				if (resp.status < 200 || resp.status > 299) {
@@ -491,11 +483,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				return await actions.upload({ content: data }, _store.info);
 			},
-			getApiSyllabusForNewDay: async (academy, profile, version) => {
-<<<<<<< HEAD
-				console.log(profile);
-=======
->>>>>>> fc6aee55a75be68a8ff72c3b5f68b88a14ea8d3b
+			getApiSyllabusVersionForNewDay: async (academy, profile, version) => {
 				// ignore version, academy or profile null
 				if (
 					!version ||
@@ -512,16 +500,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(
-					API.options.apiPathV2 + "/admissions/certificate/" + profile + "/academy/" + academy + "/syllabus/" + version,
-					{
-						headers: {
-							//"Cache-Control": "no-cache",
-							"Content-type": "application/json",
-							Authorization: "Token " + apiKey
-						}
+				const resp = await fetch(API.options.apiPathV2 + "/admissions/syllabus/" + profile + "/version/" + version, {
+					headers: {
+						Academy: parseInt(academy),
+						//"Cache-Control": "no-cache",
+						"Content-type": "application/json",
+						Authorization: "Token " + apiKey
 					}
-				);
+				});
 				const data = await resp.text();
 				const actions = getActions();
 				if (resp.status < 200 || resp.status > 299) {
@@ -538,8 +524,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const actions = getActions();
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/admissions/certificate/" + courseSlug + "/academy/" + academyId + "/syllabus", {
+				const resp = await fetch(API.options.apiPathV2 + "/admissions/syllabus/" + courseSlug + "/version", {
 					headers: {
+						Academy: parseInt(academyId),
 						"Content-type": "application/json",
 						Authorization: "Token " + apiKey
 					}

@@ -1,17 +1,17 @@
 {
 	"name": "react-hello",
 	"engines": {
-		"node": "14.x"
+		"node": ">=14.x"
 	},
 	"version": "1.0.1",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"c9": "webpack-dev-server --mode development --open --host $IP --port $PORT",
-		"gitpod": "webpack-dev-server --mode development --open --port 3000",
-		"start": "webpack-dev-server --mode development --hot",
-		"build": "webpack --mode development",
-		"now-build": "webpack --mode production",
+		"c9": "webpack-dev-server --mode development --open --host $IP --port $PORT --config webpack.dev.js",
+		"gitpod": "webpack-dev-server --mode development --open --port 3000 --config webpack.dev.js",
+		"start": "webpack-dev-server --mode development --hot --config webpack.dev.js",
+		"build": "webpack --mode production --config webpack.prod.js",
+		"now-build": "webpack --mode production --config webpack.prod.js",
 		"deploy": "node deploy-to-github.js"
 	},
 	"author": "Alejandro Sanchez",
@@ -45,7 +45,8 @@
 		"style-loader": "^0.19.0",
 		"webpack": "^4.41.2",
 		"webpack-cli": "^3.3.0",
-		"webpack-dev-server": "^3.11.2"
+		"webpack-dev-server": "^3.11.2",
+		"webpack-merge": "^5.8.0"
 	},
 	"babel": {
 		"presets": [

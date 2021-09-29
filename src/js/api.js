@@ -1,5 +1,8 @@
 /* global fetch, localStorage, window */
 import swal from "sweetalert";
+import getCurrentUrl from "./utils/get-current-url";
+
+const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 
 class Wrapper {
 	constructor() {
@@ -96,7 +99,10 @@ class Wrapper {
 							text: "Please login to continue",
 							icon: "warning"
 						});
-						if (answer) window.location.href = `https://breathecode.herokuapp.com/v1/auth/view/login?url=${window.location.href}`;
+						if (answer) {
+							const callbackUrl = getCurrentUrl();
+							window.location.href = `${apiUrl}/v1/auth/view/login?url=${callbackUrl}`;
+						}
 					}
 					this.pending[method][path] = false;
 					//recalculate to check if it there is pending requests
@@ -389,7 +395,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/admissions/certificate");
+				return this.get(url + "/admissions/syllabus");
 			},
 			get: id => {
 				return this.get(url + "/profile/" + id);
@@ -409,7 +415,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/admissions/certificate");
+				return this.get(url + "/admissions/syllabus");
 			}
 		};
 	}
