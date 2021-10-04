@@ -36,22 +36,22 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
+				<button
+					className="btn btn-danger btn-sm mr-2"
+					onClick={async () => {
+						const yes = await swal({
+							title: "Are you sure?",
+							text: "Make sure to save or download first or you will loose your progress",
+							icon: "warning",
+							buttons: true,
+							dangerMode: true
+						});
+						if (yes) actions.clear();
+					}}>
+					<i className="fas fa-ban" /> Clear
+				</button>
 				{notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
-						<button
-							className="btn btn-danger btn-sm mr-2"
-							onClick={async () => {
-								const yes = await swal({
-									title: "Are you sure?",
-									text: "Make sure to save or download first or you will loose your progress",
-									icon: "warning",
-									buttons: true,
-									dangerMode: true
-								});
-								if (yes) actions.clear();
-							}}>
-							<i className="fas fa-ban" /> Clear
-						</button>
 						{store.info.version != "" && store.info.version && (
 							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus(store, actions)}>
 								<i className="fas fa-save" /> Save

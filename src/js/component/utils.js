@@ -1,12 +1,13 @@
 export const urls = {
 	lesson: "https://content.breatheco.de/lesson/",
 	project: "https://projects.breatheco.de/project/",
-	quiz: "https://assets.breatheco.de/apps/quiz/",
-	replit: "https://assets.breatheco.de/apis/registry/"
+	quiz: "https://breathecode.herokuapp.com/v1/registry/asset/",
+	replit: "https://breathecode.herokuapp.com/v1/registry/asset/"
 };
 
 export const getLink = async data => {
-	if (!data) return "#";
+	console.log("Get link for ", data);
+	if (!data) throw Error("No data url");
 	if (data.url) return data.url;
 
 	let slug = data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
@@ -15,8 +16,9 @@ export const getLink = async data => {
 
 	if (data.type === "replit") {
 		const resp = await fetch(url);
+		if (!resp.ok) throw Error("Link URL is invalid");
 		const info = await resp.json();
-		return info.repository;
+		return info.url;
 	}
 
 	return url;

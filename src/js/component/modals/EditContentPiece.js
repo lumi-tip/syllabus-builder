@@ -5,11 +5,24 @@ import { getLink } from "../utils";
 const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	const [data, _setData] = useState(null);
 	const [formStatus, setFormStatus] = useState({ status: "ok", messages: [] });
+	const [linkStatus, setLinkStatus] = useState({ status: "bg-light", message: "Testing URL...", value: null });
 
 	useEffect(() => {
 		if (defaultValue.custom !== true && defaultValue.mandatory === undefined) defaultValue.mandatory = true;
 		if (typeof defaultValue == "object") _setData(defaultValue.info || defaultValue);
 	}, [defaultValue]);
+
+	useEffect(() => {
+		if (data && !data.custom) {
+			getLink(data)
+				.then(url =>
+					url && url != ""
+						? setLinkStatus({ value: url, status: null, message: null })
+						: setLinkStatus({ status: "alert-danger", message: "URL not found" })
+				)
+				.catch(error => setLinkStatus({ status: "alert-danger", message: "Error fetching piece url: " + error.message }));
+		}
+	}, [data]);
 
 	const validate = e => {
 		e.preventDefault();
@@ -37,9 +50,20 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 	return (
 		<div
 			className="modal show d-block edit-piece"
+			onDrag={e => {
+				e.preventDefault();
+				e.stopPropagation();
+			}}
+			onClick={e => {
+				e.preventDefault();
+				e.stopPropagation();
+			}}
 			tabIndex="-1"
 			role="dialog"
-			onMouseDown={e => e.stopPropagation()}
+			onMouseDown={e => {
+				e.preventDefault();
+				e.stopPropagation();
+			}}
 			style={{ background: "rgba(0,0,0,0.5)" }}>
 			<div className="modal-dialog" role="document">
 				<form className="modal-content" onSubmit={validate}>
@@ -72,7 +96,20 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 								{"Custom slugs are only accepted for custom lessons, replits and projects"}
 							</small>
 						</div>
-						<div className="form-group">
+						<div className="form-group" style={{ position: "relative" }}>
+							{!linkStatus.message && (
+								<div
+									className={`alert ${linkStatus.status} w-100`}
+									style={{
+										borderBottomLeftRadius: "0px",
+										borderBottomRightRadius: "0px",
+										position: "absolute",
+										top: "-23px",
+										fontSize: "10px"
+									}}>
+									{linkStatus.message}
+								</div>
+							)}
 							{data.custom ? (
 								<input
 									type="url"
@@ -83,17 +120,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 									onChange={e => setData({ ...data, url: e.target.value })}
 								/>
 							) : (
-								<a
-									href="#"
-									className="form-control text-primary"
-									onClick={e => {
-										e.preventDefault();
-										getLink(data)
-											.then(url => window.open(url))
-											.catch(error => console.error("Error fetching piece url", error));
-									}}
-									target="_blank"
-									rel="noopener noreferrer">
+								<a href={linkStatus.value || "#"} className="form-control text-primary" target="_blank" rel="noopener noreferrer">
 									Test URL in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
 								</a>
 							)}
