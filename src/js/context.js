@@ -33,7 +33,6 @@ const mapEntity = {
 	technology: "technologies",
 	replit: "replits",
 	quiz: "quizzes",
-	profile: "profiles",
 	syllabu: "syllabus",
 	courseV2: "courses"
 };
@@ -50,7 +49,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 		store: {
 			days: [],
 			info: defaultSyllabusInfo,
-			profiles: [],
 			lessons: [],
 			projects: [],
 			replits: [],
@@ -519,37 +517,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 				return await actions.import({ content: data });
 			},
-			getSyllabisVersions: async (academyId, courseSlug, readOnly = false) => {
-				const store = getStore();
-				const actions = getActions();
-				const params = new URLSearchParams(window.location.search);
-				const apiKey = params.get("token");
-				const resp = await fetch(API.options.apiPathV2 + "/admissions/syllabus/" + courseSlug + "/version", {
-					headers: {
-						Academy: parseInt(academyId),
-						"Content-type": "application/json",
-						Authorization: "Token " + apiKey
-					}
-				});
-				const data = await resp.json();
-				if (resp.status < 200 || resp.status > 299) {
-					if (resp.status > 399 && resp.status < 500) {
-						throw Error(data.detail || data.details);
-					} else {
-						throw Error("There was an error saving the syllabus");
-					}
-				}
-				console.log(data);
-				if (!readOnly) setStore({ ...store, info: { ...store.info, academy_author: academyId, profile: courseSlug }, syllabus: data });
-				else setStore({ imported_syllabus: data });
-			},
 			cleanSyllabus: async ({ academy = null, profile = null }) => {
 				const store = getStore();
 				setStore({
 					...store,
 					info: { ...defaultSyllabusInfo, academy_author: academy, profile },
-					syllabus: profile ? store.syllabus : null,
-					profiles: academy ? store.profiles : []
+					syllabus: profile ? store.syllabus : null
 				});
 			},
 			days: () => {

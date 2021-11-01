@@ -397,6 +397,9 @@ class Wrapper {
 			all: () => {
 				return this.get(url + "/admissions/syllabus");
 			},
+			version: syllabusSlug => {
+				return this.get(`${url}/admissions/syllabus/${syllabusSlug}/version`);
+			},
 			get: id => {
 				return this.get(url + "/profile/" + id);
 			},

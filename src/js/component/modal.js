@@ -46,11 +46,15 @@ UploadSyllabus.propTypes = {
 
 export const SyllabusDetails = ({ onConfirm }) => {
 	const { store, actions } = useContext(ContentContext);
+	const [academy, setAcademy] = useState(null);
 	const [label, setLabel] = useState(store.info.label);
-	const [profile, setProfile] = useState(store.info.profile);
-	const [academy, setAcademy] = useState(store.info.academy_author);
 	const [desc, setDesc] = useState(store.info.description);
+
+	const [profile, setProfile] = useState(store.info.profile);
+	const [profileOptions, setProfileOptions] = useState([]);
+	// versions
 	const [version, setVersion] = useState(store.info.slug && store.info.slug != "" ? store.info.version : null);
+	const [versionOptions, setVersionOptions] = useState([]);
 
 	useEffect(() => {
 		if (store.info.slug && store.info.slug != "") {
@@ -65,6 +69,45 @@ export const SyllabusDetails = ({ onConfirm }) => {
 			}
 		}
 	}, [store.info]);
+
+	useEffect(() => {
+		const academyEffects = async () => {
+			actions.cleanSyllabus({ academy });
+
+			const profiles = await API.profile().all();
+			setProfileOptions(profiles);
+		};
+		// first reset the academy to the api
+		API.setOptions({ academy });
+
+		// profile and version must be null
+		setProfile(null);
+		setVersion(null);
+
+		if (academy) academyEffects();
+	}, [academy]);
+
+	useEffect(() => {
+		const profileEffects = async () => {
+			actions.cleanSyllabus({ academy, profile });
+			console.log("Fetching versions");
+			const versions = await API.profile().version(profile);
+			setVersionOptions(versions.sort((a, b) => (a.version > b.version ? 1 : -1)));
+		};
+		// profile and version must be null
+		setVersion(null);
+
+		if (profile) profileEffects();
+	}, [profile]);
+
+	useEffect(() => {
+		const versionEffects = async () => {
+			actions.cleanSyllabus({ academy, profile });
+			actions.getApiSyllabusVersion(academy, profile, version);
+		};
+
+		if (version) versionEffects();
+	}, [version]);
 
 	const shouldBeOpened = () => {
 		return academy && academy != "" && profile && profile != "";
@@ -81,18 +124,8 @@ export const SyllabusDetails = ({ onConfirm }) => {
 									<select
 										className="form-control"
 										onChange={e => {
-											console.log("select changed", e.target.value);
-											if (e.target.value && e.target.value != "null") {
-												API.setOptions({ academy: e.target.value });
-												setAcademy(e.target.value);
-												// if (profile) actions.getSyllabusVersion(e.target.value, profile);
-												// else actions.fetch(["profile"]);
-											} else {
-												setAcademy(null);
-											}
-											setProfile(null);
-											setVersion(null);
-											actions.cleanSyllabus();
+											console.log("Academy changed", e.target.value);
+											setAcademy(e.target.value && e.target.value != "null" ? e.target.value : null);
 										}}
 										value={academy}>
 										<option key={0} value={"null"}>
@@ -110,20 +143,13 @@ export const SyllabusDetails = ({ onConfirm }) => {
 										<select
 											className="form-control"
 											onChange={e => {
-												if (academy && e.target.value && e.target.value != "null") {
-													setProfile(e.target.value);
-													actions.getSyllabisVersions(academy, e.target.value);
-												} else {
-													setProfile(null);
-													setVersion(null);
-													actions.cleanSyllabus({ academy });
-												}
+												setProfile(e.target.value && e.target.value != "null" ? e.target.value : null);
 											}}
 											value={profile}>
 											<option key={0} value={"null"}>
 												Select profile
 											</option>
-											{store.profiles.map((course, i) => {
+											{profileOptions.map((course, i) => {
 												return (
 													<option key={i} value={course.slug}>
 														{course.slug}
@@ -132,33 +158,29 @@ export const SyllabusDetails = ({ onConfirm }) => {
 											})}
 										</select>
 									)}
-									<select
-										className={"form-control  " + (shouldBeOpened() ? "" : "d-none")}
-										onChange={e => {
-											if (academy && profile && e.target.value && e.target.value != "null") {
-												setVersion(e.target.value);
-												actions.getApiSyllabusVersion(academy, profile, e.target.value);
-											} else {
-												setVersion(null);
-												actions.cleanSyllabus({ academy, profile });
-											}
-										}}
-										value={version}>
-										<option key={0} value={"null"}>
-											Select version
-										</option>
-										{store.syllabus !== null && store.syllabus.length > 0 ? (
-											store.syllabus.map((syllabu, i) => {
-												return (
-													<option key={i} value={syllabu.version}>
-														{syllabu.version}
-													</option>
-												);
-											})
-										) : (
-											<option disabled>no version</option>
-										)}
-									</select>
+									{profile && (
+										<select
+											className={"form-control  " + (shouldBeOpened() ? "" : "d-none")}
+											onChange={e => {
+												setVersion(e.target.value && e.target.value != "null" ? e.target.value : null);
+											}}
+											value={version}>
+											<option key={0} value={"null"}>
+												Select version
+											</option>
+											{versionOptions.length > 0 ? (
+												versionOptions.map((syllabu, i) => {
+													return (
+														<option key={i} value={syllabu.version}>
+															{syllabu.version}
+														</option>
+													);
+												})
+											) : (
+												<option disabled>no version</option>
+											)}
+										</select>
+									)}
 								</div>
 							</div>
 						</div>
