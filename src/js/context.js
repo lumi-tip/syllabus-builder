@@ -450,6 +450,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
+			test: async () => {
+				const store = getStore();
+				try {
+					const resp = await API.registry().testSyllabus({ days: store.days });
+					return true;
+				} catch (error) {
+					throw error;
+				}
+			},
 			getApiSyllabusVersion: async (academy, profile, version) => {
 				const store = getStore();
 				const meta = { academy_author: academy, profile, version, slug: profile };

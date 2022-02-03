@@ -8,8 +8,16 @@ import { MultiSelect } from "react-multi-select-component";
 const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, translations }) => {
 	const [data, _setData] = useState(null);
 	const [editMode, setEditMode] = useState(false);
-	const [formStatus, setFormStatus] = useState({ status: "ok", messages: [] });
-	const [linkStatus, setLinkStatus] = useState({ status: "bg-light", message: "Testing URL...", value: null });
+	const [formStatus, setFormStatus] = useState({
+		status: "ok",
+		messages: []
+	});
+	const [slugValid, setSlugValid] = useState(null);
+	const [linkStatus, setLinkStatus] = useState({
+		status: "bg-light",
+		message: "Testing URL...",
+		value: null
+	});
 	const debouncedSlug = useDebounce(data ? data.slug : "", 500);
 
 	useEffect(() => {
@@ -22,10 +30,22 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 			getLink(data)
 				.then(url =>
 					url && url != ""
-						? setLinkStatus({ value: url, status: null, message: null })
-						: setLinkStatus({ status: "alert-danger", message: "URL not found" })
+						? setLinkStatus({
+								value: url,
+								status: null,
+								message: null
+						  })
+						: setLinkStatus({
+								status: "alert-danger",
+								message: "URL not found"
+						  })
 				)
-				.catch(error => setLinkStatus({ status: "alert-danger", message: "Error fetching piece url: " + error.message }));
+				.catch(error =>
+					setLinkStatus({
+						status: "alert-danger",
+						message: "Error fetching piece url: " + error.message
+					})
+				);
 		}
 
 		if (data && data.custom) setEditMode(true);
@@ -34,7 +54,10 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 	// Effect for API call
 	useEffect(
 		() => {
-			if (debouncedSlug && data.custom) validateSlug(debouncedSlug);
+			if (debouncedSlug)
+				validateSlug(debouncedSlug)
+					.then(valid => setSlugValid(valid))
+					.catch(error => setSlugValid(false));
 		},
 		[debouncedSlug] // Only call effect if debounced search term changes
 	);
@@ -59,7 +82,12 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 				.then(() => {
 					setData({ ...data, custom: false });
 				})
-				.catch(errors => setFormStatus({ status: "error", messages: Array.isArray(errors) ? errors : [errors.message || errors.msg] }));
+				.catch(errors =>
+					setFormStatus({
+						status: "error",
+						messages: Array.isArray(errors) ? errors : [errors.message || errors.msg]
+					})
+				);
 		}
 	};
 
@@ -69,18 +97,33 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 	};
 
 	const validateSlug = async _slug => {
-		if (!_slug || _slug == "") {
-			setFormStatus({ status: "error", messages: ["Invalid content slug"] });
+		if (!_slug || _slug == "" || !/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(data.slug)) {
+			setFormStatus({
+				status: "error",
+				messages: ["Invalid content slug"]
+			});
 			return false;
 		}
 
 		try {
 			const asset = await API.registry().getAsset(_slug);
 			if (data.custom) {
-				setFormStatus({ status: "error", messages: [`Slug is already taken by ${asset.asset_type.toLowerCase()}: ${asset.title}`] });
+				setFormStatus({
+					status: "error",
+					messages: [`Slug is already taken by ${asset.asset_type.toLowerCase()}: ${asset.title}`]
+				});
 				return false;
 			}
+			return true;
 		} catch (error) {
+			if (!data.custom) {
+				setFormStatus({
+					status: "error",
+					messages: [`Asset found on registry`]
+				});
+				return false;
+			}
+
 			return true;
 		}
 	};
@@ -126,15 +169,34 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 							<small className="form-text text-muted">{"Students will see this title"}</small>
 						</div>
 						<div className="form-group">
-							<input
-								type="text"
-								required={true}
-								readOnly={data.custom !== true}
-								className="form-control"
-								placeholder="Write a unique slug identifier"
-								value={data.slug}
-								onChange={e => data.custom && setData({ ...data, slug: e.target.value })}
-							/>
+							<div className="input-group mb-3">
+								<input
+									type="text"
+									required={true}
+									readOnly={data.custom !== true}
+									className="form-control border-right-0"
+									placeholder="Write a unique slug identifier"
+									value={data.slug}
+									onChange={e =>
+										data.custom &&
+										setData({
+											...data,
+											slug: e.target.value
+										})
+									}
+								/>
+								<div className="input-group-append">
+									<span className="input-group-text bg-white" id="basic-addon2">
+										{slugValid === null ? (
+											<i className={"fas fa-sync spin"}></i>
+										) : slugValid ? (
+											<i className={`fas fa-smile-beam text-success`}></i>
+										) : (
+											<i className={`far fa-frown text-danger`}></i>
+										)}
+									</span>
+								</div>
+							</div>
 							<small className="form-text text-muted">
 								{"Custom slugs are only accepted for custom lessons, replits and projects"}
 							</small>
@@ -160,7 +222,12 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 									className="form-control"
 									placeholder="Any specific url?"
 									value={data.url}
-									onChange={e => setData({ ...data, url: e.target.value })}
+									onChange={e =>
+										setData({
+											...data,
+											url: e.target.value
+										})
+									}
 								/>
 							) : (
 								<a href={linkStatus.value || "#"} className="form-control text-primary" target="_blank" rel="noopener noreferrer">
@@ -173,20 +240,42 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 								<div className="form-group">
 									<MultiSelect
 										hasSelectAll={false}
-										options={translations.map(t => ({ label: t.title, value: t.slug }))}
-										value={data.translations.map(t => ({ label: t, value: t }))}
+										options={translations.map(t => ({
+											label: t.title,
+											value: t.slug
+										}))}
+										value={data.translations.map(t => ({
+											label: t,
+											value: t
+										}))}
 										placeholder="Language translations"
-										onChange={translations => setData({ ...data, translations: translations.map(t => t.value) })}
+										onChange={translations =>
+											setData({
+												...data,
+												translations: translations.map(t => t.value)
+											})
+										}
 										labelledBy="Select available languages"
 									/>
 								</div>
 								<div className="form-group">
 									<MultiSelect
 										hasSelectAll={false}
-										options={technologies.map(t => ({ label: t.title, value: t.slug }))}
-										value={data.technologies.map(t => ({ label: t, value: t }))}
+										options={technologies.map(t => ({
+											label: t.title,
+											value: t.slug
+										}))}
+										value={data.technologies.map(t => ({
+											label: t,
+											value: t
+										}))}
 										placeholder="Technologies"
-										onChange={technologies => setData({ ...data, technologies: technologies.map(t => t.value) })}
+										onChange={technologies =>
+											setData({
+												...data,
+												technologies: technologies.map(t => t.value)
+											})
+										}
 										labelledBy="Select available technologies"
 									/>
 								</div>
@@ -197,7 +286,10 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 											type="checkbox"
 											checked={data.includeInRegistry === "true"}
 											onChange={e =>
-												setData({ ...data, includeInRegistry: data.includeInRegistry === "true" ? "false" : "true" })
+												setData({
+													...data,
+													includeInRegistry: data.includeInRegistry === "true" ? "false" : "true"
+												})
 											}
 										/>
 										<label className="form-check-label">Add to registry for future re-usage</label>
@@ -211,7 +303,12 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 									className="form-check-input"
 									type="checkbox"
 									checked={data.target === "blank"}
-									onChange={e => setData({ ...data, target: data.target === "blank" ? "self" : "blank" })}
+									onChange={e =>
+										setData({
+											...data,
+											target: data.target === "blank" ? "self" : "blank"
+										})
+									}
 								/>
 								<label className="form-check-label">Make it open in a new window</label>
 							</div>
@@ -222,7 +319,12 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 									className="form-check-input"
 									type="checkbox"
 									checked={data.mandatory}
-									onChange={e => setData({ ...data, mandatory: data.mandatory !== true })}
+									onChange={e =>
+										setData({
+											...data,
+											mandatory: data.mandatory !== true
+										})
+									}
 								/>
 								<label className="form-check-label">Mandatory: must be completed before graduation</label>
 							</div>

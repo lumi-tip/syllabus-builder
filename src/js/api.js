@@ -224,6 +224,9 @@ class Wrapper {
 			},
 			createAsset: args => {
 				return this.post(url + "/registry/asset", args);
+			},
+			testSyllabus: args => {
+				return this.post(url + "/registry/syllabus/test", args);
 			}
 		};
 	}

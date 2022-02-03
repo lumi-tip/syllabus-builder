@@ -8,6 +8,10 @@ import NewDay from "../component/modals/NewDayModal";
 export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
+	const [syllabusStatus, setSyllabusStatus] = useState({
+		status: "btn-dark",
+		messages: []
+	});
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 	const academy = store.academies.find(a => a.id == store.info.academy_author);
@@ -42,6 +46,32 @@ export const TopBar = () => {
 			<div>
 				{notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
+						<button
+							className={`btn ${syllabusStatus.status} btn-sm mr-2`}
+							onClick={() => {
+								actions
+									.test()
+									.then(data =>
+										setSyllabusStatus({
+											status: "btn-success",
+											messages: []
+										})
+									)
+									.catch(async error => {
+										setSyllabusStatus({
+											status: "btn-danger",
+											messages: [error.detail || error.msg]
+										});
+										await swal({
+											title: "Errors found on syllabus",
+											text: error.detail || error.msg,
+											icon: "error",
+											dangerMode: true
+										});
+									});
+							}}>
+							<i className="fas fa-check" /> Test
+						</button>
 						<button
 							className="btn btn-danger btn-sm mr-2"
 							onClick={async () => {
