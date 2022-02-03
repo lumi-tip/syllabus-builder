@@ -90,8 +90,8 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	useEffect(() => {
 		const profileEffects = async () => {
 			actions.cleanSyllabus({ academy, profile });
-			console.log("Fetching versions");
-			const versions = await API.profile().version(profile);
+			let versions = await API.profile().version(profile);
+			if (versions.length === 0) versions = [{ version: "new version" }];
 			setVersionOptions(versions.sort((a, b) => (a.version > b.version ? 1 : -1)));
 		};
 		// profile and version must be null
@@ -124,7 +124,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 									<select
 										className="form-control"
 										onChange={e => {
-											console.log("Academy changed", e.target.value);
 											setAcademy(e.target.value && e.target.value != "null" ? e.target.value : null);
 										}}
 										value={academy}>
@@ -142,14 +141,17 @@ export const SyllabusDetails = ({ onConfirm }) => {
 									{academy && (
 										<select
 											className="form-control"
-											onChange={e => {
+											onChange={async e => {
+												// if(e.target.value === "new course"){
+												// 	actions.
+												// }
 												setProfile(e.target.value && e.target.value != "null" ? e.target.value : null);
 											}}
 											value={profile}>
 											<option key={0} value={"null"}>
 												Select profile
 											</option>
-											{profileOptions.map((course, i) => {
+											{[{ slug: "new course" }].concat(profileOptions).map((course, i) => {
 												return (
 													<option key={i} value={course.slug}>
 														{course.slug}
@@ -168,17 +170,13 @@ export const SyllabusDetails = ({ onConfirm }) => {
 											<option key={0} value={"null"}>
 												Select version
 											</option>
-											{versionOptions.length > 0 ? (
-												versionOptions.map((syllabu, i) => {
-													return (
-														<option key={i} value={syllabu.version}>
-															{syllabu.version}
-														</option>
-													);
-												})
-											) : (
-												<option disabled>no version</option>
-											)}
+											{versionOptions.map((syllabu, i) => {
+												return (
+													<option key={i} value={syllabu.version}>
+														{syllabu.version}
+													</option>
+												);
+											})}
 										</select>
 									)}
 								</div>

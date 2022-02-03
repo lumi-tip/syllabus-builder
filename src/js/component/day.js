@@ -14,7 +14,7 @@ const icons = {
 	project: "fas fa-laptop-code",
 	quiz: "fas fa-clipboard-check"
 };
-const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
+const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, technologies, translations }) => {
 	const [editMode, setEditMode] = useState(false);
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
@@ -35,10 +35,13 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			}}>
 			{editMode && (
 				<EditContentPiece
-					defaultValue={{ custom: true, type, target: "blank" }}
-					onSave={_d => {
+					defaultValue={{ custom: true, type, target: "blank", translations: [], technologies: [] }}
+					technologies={technologies}
+					translations={translations}
+					onSave={async _piece => {
+						await onEdit(_piece);
 						setEditMode(false);
-						onEdit(_d);
+						return true;
 					}}
 					onCancel={() => setEditMode(false)}
 				/>
@@ -58,6 +61,7 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 							key={i}
 							type={p.type}
 							data={p}
+							technologies={technologies}
 							status={p.status}
 							onEdit={_piece => onEdit(_piece)}
 							onDelete={() => onDelete(p)}
@@ -72,12 +76,16 @@ Column.propTypes = {
 	heading: PropTypes.string,
 	type: PropTypes.string,
 	pieces: PropTypes.array,
+	technologies: PropTypes.array,
+	translations: PropTypes.array,
 	onDrop: PropTypes.func,
 	onDelete: PropTypes.func,
 	onEdit: PropTypes.func
 };
 Column.defaultProps = {
 	pieces: [],
+	technologies: [],
+	translations: [],
 	type: null
 };
 
@@ -235,74 +243,68 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<Column
 						key={i}
 						heading={m.storeName}
+						technologies={store.technologies}
+						translations={store.translations}
 						type={m.type}
 						pieces={_data[m.storeName]}
-						onEdit={item =>
-							actions
-								.days()
-								.update(_data.id, { ..._data, [m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item) })
-						}
+						onEdit={item => {
+							return actions
+								.database()
+								.add(item)
+								.then(() => {
+									actions.days().update(_data.id, {
+										..._data,
+										[m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item)
+									});
+								});
+						}}
 						onDrop={async item => {
 							const exists = actions.days().findPiece(item, m.storeName);
-							let confirm = true;
-							if (exists.found) {
-								confirm = await swal({
-									title: "Are you sure?",
-									text: `This ${item.type} is already added to this syllabus`,
-									icon: "warning",
-									buttons: {
-										duplicate: "Duplicate",
-										replace: "Replace item",
-										cancel: true
-									},
-									dangerMode: true
-								}).then(value => {
-									switch (value) {
-										case "duplicate":
-											return true;
-										case "replace":
-											actions.pieces().in(item, {
-												id: _data.id,
-												[m.storeName]: _data[m.storeName]
-													.filter(l => {
-														if (item.type === "quiz") {
-															if (item.info == undefined) return false;
-															if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-															return false;
-														} else
-															return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
-													})
-													.concat([item.data])
-											});
-											actions.pieces().out(item.data, {
-												id: exists.day.id,
-												[m.storeName]: _data[m.storeName].filter(l => {
-													if (item.type === "quiz") {
-														if (item.info == undefined) return false;
-														if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-														return false;
-													} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
-												})
-											});
+
+							// by default we replace it (unless we found a copy on a different day; the user may want to duplicate it)
+							let confirm =
+								exists.found === false || exists.day.id === _data.id
+									? "replace"
+									: await swal({
+											title: "Are you sure?",
+											text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
+											icon: "warning",
+											buttons: {
+												duplicate: "Copy item",
+												replace: "Move item",
+												cancel: true
+											},
+											dangerMode: true
+									  });
+
+							// cancel action
+							if (!confirm || confirm === undefined) return false;
+
+							if (confirm === "replace" && exists.found) {
+								actions.pieces().out(item.data, {
+									id: exists.day.id,
+									[m.storeName]: _data[m.storeName].filter(l => {
+										if (item.type === "quiz") {
+											if (item.info == undefined) return false;
+											if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
 											return false;
-										default:
-											break;
-									}
+										} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+									})
 								});
 							}
-							if (confirm)
-								actions.pieces().in(item, {
-									id: _data.id,
-									[m.storeName]: _data[m.storeName]
-										.filter(l => {
-											if (item.type === "quiz") {
-												if (item.info == undefined) return false;
-												if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-												return false;
-											} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
-										})
-										.concat([item.data])
-								});
+
+							actions.pieces().in(item, {
+								id: _data.id,
+								[m.storeName]: _data[m.storeName]
+									.filter(l => {
+										if (item.type === "quiz") {
+											if (item.info == undefined) return false;
+											if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
+											return false;
+										} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+									})
+									.concat([item.data])
+							});
 						}}
 						onDelete={item =>
 							actions.pieces().out(item, {

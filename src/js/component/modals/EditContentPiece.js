@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getLink } from "../utils";
+import { getLink, useDebounce } from "../utils";
+import API from "../../api";
+import swal from "sweetalert";
+import { MultiSelect } from "react-multi-select-component";
 
-const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
+const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, translations }) => {
 	const [data, _setData] = useState(null);
+	const [editMode, setEditMode] = useState(false);
 	const [formStatus, setFormStatus] = useState({ status: "ok", messages: [] });
 	const [linkStatus, setLinkStatus] = useState({ status: "bg-light", message: "Testing URL...", value: null });
+	const debouncedSlug = useDebounce(data ? data.slug : "", 500);
 
 	useEffect(() => {
 		if (defaultValue.custom !== true && defaultValue.mandatory === undefined) defaultValue.mandatory = true;
@@ -22,7 +27,17 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 				)
 				.catch(error => setLinkStatus({ status: "alert-danger", message: "Error fetching piece url: " + error.message }));
 		}
+
+		if (data && data.custom) setEditMode(true);
 	}, [data]);
+
+	// Effect for API call
+	useEffect(
+		() => {
+			if (debouncedSlug && data.custom) validateSlug(debouncedSlug);
+		},
+		[debouncedSlug] // Only call effect if debounced search term changes
+	);
 
 	const validate = e => {
 		e.preventDefault();
@@ -34,10 +49,18 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 			if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(data.slug))
 				errors.push("The slug is a unique identifier that has only letters, numbers and hyphens");
 			if (data.target != "blank") errors.push("Custom content must always open on a new window");
+			if (!Array.isArray(data.technologies) || data.technologies.length === 0) errors.push("Select at least 1 technology");
+			if (!Array.isArray(data.translations) || data.translations.length === 0) errors.push("Select at least 1 translation");
 		}
 
 		if (errors.length > 0) setFormStatus({ status: "error", messages: errors });
-		else if (onSave) onSave(data);
+		else {
+			onSave(data)
+				.then(() => {
+					setData({ ...data, custom: false });
+				})
+				.catch(errors => setFormStatus({ status: "error", messages: Array.isArray(errors) ? errors : [errors.message || errors.msg] }));
+		}
 	};
 
 	const setData = params => {
@@ -45,35 +68,55 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 		_setData(params);
 	};
 
+	const validateSlug = async _slug => {
+		if (!_slug || _slug == "") {
+			setFormStatus({ status: "error", messages: ["Invalid content slug"] });
+			return false;
+		}
+
+		try {
+			const asset = await API.registry().getAsset(_slug);
+			if (data.custom) {
+				setFormStatus({ status: "error", messages: [`Slug is already taken by ${asset.asset_type.toLowerCase()}: ${asset.title}`] });
+				return false;
+			}
+		} catch (error) {
+			return true;
+		}
+	};
+
+	const propagate = e => {
+		if (!data.custom && !editMode) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	};
+
 	if (!data) return "Loading...";
 
 	return (
 		<div
 			className="modal show d-block edit-piece"
-			onDrag={e => {
-				e.preventDefault();
-				e.stopPropagation();
-			}}
-			onClick={e => {
-				e.preventDefault();
-				e.stopPropagation();
-			}}
+			onDrag={propagate}
+			onClick={propagate}
 			tabIndex="-1"
 			role="dialog"
-			onMouseDown={e => {
-				e.preventDefault();
-				e.stopPropagation();
-			}}
+			onMouseDown={propagate}
 			style={{ background: "rgba(0,0,0,0.5)" }}>
 			<div className="modal-dialog" role="document">
-				<form className="modal-content" onSubmit={validate}>
+				<form className="modal-content">
 					<div className="modal-header p-2">
-						<h3 className="w-100 text-center">{data.custom ? "Add Custom Content" : "Content Details"}</h3>
+						<h3 className="w-100 text-center text-capitalize">{data.custom ? `Add Custom ${data.type}` : "Content Details"}</h3>
 					</div>
 					<div className="modal-body">
 						<div className="form-group">
 							<input
 								type="text"
+								onClick={e => {
+									setEditMode(true);
+									e.target.focus();
+								}}
+								onBlur={() => setEditMode(false)}
 								required={true}
 								className="form-control"
 								placeholder="Write a title"
@@ -125,6 +168,43 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 								</a>
 							)}
 						</div>
+						{data.custom && (
+							<>
+								<div className="form-group">
+									<MultiSelect
+										hasSelectAll={false}
+										options={translations.map(t => ({ label: t.title, value: t.slug }))}
+										value={data.translations.map(t => ({ label: t, value: t }))}
+										placeholder="Language translations"
+										onChange={translations => setData({ ...data, translations: translations.map(t => t.value) })}
+										labelledBy="Select available languages"
+									/>
+								</div>
+								<div className="form-group">
+									<MultiSelect
+										hasSelectAll={false}
+										options={technologies.map(t => ({ label: t.title, value: t.slug }))}
+										value={data.technologies.map(t => ({ label: t, value: t }))}
+										placeholder="Technologies"
+										onChange={technologies => setData({ ...data, technologies: technologies.map(t => t.value) })}
+										labelledBy="Select available technologies"
+									/>
+								</div>
+								<div className="form-group">
+									<div className="form-check">
+										<input
+											className="form-check-input"
+											type="checkbox"
+											checked={data.includeInRegistry === "true"}
+											onChange={e =>
+												setData({ ...data, includeInRegistry: data.includeInRegistry === "true" ? "false" : "true" })
+											}
+										/>
+										<label className="form-check-label">Add to registry for future re-usage</label>
+									</div>
+								</div>
+							</>
+						)}
 						<div className="form-group">
 							<div className="form-check">
 								<input
@@ -150,19 +230,21 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 					</div>
 					<div className="modal-footer">
 						{formStatus.status === "ok" ? (
-							<button className="btn btn-primary">Save Content Piece</button>
+							<button onClick={validate} className="btn btn-primary text-capitalize">
+								Save {data.type}
+							</button>
 						) : formStatus.status === "loading" ? (
 							<button className="btn btn-primary">
 								<i className={"fas fa-sync spin"}></i> Loading ...
 							</button>
 						) : formStatus.status === "error" ? (
-							<div className="alert alert-danger">
+							<ul className="list-groupalert alert-danger w-100 p-1">
 								{formStatus.messages.map((m, i) => (
-									<li className="small" key={i}>
+									<li className="small p-1" key={i}>
 										{m}
 									</li>
 								))}
-							</div>
+							</ul>
 						) : null}
 						<button onClick={() => onCancel && onCancel()} type="button" className="btn btn-secondary" data-dismiss="modal">
 							Cancel
@@ -176,11 +258,15 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel }) => {
 EditContentPiece.propTypes = {
 	defaultValue: PropTypes.string,
 	title: PropTypes.string,
+	technologies: PropTypes.array,
+	translations: PropTypes.array,
 	onSave: PropTypes.func.required,
 	onCancel: PropTypes.func
 };
 EditContentPiece.defaultProps = {
 	defaultValue: {},
+	technologies: [],
+	translations: [],
 	title: null
 };
 export default EditContentPiece;

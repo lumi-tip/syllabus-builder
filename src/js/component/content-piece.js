@@ -6,7 +6,7 @@ import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
 import swal from "sweetalert";
 
-const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning }) => {
+const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning, technologies, translations }) => {
 	const [editMode, setEditMode] = useState(false);
 
 	const [{ isDragging }, drag] = useDrag({
@@ -21,7 +21,14 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 
 	return (
 		<li className="content-piece" ref={drag}>
-			{editMode && <EditContentPiece defaultValue={data} onSave={_d => setEditMode(false) || onEdit(_d)} onCancel={() => setEditMode(false)} />}
+			{editMode && (
+				<EditContentPiece
+					defaultValue={data}
+					onSave={_piece => setEditMode(false) || onEdit(_piece)}
+					onCancel={() => setEditMode(false)}
+					technologies={technologies}
+				/>
+			)}
 			{_title}
 			{withWarning && _status != "published" && (
 				<Tooltip content={`${_status} (needs to be published)`}>
@@ -59,12 +66,16 @@ ContentPiece.propTypes = {
 	onDelete: PropTypes.func,
 	onEdit: PropTypes.func,
 	previewLink: PropTypes.bool,
+	technologies: PropTypes.array,
+	translations: PropTypes.array,
 	withWarning: PropTypes.bool
 };
 ContentPiece.defaultProps = {
 	onDelete: null,
 	onEdit: null,
 	status: null,
+	technologies: [],
+	translations: [],
 	previewLink: false,
 	withWarning: false
 };

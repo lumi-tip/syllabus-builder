@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
-import { urls } from "./component/utils";
+import { urls, serialize } from "./component/utils";
 import { ToastProvider } from "react-toast-notifications";
 
 export const ContentContext = React.createContext({});
@@ -20,9 +20,6 @@ const newDay = (id = 0, position = 0, seed = {}) => ({
 });
 
 API.setOptions({
-	assetsPath:
-		//"https://8080-f0d8e861-4b22-40c7-8de2-e2406c72dbc6.ws-us02.gitpod.io/apis",
-		"https://assets.breatheco.de/apis",
 	apiPath: "https://api.breatheco.de",
 	apiPathV2: process.env.API_URL + "/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
@@ -31,10 +28,17 @@ const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
 	technology: "technologies",
+	translation: "translations",
 	replit: "replits",
 	quiz: "quizzes",
 	syllabu: "syllabus",
 	courseV2: "courses"
+};
+const reveseMap = type => {
+	for (let key in mapEntity) {
+		if (mapEntity[key] === type) return key;
+	}
+	return null;
 };
 const defaultSyllabusInfo = {
 	label: "",
@@ -57,6 +61,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			courses: [],
 			academies: [],
 			technologies: [],
+			translations: [],
 			report: [],
 			imported_days: [],
 			imported_syllabus: []
@@ -73,6 +78,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			fetch: (models, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
+				console.log("fetching ", models);
 				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
@@ -85,17 +91,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 										const newStore = {
 											[mapEntity[entity]]: data
 												.filter(e => {
-													return (
+													const keep =
 														typeof e.lang === "undefined" ||
 														e.lang == "us" ||
 														e.lang == "en" ||
-														["project", "replit", "exercise"].includes(entity)
-													);
+														["project", "replit", "exercise", "lesson"].includes(entity);
+													if (!keep) console.log(`entity ${entity} was filted`, e);
+													return keep;
 												})
-												.map(e => {
-													e.type = entity;
-													return e;
-												})
+												.map(e => serialize({ ...e, type: entity }))
 										};
 										setStore(newStore);
 										resolve(data);
@@ -410,32 +414,39 @@ const getState = ({ getStore, getActions, setStore }) => {
 						this.days().update(day.id, day);
 					},
 					addOrReplace: piece => {
-						piece.type === "quiz"
-							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]]
-										.filter(p =>
-											typeof piece.slug !== undefined
-												? piece.slug !== p.info.slug
-												: typeof piece.info.slug !== undefined
-												? p.info.slug !== piece.info.slug
-												: p.info.slug !== piece.data.info.slug
-										)
-										.concat(piece)
-							  })
-							: setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug !== piece.slug).concat(piece)
-							  });
+						setStore({
+							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug !== piece.slug).concat(piece)
+						});
 					},
 					delete: piece => {
-						piece.type === "quiz"
-							? setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p =>
-										typeof piece.data.info.slug === undefined ? p.info.slug !== piece.slug : p.info.slug !== piece.data.info.slug
-									)
-							  })
-							: setStore({
-									[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.data.slug)
-							  });
+						setStore({
+							[mapEntity[piece.type]]: store[mapEntity[piece.type]].filter(p => p.slug != piece.data.slug)
+						});
+					}
+				};
+			},
+			database: function() {
+				const store = getStore();
+				return {
+					add: async data => {
+						const { includeInRegistry, custom, ..._asset } = data;
+						if (includeInRegistry === undefined || !includeInRegistry) return _asset;
+
+						try {
+							const resp = await API.registry().createAsset({
+								asset_type: _asset.type === "replit" ? "EXERCISE" : _asset.type.toUpperCase(),
+								technologies: [],
+								..._asset
+							});
+							setStore({ [mapEntity[_asset.type]]: store[mapEntity[_asset.type]].concat(_asset) });
+
+							data.custom = false;
+							data.includeInRegistry = false;
+
+							return true;
+						} catch (error) {
+							throw error;
+						}
 					}
 				};
 			},
@@ -568,12 +579,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						const store = getStore();
 						for (let i = 0; i < store.days.length; i++) {
 							const day = store.days[i];
-							let _found = false;
-							if (type === "quiz")
-								_found = day[type].find(p =>
-									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
-								);
-							else _found = day[type].find(p => p.slug === piece.data.slug);
+							let _found = day[type].find(p => p.slug === piece.data.slug);
 							if (_found) return true;
 						}
 						return false;
@@ -583,16 +589,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 						for (let i = 0; i < store.days.length; i++) {
 							const day = store.days[i];
-							let _found = false;
-							if (type === "quiz")
-								_found = day[type].find(p =>
-									typeof piece.data.info.slug === undefined ? p.info.slug === piece.slug : p.info.slug === piece.data.info.slug
-								);
-							else _found = day[type].find(p => p.slug === piece.data.slug);
+							let _found = day[type].find(p => p.slug === piece.data.slug);
 
-							if (_found) return { found: true, day: { ..._found, id: day.id } };
+							if (_found) return { found: true, day: { ...day, id: day.id } };
 						}
-						return false;
+						return { found: false, day: null };
 					},
 					delete: id => {
 						const store = getStore();
@@ -629,10 +630,12 @@ export function injectContent(Child) {
 			const slug = window.location.hash.replace("#", "");
 			const previousStore = localStorage.getItem("syllabus-" + slug);
 			if (typeof previousStore === "string" && previousStore != "") {
-				state.actions.setStore(JSON.parse(previousStore));
+				const newStore = JSON.parse(previousStore);
+				state.actions.setStore(newStore);
+				API.setOptions({ academy: newStore.info.academy_author });
 			}
 
-			state.actions.fetch(["lesson", "quiz", "project", "replit", "technology"]);
+			state.actions.fetch(["lesson", "quiz", "project", "replit", "technology", "translation"]);
 			window.store = state.store;
 		}, []);
 		return (

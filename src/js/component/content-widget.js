@@ -7,22 +7,18 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 
 	return (
 		<div className={`content-widget ${className}`}>
-			{pieces.length == 0 ? (
-				<div>No {type.toLowerCase()} to show</div>
-			) : (
-				<div className="d-flex" style={{ overflow: "hidden" }}>
-					{!isExpanded && (
-						<button className="btn btn-sm btn-dark w-100 text-left text-capitalize mb-2" onClick={() => onCollapse()}>
-							{type + " "} <div className="badge badge-light bg-small float-right mt-1">{pieces.length} found</div>
-						</button>
-					)}
-					{onRefresh && (
-						<button className="btn btn-sm btn-dark" onClick={() => onRefresh()}>
-							<i className={"fas fa-sync fa-xs float-right " + (loading ? "loading" : "")} />
-						</button>
-					)}
-				</div>
-			)}
+			<div className="d-flex" style={{ overflow: "hidden" }}>
+				{!isExpanded && (
+					<button className="btn btn-sm btn-dark w-100 text-left text-capitalize mb-2" onClick={() => onCollapse()}>
+						{type + " "} <div className="badge badge-light bg-small float-right mt-1">{pieces.length} found</div>
+					</button>
+				)}
+				{onRefresh && (
+					<button className="btn btn-sm btn-dark" onClick={() => onRefresh()}>
+						<i className={"fas fa-sync fa-xs float-right " + (loading ? "loading" : "")} />
+					</button>
+				)}
+			</div>
 			{isExpanded && (
 				<ul
 					className="p-0 w-100"

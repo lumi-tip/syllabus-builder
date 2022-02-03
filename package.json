@@ -78,6 +78,7 @@
 		"react-dnd-html5-backend": "^10.0.2",
 		"react-dom": "^16.8.6",
 		"react-lightweight-tooltip": "^1.0.0",
+		"react-multi-select-component": "^4.2.1",
 		"react-polyfills": "0.0.1",
 		"react-scroll": "^1.8.1",
 		"react-select": "^4.3.1",

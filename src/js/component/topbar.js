@@ -10,19 +10,23 @@ export const TopBar = () => {
 	const [openNoti, setOpenNoti] = useState(false);
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
+	const academy = store.academies.find(a => a.id == store.info.academy_author);
 	return (
-		<div className="topbar text-right p-3 position-sticky sticky-top bg-light">
+		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={() => setOpenSyllabusDetails(false)} />}
 			<div className="d-flex">
-				<p className="mt-0 p-0 text-left w-100">
-					{store.info.slug && store.info.slug != "" ? `${store.info.slug}:v${store.info.version}` : "No syllabus selected"}
-				</p>
+				<p className="m-0 p-0 text-left w-100">Academy: {academy ? academy.name : "Uknown"}</p>
 				<div
 					style={{ width: "100px" }}
 					onClick={() => setOpenNoti(!openNoti)}
 					className={`btn pointer text-right p-0 text-${store.report.length === 0 ? "primary" : "danger"}`}>
 					<i className="fas fa-bell" /> <span className="badge badge-light">{store.report.length}</span>
 				</div>
+			</div>
+			<div className="d-flex">
+				<p className="mt-0 p-0 text-left w-100">
+					Syllabus: {store.info.slug && store.info.slug != "" ? `${store.info.slug} v${store.info.version}` : "No syllabus selected"}
+				</p>
 			</div>
 			{/* const { type, message, item } = item */}
 			{openNoti && (
@@ -36,23 +40,23 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
-				<button
-					className="btn btn-danger btn-sm mr-2"
-					onClick={async () => {
-						const yes = await swal({
-							title: "Are you sure?",
-							text: "Make sure to save or download first or you will loose your progress",
-							icon: "warning",
-							buttons: true,
-							dangerMode: true
-						});
-						if (yes) actions.clear();
-					}}>
-					<i className="fas fa-ban" /> Clear
-				</button>
 				{notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
-						{store.info.version != "" && store.info.version && (
+						<button
+							className="btn btn-danger btn-sm mr-2"
+							onClick={async () => {
+								const yes = await swal({
+									title: "Are you sure?",
+									text: "Make sure to save or download first or you will loose your progress",
+									icon: "warning",
+									buttons: true,
+									dangerMode: true
+								});
+								if (yes) actions.clear();
+							}}>
+							<i className="fas fa-ban" /> Clear
+						</button>
+						{!["", "new version"].includes(store.info.version) && store.info.version && (
 							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus(store, actions)}>
 								<i className="fas fa-save" /> Save
 							</button>
@@ -63,26 +67,25 @@ export const TopBar = () => {
 						<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.download()}>
 							<i className="fas fa-file-download" /> Export
 						</button>
+						<button
+							className="btn btn-dark btn-sm mr-2"
+							onClick={() => {
+								let noti = Notify.add(
+									"info",
+									UploadSyllabus,
+									answer => {
+										if (answer.value) actions.upload(answer.url);
+										noti.remove();
+									},
+									9999999999999
+								);
+							}}>
+							<i className="fas fa-file-upload" /> Import
+						</button>
 					</>
 				)}
-
-				<button
-					className="btn btn-dark btn-sm mr-2"
-					onClick={() => {
-						let noti = Notify.add(
-							"info",
-							UploadSyllabus,
-							answer => {
-								if (answer.value) actions.upload(answer.url);
-								noti.remove();
-							},
-							9999999999999
-						);
-					}}>
-					<i className="fas fa-file-upload" /> Import
-				</button>
 				<button className="btn btn-dark btn-sm" onClick={() => setOpenSyllabusDetails(true)}>
-					<i className="fas fa-bars" /> Load
+					<i className="fas fa-plus" /> Start
 				</button>
 			</div>
 		</div>

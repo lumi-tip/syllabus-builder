@@ -1,21 +1,18 @@
 /* global fetch, localStorage, window */
 import swal from "sweetalert";
 import getCurrentUrl from "./utils/get-current-url";
+import { getAPIErrors } from "./component/utils";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 
 class Wrapper {
 	constructor() {
 		this.options = {
-			assetsPath: typeof process != "undefined" ? process.env.ASSETS_URL + "/apis" : null,
 			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
 			apiPathV2: typeof process != "undefined" ? process.env.API_URL_V2 : null,
 			_debug: typeof process != "undefined" ? process.env.DEBUG : false,
 			academy: null,
 			token: "",
-			getToken: (type = "api") => {
-				return type == "api" ? this.apiPath : this.assetsPath;
-			},
 			onLoading: null,
 			onLogout: null
 		};
@@ -58,21 +55,19 @@ class Wrapper {
 		return fetch(...args);
 	}
 	req(method, path, args) {
-		let token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
 
 		let opts = {
 			method,
 			cache: "no-cache",
-			headers: { "Content-Type": "application/json" }
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Token ${apiKey}`,
+				Academy: this.options.academy
+			}
 		};
 
-		if (path.includes("syllabus") || path.includes("certificate") || path.includes("/auth/user/me")) token = "Token " + apiKey;
-		if (path.includes("heroku")) opts.headers = { ...opts.headers, Academy: this.options.academy };
-		if (token) {
-			opts.headers["Authorization"] = token;
-		}
 		if (method === "get") path += this.serialize(args).toStr();
 		else {
 			if (method == "put" && !args) throw new Error("Missing request body");
@@ -108,7 +103,7 @@ class Wrapper {
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
 
-					if (resp.status == 200) return await resp.json();
+					if (resp.status >= 200 && resp.status < 400) return await resp.json();
 					else {
 						this._logError(resp);
 						if (resp.status == 403)
@@ -122,8 +117,9 @@ class Wrapper {
 						} else if (resp.status == 400)
 							try {
 								const err = await resp.json();
-								reject({ msg: err.msg || err, code: 400 });
+								reject({ msg: getAPIErrors(err), code: 400 });
 							} catch (err) {
+								console.error(err);
 								reject({
 									msg: "Invalid Argument",
 									code: 400
@@ -203,30 +199,6 @@ class Wrapper {
 		};
 	}
 
-	credentials() {
-		let url = this.options.assetsPath + "/credentials";
-		return {
-			autenticate: (username, password, user_agent = "") => {
-				return this.post(url + "/auth", {
-					username,
-					password,
-					user_agent
-				});
-			},
-			remind: username => {
-				return this.post(url + "/remind/" + encodeURIComponent(username), { username });
-			}
-		};
-	}
-	syllabus() {
-		let url = this.options.assetsPath + "/syllabus";
-		return {
-			get: slug => {
-				if (!slug) throw new Error("Missing slug");
-				else return this.get(url + "/" + slug);
-			}
-		};
-	}
 	todo() {
 		let url = this.options.apiPath;
 		return {
@@ -244,6 +216,17 @@ class Wrapper {
 			}
 		};
 	}
+	registry() {
+		let url = this.options.apiPathV2;
+		return {
+			getAsset: slug => {
+				return this.get(url + "/registry/asset/" + slug);
+			},
+			createAsset: args => {
+				return this.post(url + "/registry/asset", args);
+			}
+		};
+	}
 	project() {
 		let url = this.options.apiPathV2;
 		return {
@@ -255,16 +238,16 @@ class Wrapper {
 	replit() {
 		let url = this.options.apiPathV2;
 		return {
-			all: syllabus_slug => {
+			all: () => {
 				return this.get(url + "/registry/asset?type=exercise");
 			}
 		};
 	}
 	quiz() {
-		let url = this.options.assetsPath;
+		let url = this.options.apiPathV2;
 		return {
-			all: syllabus_slug => {
-				return this.get(url + "/quiz/all");
+			all: () => {
+				return this.get(url + "/registry/asset?type=quiz");
 			}
 		};
 	}
@@ -424,19 +407,14 @@ class Wrapper {
 	}
 
 	lesson() {
-		let url = this.options.assetsPath;
+		let url = this.options.apiPathV2;
 		return {
 			all: () => {
 				//return this.get(url + "/lesson/all/v2");
-				return new Promise((resolve, reject) => {
-					fetch("https://content.breatheco.de/static/api/lessons.json")
-						.then(r => r.json())
-						.then(data => resolve(data))
-						.catch(err => reject(err));
-				});
+				return this.get(url + "/registry/asset?type=lesson");
 			},
 			get: id => {
-				return this.get(url + "/lessons/" + id);
+				return this.get(url + "/registry/asset/" + id);
 			}
 		};
 	}
@@ -445,6 +423,14 @@ class Wrapper {
 		return {
 			all: () => {
 				return this.get(url + "/registry/technology");
+			}
+		};
+	}
+	translation() {
+		let url = this.options.apiPathV2;
+		return {
+			all: () => {
+				return this.get(url + "/registry/translation");
 			}
 		};
 	}

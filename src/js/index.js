@@ -30,6 +30,7 @@ const Main = injectContent(() => {
 	const [openNewDay, setOpenNewDay] = useState(false);
 	const [index, setIndex] = useState(0);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
+	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 
 	useEffect(() => {
 		actions.getMe();
@@ -77,17 +78,21 @@ const Main = injectContent(() => {
 						<TopBar />
 						<div className="hbar" />
 						{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} index={index} />}
-						{sortedDays.length === 0 && (
-							<div className="text-center">
-								<i
-									onClick={() => {
-										setOpenNewDay(true);
-										setIndex(null);
-									}}
-									className="fas fa-plus-circle pointer text-secondary"
-								/>
-							</div>
-						)}
+						{sortedDays.length === 0 &&
+							notInfoEmpty("profile") &&
+							notInfoEmpty("academy_author") &&
+							notInfoEmpty("slug") &&
+							notInfoEmpty("version") && (
+								<div className="text-center">
+									<i
+										onClick={() => {
+											setOpenNewDay(true);
+											setIndex(null);
+										}}
+										className="fas fa-plus-circle pointer text-secondary"
+									/>
+								</div>
+							)}
 						{sortedDays.map((d, i) => (
 							<div id={"day" + d.id.toString()} key={d.id.toString() + d.position.toString()}>
 								<Day
@@ -108,6 +113,7 @@ const Main = injectContent(() => {
 										actions.days().delete(id);
 									}}
 								/>
+
 								<div className="text-center">
 									<i
 										onClick={() => {
