@@ -283,12 +283,9 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							if (confirm === "replace" && exists.found) {
 								actions.pieces().out(item.data, {
 									id: exists.day.id,
-									[m.storeName]: _data[m.storeName].filter(l => {
-										if (item.type === "quiz") {
-											if (item.info == undefined) return false;
-											if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-											return false;
-										} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+									[m.storeName]: exists.day[m.storeName].filter(l => {
+										console.log("item will be replaced", item, l);
+										return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 									})
 								});
 							}
@@ -297,11 +294,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								id: _data.id,
 								[m.storeName]: _data[m.storeName]
 									.filter(l => {
-										if (item.type === "quiz") {
-											if (item.info == undefined) return false;
-											if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-											return false;
-										} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+										return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 									})
 									.concat([item.data])
 							});
@@ -310,11 +303,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							actions.pieces().out(item, {
 								id: _data.id,
 								[m.storeName]: _data[m.storeName].filter(l => {
-									if (item.type === "quiz") {
-										if (item.info == undefined) return false;
-										if (typeof item.info.slug !== "undefined") return l.info.slug !== item.info.slug;
-										return false;
-									} else return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+									return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 								})
 							})
 						}
