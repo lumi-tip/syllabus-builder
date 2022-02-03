@@ -124,7 +124,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				</div>
 			)}
 			<h3>
-				Day {_data.position}:{" "}
+				Module {_data.position}:{" "}
 				<div className={"pointer float-right"} onClick={() => onDelete(_data.id)}>
 					<i className="fas fa-trash" />
 				</div>
