@@ -35,7 +35,13 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, technologies,
 			}}>
 			{editMode && (
 				<EditContentPiece
-					defaultValue={{ custom: true, type, target: "blank", translations: [], technologies: [] }}
+					defaultValue={{
+						custom: true,
+						type,
+						target: "blank",
+						translations: [],
+						technologies: []
+					}}
 					technologies={technologies}
 					translations={translations}
 					onSave={async _piece => {
@@ -143,7 +149,12 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 						type="textarea"
 						className="transparent w-100 bg-white-light rounded"
 						placeholder="Type a description for the teacher..."
-						onChange={teacher_instructions => actions.days().update(_data.id, { ..._data, teacher_instructions })}
+						onChange={teacher_instructions =>
+							actions.days().update(_data.id, {
+								..._data,
+								teacher_instructions
+							})
+						}
 						initialValue={_data.teacher_instructions || _data.instructions}
 					/>
 					<small className="text-right d-block" style={{ marginTop: "-8px" }}>
@@ -195,7 +206,10 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								});
 								setAddNewTech(false);
 							}}
-							options={store.technologies.map(t => ({ value: t.slug, label: t.title }))}
+							options={store.technologies.map(t => ({
+								value: t.slug,
+								label: t.title
+							}))}
 						/>
 					) : (
 						<button className="btn btn-sm btn-dark" style={{ fontSize: "10px" }} onClick={() => setAddNewTech(true)}>
@@ -214,9 +228,10 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									{c}{" "}
 									<i
 										onClick={() =>
-											actions
-												.days()
-												.update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].filter(kc => kc != c) })
+											actions.days().update(_data.id, {
+												..._data,
+												["key-concepts"]: _data["key-concepts"].filter(kc => kc != c)
+											})
 										}
 										className="fas fa-trash-alt pointer p-1"
 									/>
@@ -231,7 +246,10 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 						onChange={e => setConcept(e.target.value)}
 						onKeyPress={e => {
 							if (e.charCode == 13) {
-								actions.days().update(_data.id, { ..._data, ["key-concepts"]: _data["key-concepts"].concat([concept]) });
+								actions.days().update(_data.id, {
+									..._data,
+									["key-concepts"]: _data["key-concepts"].concat([concept])
+								});
 								setConcept("");
 							}
 						}}
@@ -239,76 +257,78 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				</div>
 			</div>
 			<div className="d-flex">
-				{mappers.map((m, i) => (
-					<Column
-						key={i}
-						heading={m.storeName}
-						technologies={store.technologies}
-						translations={store.translations}
-						type={m.type}
-						pieces={_data[m.storeName]}
-						onEdit={item => {
-							return actions
-								.database()
-								.add(item)
-								.then(() => {
-									actions.days().update(_data.id, {
-										..._data,
-										[m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item)
+				{mappers
+					.filter(m => m.draggable)
+					.map((m, i) => (
+						<Column
+							key={i}
+							heading={m.storeName}
+							technologies={store.technologies}
+							translations={store.translations}
+							type={m.type}
+							pieces={_data[m.storeName]}
+							onEdit={item => {
+								return actions
+									.database()
+									.add(item)
+									.then(() => {
+										actions.days().update(_data.id, {
+											..._data,
+											[m.storeName]: _data[m.storeName].filter(i => i.slug !== item.slug).concat(item)
+										});
 									});
+							}}
+							onDrop={async item => {
+								const exists = actions.days().findPiece(item, m.storeName);
+
+								// by default we replace it (unless we found a copy on a different day; the user may want to duplicate it)
+								let confirm =
+									exists.found === false || exists.day.id === _data.id
+										? "replace"
+										: await swal({
+												title: "Are you sure?",
+												text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
+												icon: "warning",
+												buttons: {
+													duplicate: "Copy item",
+													replace: "Move item",
+													cancel: true
+												},
+												dangerMode: true
+										  });
+
+								// cancel action
+								if (!confirm || confirm === undefined) return false;
+
+								if (confirm === "replace" && exists.found) {
+									actions.pieces().out(item.data, {
+										id: exists.day.id,
+										[m.storeName]: exists.day[m.storeName].filter(l => {
+											console.log("item will be replaced", item, l);
+											return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+										})
+									});
+								}
+
+								actions.pieces().in(item, {
+									id: _data.id,
+									[m.storeName]: _data[m.storeName]
+										.filter(l => {
+											return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
+										})
+										.concat([item.data])
 								});
-						}}
-						onDrop={async item => {
-							const exists = actions.days().findPiece(item, m.storeName);
-
-							// by default we replace it (unless we found a copy on a different day; the user may want to duplicate it)
-							let confirm =
-								exists.found === false || exists.day.id === _data.id
-									? "replace"
-									: await swal({
-											title: "Are you sure?",
-											text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
-											icon: "warning",
-											buttons: {
-												duplicate: "Copy item",
-												replace: "Move item",
-												cancel: true
-											},
-											dangerMode: true
-									  });
-
-							// cancel action
-							if (!confirm || confirm === undefined) return false;
-
-							if (confirm === "replace" && exists.found) {
-								actions.pieces().out(item.data, {
-									id: exists.day.id,
-									[m.storeName]: exists.day[m.storeName].filter(l => {
-										console.log("item will be replaced", item, l);
+							}}
+							onDelete={item =>
+								actions.pieces().out(item, {
+									id: _data.id,
+									[m.storeName]: _data[m.storeName].filter(l => {
 										return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 									})
-								});
-							}
-
-							actions.pieces().in(item, {
-								id: _data.id,
-								[m.storeName]: _data[m.storeName]
-									.filter(l => {
-										return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
-									})
-									.concat([item.data])
-							});
-						}}
-						onDelete={item =>
-							actions.pieces().out(item, {
-								id: _data.id,
-								[m.storeName]: _data[m.storeName].filter(l => {
-									return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 								})
-							})
-						}
-					/>
-				))}
+							}
+						/>
+					))}
 			</div>
 			<div className="row no-gutters">
 				<div className="col-12 px-1" style={{ marginTop: "3px" }}>

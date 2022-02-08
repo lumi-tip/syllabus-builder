@@ -33,7 +33,9 @@ const Sidebar = ({ content, onRefresh, width }) => {
 							setLoading(true);
 							Promise.all(onRefresh(currentType)).then(() => {
 								setLoading(false);
-								addToast("Sync successfully", { appearance: "success" });
+								addToast(`Sync ${currentType} successfully`, {
+									appearance: "success"
+								});
 							});
 						}}>
 						<i className={"fas fa-sync" + (loading ? " spin" : "")}></i>

@@ -58,10 +58,11 @@ export const getStatus = data => {
 };
 
 export let mappers = [
-	{ type: "lesson", storeName: "lessons" },
-	{ type: "replit", storeName: "replits" },
-	{ type: "quiz", storeName: "quizzes" },
-	{ type: "project", storeName: "projects" }
+	{ type: "lesson", storeName: "lessons", draggable: true },
+	{ type: "replit", storeName: "replits", draggable: true },
+	{ type: "quiz", storeName: "quizzes", draggable: true },
+	{ type: "project", storeName: "projects", draggable: true },
+	{ type: "technology", storeName: "technologies", draggable: false }
 ];
 
 export function useDebounce(value, delay) {
