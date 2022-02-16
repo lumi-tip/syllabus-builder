@@ -10,6 +10,7 @@ const newDay = (id = 0, position = 0, seed = {}) => ({
 	label: "",
 	"key-concepts": [],
 	lessons: [],
+	profiles: [], //only used for modal windows to select profile
 	projects: [],
 	replits: [],
 	quizzes: [],
@@ -27,6 +28,7 @@ API.setOptions({
 const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
+	profile: "profiles",
 	technology: "technologies",
 	translation: "translations",
 	replit: "replits",
@@ -82,7 +84,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
-							if (forceUpdate || !Array.isArray(mapEntity[entity] || mapEntity[entity].length == 0))
+							if (forceUpdate || !Array.isArray(mapEntity[entity]) || mapEntity[entity].length == 0)
 								API[entity]()
 									.all()
 									.then(_data => {
@@ -99,7 +101,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 													if (!keep) console.log(`entity ${entity} was filted`, e);
 													return keep;
 												})
-												.map(e => serialize({ ...e, type: entity }))
+												.map(e =>
+													serialize({
+														...e,
+														type: entity
+													})
+												)
 										};
 										setStore(newStore);
 										resolve(data);
@@ -112,7 +119,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return {
 					add: (type, message, item) => {
 						const store = getStore();
-						setStore({ report: store.report.concat({ type, message, item }) });
+						setStore({
+							report: store.report.concat({
+								type,
+								message,
+								item
+							})
+						});
 					},
 					clear: () => {
 						setStore({ report: [] });
@@ -160,10 +173,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 											if (project === undefined) {
 												if (typeof p === "object") {
 													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
-													return { ...p, type: "project" };
+													return {
+														...p,
+														type: "project"
+													};
 												} else {
 													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
-													return { type: "project", slug: p, title: "Invalid project" };
+													return {
+														type: "project",
+														slug: p,
+														title: "Invalid project"
+													};
 												}
 											}
 
@@ -186,7 +206,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			upload: (data, overrideInfo = {}) => {
 				//if its not a url
 				const actions = getActions();
-				const { projects, info } = { ...getStore(), info: overrideInfo };
+				const { projects, info } = {
+					...getStore(),
+					info: overrideInfo
+				};
 
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					let content = JSON.parse(data.content);
@@ -230,10 +253,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 												if (project === undefined) {
 													if (typeof p === "object") {
 														actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
-														return { ...p, type: "project" };
+														return {
+															...p,
+															type: "project"
+														};
 													} else {
 														actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
-														return { type: "project", slug: p, title: "Invalid project" };
+														return {
+															type: "project",
+															slug: p,
+															title: "Invalid project"
+														};
 													}
 												}
 
@@ -252,7 +282,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 							};
 						})
 					});
-					actions.setInfo({ slug: info.profile, profile: info.profile, label, description, version: info.version });
+					actions.setInfo({
+						slug: info.profile,
+						profile: info.profile,
+						label,
+						description,
+						version: info.version
+					});
 				} else
 					new Promise((resolve, reject) => {
 						return fetch(data)
@@ -273,17 +309,41 @@ const getState = ({ getStore, getActions, setStore }) => {
 											id: i + 1,
 											position: i + 1,
 											technologies: d.technologies || [],
-											lessons: d.lessons ? d.lessons.map(l => ({ ...l, type: "lesson" })) : [],
-											replits: d.replits ? d.replits.map(l => ({ ...l, type: "replit" })) : [],
-											projects: d.assignments
-												? d.assignments.map(a => ({ ...projects.find(p => p.slug === a), type: "project" }))
+											lessons: d.lessons
+												? d.lessons.map(l => ({
+														...l,
+														type: "lesson"
+												  }))
 												: [],
-											quizzes: d.quizzes ? d.quizzes.map(l => ({ ...l, type: "quiz" })) : [],
+											replits: d.replits
+												? d.replits.map(l => ({
+														...l,
+														type: "replit"
+												  }))
+												: [],
+											projects: d.assignments
+												? d.assignments.map(a => ({
+														...projects.find(p => p.slug === a),
+														type: "project"
+												  }))
+												: [],
+											quizzes: d.quizzes
+												? d.quizzes.map(l => ({
+														...l,
+														type: "quiz"
+												  }))
+												: [],
 											"key-concepts": d["key-concepts"] || []
 										}));
 								setStore({ days });
 
-								actions.setInfo({ slug: info.profile, profile: info.profile, label, description, version: info.version });
+								actions.setInfo({
+									slug: info.profile,
+									profile: info.profile,
+									label,
+									description,
+									version: info.version
+								});
 								resolve(json);
 							})
 							.catch(error => reject(error));
@@ -438,7 +498,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 								technologies: [],
 								..._asset
 							});
-							setStore({ [mapEntity[_asset.type]]: store[mapEntity[_asset.type]].concat(_asset) });
+							setStore({
+								[mapEntity[_asset.type]]: store[mapEntity[_asset.type]].concat(_asset)
+							});
 
 							data.custom = false;
 							data.includeInRegistry = false;
@@ -453,7 +515,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 			test: async () => {
 				const store = getStore();
 				try {
-					const resp = await API.registry().testSyllabus({ days: store.days });
+					const resp = await API.registry().testSyllabus({
+						days: store.days
+					});
 					return true;
 				} catch (error) {
 					throw error;
@@ -461,7 +525,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			getApiSyllabusVersion: async (academy, profile, version) => {
 				const store = getStore();
-				const meta = { academy_author: academy, profile, version, slug: profile };
+				const meta = {
+					academy_author: academy,
+					profile,
+					version,
+					slug: profile
+				};
 				const _store = { ...store, info: { ...store.info, ...meta } };
 				setStore(_store);
 
@@ -541,7 +610,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const store = getStore();
 				setStore({
 					...store,
-					info: { ...defaultSyllabusInfo, academy_author: academy, profile },
+					info: {
+						...defaultSyllabusInfo,
+						academy_author: academy,
+						profile
+					},
 					syllabus: profile ? store.syllabus : null
 				});
 			},
@@ -562,7 +635,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 											_days.push(newDay(extra + i, extra + i, d));
 										});
 									}
-									_days.push({ ...store.days[i], id: extra + i + 1, position: extra + i + 1 });
+									_days.push({
+										...store.days[i],
+										id: extra + i + 1,
+										position: extra + i + 1
+									});
 								}
 								if (index === null || index + 1 === store.days.length) {
 									let count = store.days.length;
@@ -600,7 +677,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 							const day = store.days[i];
 							let _found = day[type].find(p => p.slug === piece.data.slug);
 
-							if (_found) return { found: true, day: { ...day, id: day.id } };
+							if (_found)
+								return {
+									found: true,
+									day: { ...day, id: day.id }
+								};
 						}
 						return { found: false, day: null };
 					},

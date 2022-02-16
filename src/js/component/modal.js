@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ContentContext } from "../context.js";
 import SmartInput from "./smart-input";
+import Select from "react-select";
 import API from "../api.js";
 import MDEditor from "@uiw/react-md-editor";
 import PropTypes from "prop-types";
@@ -25,7 +26,10 @@ export const UploadSyllabus = ({ onConfirm }) => {
 					const reader = new FileReader();
 					const files = e.target.files;
 					reader.onload = () => {
-						setValue({ name: files[0].name, content: reader.result });
+						setValue({
+							name: files[0].name,
+							content: reader.result
+						});
 					};
 					reader.readAsText(files[0]);
 				}}
@@ -89,9 +93,9 @@ export const SyllabusDetails = ({ onConfirm }) => {
 
 	useEffect(() => {
 		const profileEffects = async () => {
-			actions.cleanSyllabus({ academy, profile });
-			let versions = await API.profile().version(profile);
-			if (versions.length === 0) versions = [{ version: "new version" }];
+			actions.cleanSyllabus({ academy, profile: profile?.slug });
+			let versions = await API.profile().version(profile?.slug);
+			if (versions.length === 0) versions = [{ version: "new version", value: "new version" }];
 			setVersionOptions(versions.sort((a, b) => (a.version > b.version ? 1 : -1)));
 		};
 		// profile and version must be null
@@ -102,8 +106,8 @@ export const SyllabusDetails = ({ onConfirm }) => {
 
 	useEffect(() => {
 		const versionEffects = async () => {
-			actions.cleanSyllabus({ academy, profile });
-			actions.getApiSyllabusVersion(academy, profile, version);
+			actions.cleanSyllabus({ academy, profile: profile?.slug });
+			if (version && version.value && version.value !== "new version") actions.getApiSyllabusVersion(academy, profile?.slug, version?.value);
 		};
 
 		if (version) versionEffects();
@@ -139,45 +143,37 @@ export const SyllabusDetails = ({ onConfirm }) => {
 										})}
 									</select>
 									{academy && (
-										<select
-											className="form-control"
-											onChange={async e => {
-												// if(e.target.value === "new course"){
-												// 	actions.
-												// }
-												setProfile(e.target.value && e.target.value != "null" ? e.target.value : null);
+										<Select
+											className="form-control p-0 border-none"
+											label="Select Profile"
+											onChange={p => {
+												setProfile(p);
 											}}
-											value={profile}>
-											<option key={0} value={"null"}>
-												Select profile
-											</option>
-											{[{ slug: "new course" }].concat(profileOptions).map((course, i) => {
-												return (
-													<option key={i} value={course.slug}>
-														{course.slug}
-													</option>
-												);
-											})}
-										</select>
+											options={[
+												{
+													slug: "new course",
+													label: "New Course"
+												}
+											].concat(
+												profileOptions.map(p => ({
+													slug: p.slug,
+													label: p.name
+												}))
+											)}
+										/>
 									)}
 									{profile && (
-										<select
-											className={"form-control  " + (shouldBeOpened() ? "" : "d-none")}
-											onChange={e => {
-												setVersion(e.target.value && e.target.value != "null" ? e.target.value : null);
+										<Select
+											className="form-control p-0"
+											label="Select version"
+											onChange={v => {
+												setVersion(v);
 											}}
-											value={version}>
-											<option key={0} value={"null"}>
-												Select version
-											</option>
-											{versionOptions.map((syllabu, i) => {
-												return (
-													<option key={i} value={syllabu.version}>
-														{syllabu.version}
-													</option>
-												);
-											})}
-										</select>
+											options={versionOptions.map(v => ({
+												value: v.version,
+												label: v.version
+											}))}
+										/>
 									)}
 								</div>
 							</div>
@@ -215,7 +211,14 @@ export const SyllabusDetails = ({ onConfirm }) => {
 								onClick={() =>
 									onConfirm({
 										value: true,
-										data: { profile, description: desc, label, slug: profile + ".v" + version, version, academy_author: academy }
+										data: {
+											profile,
+											description: desc,
+											label,
+											slug: profile + ".v" + version,
+											version,
+											academy_author: academy
+										}
 									})
 								}>
 								<i className="fas fa-smile"></i> Continue editing
