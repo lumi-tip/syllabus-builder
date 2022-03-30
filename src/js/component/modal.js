@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { ContentContext } from "../context.js";
 import SmartInput from "./smart-input";
 import Select from "react-select";
+import swal from "sweetalert";
 import API from "../api.js";
 import MDEditor from "@uiw/react-md-editor";
 import PropTypes from "prop-types";
@@ -51,8 +52,6 @@ UploadSyllabus.propTypes = {
 export const SyllabusDetails = ({ onConfirm }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [academy, setAcademy] = useState(null);
-	const [label, setLabel] = useState(store.info.label);
-	const [desc, setDesc] = useState(store.info.description);
 
 	const [profile, setProfile] = useState(store.info.profile);
 	const [profileOptions, setProfileOptions] = useState([]);
@@ -67,9 +66,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 			}
 			if (store.info.academy && store.info.academy != "") {
 				setAcademy(store.info.academy);
-			}
-			if (store.info.label && store.info.label != "") {
-				setLabel(store.info.label);
 			}
 		}
 	}, [store.info]);
@@ -106,16 +102,12 @@ export const SyllabusDetails = ({ onConfirm }) => {
 
 	useEffect(() => {
 		const versionEffects = async () => {
-			actions.cleanSyllabus({ academy, profile: profile?.slug });
-			if (version && version.value && version.value !== "new version") actions.getApiSyllabusVersion(academy, profile?.slug, version?.value);
+			// actions.cleanSyllabus({ academy, profile: profile?.slug });
+			if (version) actions.getApiSyllabusVersion(academy, profile?.slug, version.value || version);
 		};
 
 		if (version) versionEffects();
 	}, [version]);
-
-	const shouldBeOpened = () => {
-		return academy && academy != "" && profile && profile != "";
-	};
 
 	return (
 		<div className="modal show d-block syllabus-details" tabIndex="-1" role="dialog" style={{ background: "rgba(0,0,0,0.5)" }}>
@@ -124,103 +116,61 @@ export const SyllabusDetails = ({ onConfirm }) => {
 					<div className="modal-body p-0">
 						<div className="row">
 							<div className="col-12">
-								<div className="input-group mb-2">
-									<select
-										className="form-control"
-										onChange={e => {
-											setAcademy(e.target.value && e.target.value != "null" ? e.target.value : null);
+								<Select
+									className="form-control p-0"
+									label="Select version"
+									onChange={a => {
+										setAcademy(a.value.id);
+									}}
+									options={store.academies.map(v => ({
+										value: v,
+										label: v.name
+									}))}
+								/>
+								{academy && (
+									<Select
+										className="form-control p-0 border-none"
+										label="Select Profile"
+										onChange={p => {
+											setProfile(p.value);
 										}}
-										value={academy}>
-										<option key={0} value={"null"}>
-											Select an academy
-										</option>
-										{store.academies.map((a, i) => {
-											return (
-												<option key={i} value={a.id}>
-													{a.name}
-												</option>
-											);
-										})}
-									</select>
-									{academy && (
-										<Select
-											className="form-control p-0 border-none"
-											label="Select Profile"
-											onChange={p => {
-												setProfile(p);
-											}}
-											options={[
-												{
-													slug: "new course",
-													label: "New Course"
-												}
-											].concat(
-												profileOptions.map(p => ({
-													slug: p.slug,
-													label: p.name
-												}))
-											)}
-										/>
-									)}
-									{profile && (
-										<Select
-											className="form-control p-0"
-											label="Select version"
-											onChange={v => {
-												setVersion(v);
-											}}
-											options={versionOptions.map(v => ({
-												value: v.version,
-												label: v.version
+										options={profileOptions
+											.sort((a, b) => (a.name > b.name ? 1 : -1))
+											.filter(p => p.academy_owner == academy)
+											.map(p => ({
+												value: p,
+												label: p.name
 											}))}
-										/>
-									)}
-								</div>
+									/>
+								)}
+								{profile && (
+									<Select
+										className="form-control p-0"
+										label="Select version"
+										onChange={v => {
+											setVersion(v.value);
+										}}
+										options={versionOptions.map(v => ({
+											value: v.version,
+											label: v.version
+										}))}
+									/>
+								)}
 							</div>
 						</div>
-						{version && (
-							<div className="row mb-2">
-								<div className="col-12">
-									<input
-										type="text"
-										className="form-control"
-										placeholder={store.info.label !== undefined ? store.info.label : "Course label, e.g: FullStack 12 weeks"}
-										value={label}
-										onChange={e => setLabel(e.target.value)}
-									/>
-								</div>
-							</div>
-						)}
-						{version && (
-							<div className="row">
-								<div className="col-12">
-									<textarea
-										className="form-control"
-										placeholder={store.info.description !== undefined ? store.info.description : "What is this syllabus about?"}
-										value={desc}
-										onChange={e => setDesc(e.target.value)}
-									/>
-								</div>
-							</div>
-						)}
 					</div>
 					<div className="modal-footer p-0 border-0">
 						{version ? (
 							<button
 								className="btn btn-success"
-								onClick={() =>
+								onClick={() => {
 									onConfirm({
-										value: true,
-										data: {
-											profile,
-											description: desc,
-											label,
-											slug: profile + ".v" + version,
-											version,
-											academy_author: academy
-										}
-									})
-								}>
+										profile,
+										slug: profile + ".v" + version,
+										version,
+										academy_author: academy
+									});
+								}}>
 								<i className="fas fa-smile"></i> Continue editing
 							</button>
 						) : (

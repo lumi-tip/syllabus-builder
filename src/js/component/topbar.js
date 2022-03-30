@@ -17,7 +17,7 @@ export const TopBar = () => {
 	const academy = store.academies.find(a => a.id == store.info.academy_author);
 	return (
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
-			{openSyllabusDetails && <SyllabusDetails onConfirm={() => setOpenSyllabusDetails(false)} />}
+			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
 			<div className="d-flex">
 				<p className="m-0 p-0 text-left w-100">Academy: {academy ? academy.name : "Uknown"}</p>
 				<div
@@ -32,7 +32,6 @@ export const TopBar = () => {
 					Syllabus: {store.info.slug && store.info.slug != "" ? `${store.info.slug} v${store.info.version}` : "No syllabus selected"}
 				</p>
 			</div>
-			{/* const { type, message, item } = item */}
 			{openNoti && (
 				<ul className="noti-canvas">
 					{store.report.length === 0 && <li>No events to report</li>}
@@ -115,7 +114,7 @@ export const TopBar = () => {
 					</>
 				)}
 				<button className="btn btn-dark btn-sm" onClick={() => setOpenSyllabusDetails(true)}>
-					<i className="fas fa-plus" /> Start
+					<i className="fas fa-plus" /> Load
 				</button>
 			</div>
 		</div>

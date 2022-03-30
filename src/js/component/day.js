@@ -14,8 +14,8 @@ const icons = {
 	project: "fas fa-laptop-code",
 	quiz: "fas fa-clipboard-check"
 };
-const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, technologies, translations }) => {
-	const [editMode, setEditMode] = useState(false);
+const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
+	const [editAsset, setEditAsset] = useState(null);
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
 		drop: item => {
@@ -33,26 +33,27 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, technologies,
 			style={{
 				background: canDrop ? "#cce0d2" : isOver && !canDrop ? "red" : "white"
 			}}>
-			{editMode && (
+			{editAsset && (
 				<EditContentPiece
-					defaultValue={{
+					defaultValue={editAsset}
+					onEdit={_piece => {
+						// setEditAsset(_piece);
+					}}
+					onCancel={() => setEditAsset(null)}
+				/>
+			)}
+			<button
+				className="btn btn-sm btn-dark pointer float-right"
+				style={{ padding: "0px 5px" }}
+				onClick={() =>
+					setEditAsset({
 						custom: true,
 						type,
 						target: "blank",
-						translations: [],
+						translations: {},
 						technologies: []
-					}}
-					technologies={technologies}
-					translations={translations}
-					onSave={async _piece => {
-						await onEdit(_piece);
-						setEditMode(false);
-						return true;
-					}}
-					onCancel={() => setEditMode(false)}
-				/>
-			)}
-			<button className="btn btn-sm btn-dark pointer float-right" style={{ padding: "0px 5px" }} onClick={() => setEditMode(true)}>
+					})
+				}>
 				<i className="fas fa-plus fa-xs" />
 			</button>
 			<h4 className="text-capitalize">
@@ -62,13 +63,14 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, technologies,
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
 				{pieces.map((p, i) => {
+					console.log("piece", p);
 					return (
 						<ContentPiece
 							key={i}
 							type={p.type}
 							data={p}
-							technologies={technologies}
 							status={p.status}
+							isEditable={p.custom}
 							onEdit={_piece => onEdit(_piece)}
 							onDelete={() => onDelete(p)}
 						/>
@@ -264,7 +266,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							key={i}
 							heading={m.storeName}
 							technologies={store.technologies}
-							translations={store.translations}
 							type={m.type}
 							pieces={_data[m.storeName]}
 							onEdit={item => {

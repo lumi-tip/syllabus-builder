@@ -2,9 +2,9 @@
 
 .sidebar{
     width: 300px;
+    z-index: 1;
     background: #272727;
     color: white;
-    padding: 10px;
     height: 100vh;
     overflow-y: auto;
     &::-webkit-scrollbar {
@@ -33,5 +33,20 @@
     .back-btn{
         width: 85px;
     }
-    
+    .content{
+        padding: 0px 10px;
+    }
+    .modal-dialog{
+        margin: 0;
+        color: black;
+        .modal-content{
+            border-radius: 0;
+        }
+    }
+    li.content-piece{
+        background: #464646;
+    }
+    li.content-piece:hover{
+        background: #5a5a5a;
+    }
 }

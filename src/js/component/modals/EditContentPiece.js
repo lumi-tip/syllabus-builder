@@ -1,11 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { ContentContext } from "../../context.js";
 import PropTypes from "prop-types";
 import { getLink, useDebounce } from "../utils";
+import Flag from "../flags/flags";
 import API from "../../api";
 import swal from "sweetalert";
-import { MultiSelect } from "react-multi-select-component";
+import Select, { components, MultiValueGenericProps } from "react-select";
 
-const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, translations }) => {
+const Option = properties =>
+	!properties.isDisabled && (
+		<div className="select-option pointer" {...properties.innerProps}>
+			<Flag style={{ margin: "0px 0px 0px 3px" }} lang={properties.value[0]}></Flag> {properties.value[1]}
+		</div>
+	);
+
+const MultiValueLabel = properties => {
+	return (
+		<>
+			<Flag style={{ margin: "3px 0px 0px 3px" }} lang={properties.data.value[0]}></Flag>
+			<components.MultiValueLabel {...properties} />
+		</>
+	);
+};
+
+const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
+	const { store, actions } = useContext(ContentContext);
 	const [data, _setData] = useState(null);
 	const [editMode, setEditMode] = useState(false);
 	const [formStatus, setFormStatus] = useState({
@@ -19,6 +38,10 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 		value: null
 	});
 	const debouncedSlug = useDebounce(data ? data.slug : "", 500);
+	const langs = store.lessons.map(l => ({
+		label: l.title,
+		value: [l.lang, l.slug]
+	}));
 
 	useEffect(() => {
 		if (defaultValue.custom !== true && defaultValue.mandatory === undefined) defaultValue.mandatory = true;
@@ -68,12 +91,20 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 
 		let errors = [];
 		if (data.custom) {
+			if (!data.title || data.title == "") errors.push("Please write a Title for the content piece");
 			if (!data.url || data.url == "") errors.push("Manually added content must have URL property set");
 			if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(data.slug))
 				errors.push("The slug is a unique identifier that has only letters, numbers and hyphens");
-			if (data.target != "blank") errors.push("Custom content must always open on a new window");
+			if (data.addToRegistry != true) {
+				if (data.target != "blank") errors.push("Custom content must always open on a new window");
+			}
+		}
+		if (data.addToRegistry) {
+			if (!data.url || !data.url.includes("https://github.com")) errors.push("URL for new registry assets must point to https://github.com");
 			if (!Array.isArray(data.technologies) || data.technologies.length === 0) errors.push("Select at least 1 technology");
-			if (!Array.isArray(data.translations) || data.translations.length === 0) errors.push("Select at least 1 translation");
+
+			const trans = Object.keys(data.translations);
+			if (data.id !== undefined && (!Array.isArray(trans) || trans.length === 0)) errors.push("Select at least 1 translation");
 		}
 
 		if (errors.length > 0) setFormStatus({ status: "error", messages: errors });
@@ -97,6 +128,9 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 	};
 
 	const validateSlug = async _slug => {
+		// console.log(`Original: ${defaultValue,}`)
+		if (_slug === defaultValue.slug) return true;
+
 		if (!_slug || _slug == "" || !/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(data.slug)) {
 			setFormStatus({
 				status: "error",
@@ -145,11 +179,11 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 			tabIndex="-1"
 			role="dialog"
 			onMouseDown={propagate}
-			style={{ background: "rgba(0,0,0,0.5)" }}>
+			style={{ background: "rgba(0,0,0,0.5)", ...style }}>
 			<div className="modal-dialog" role="document">
 				<form className="modal-content">
 					<div className="modal-header p-2">
-						<h3 className="w-100 text-center text-capitalize">{data.custom ? `Add Custom ${data.type}` : "Content Details"}</h3>
+						<h3 className="w-100 text-center text-capitalize">{data.custom ? `Add ${data.type}` : "Content Details"}</h3>
 					</div>
 					<div className="modal-body">
 						<div className="form-group">
@@ -169,7 +203,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 							<small className="form-text text-muted">{"Students will see this title"}</small>
 						</div>
 						<div className="form-group">
-							<div className="input-group mb-3">
+							<div className="input-group">
 								<input
 									type="text"
 									required={true}
@@ -177,13 +211,14 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 									className="form-control border-right-0"
 									placeholder="Write a unique slug identifier"
 									value={data.slug}
-									onChange={e =>
-										data.custom &&
-										setData({
-											...data,
-											slug: e.target.value
-										})
-									}
+									onChange={e => {
+										const valid = /^[A-Za-z0-9]+([-A-Za-z0-9]+)*$/.test(e.target.value);
+										if (data.custom && valid)
+											setData({
+												...data,
+												slug: e.target.value
+											});
+									}}
 								/>
 								<div className="input-group-append">
 									<span className="input-group-text bg-white" id="basic-addon2">
@@ -197,9 +232,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 									</span>
 								</div>
 							</div>
-							<small className="form-text text-muted">
-								{"Custom slugs are only accepted for custom lessons, replits and projects"}
-							</small>
+							<small className="form-text text-muted">{"Slugs are unique among he entire academy content, no matter the type."}</small>
 						</div>
 						<div className="form-group" style={{ position: "relative" }}>
 							{!linkStatus.message && (
@@ -216,52 +249,69 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 								</div>
 							)}
 							{data.custom ? (
-								<input
-									type="url"
-									required={data.custom === true}
-									className="form-control"
-									placeholder="Any specific url?"
-									value={data.url}
-									onChange={e =>
-										setData({
-											...data,
-											url: e.target.value
-										})
-									}
-								/>
+								<>
+									<input
+										type="url"
+										required={data.custom === true}
+										className="form-control"
+										placeholder="Any specific url?"
+										value={data.url}
+										onChange={e =>
+											setData({
+												...data,
+												url: e.target.value
+											})
+										}
+									/>
+									{data.addToRegistry ? (
+										<small className="form-text text-muted">{"Only github URLs are accepted for new content"}</small>
+									) : (
+										<small className="form-text text-muted">{`Students will be forwarded to this URL when opening the ${data.type.toLowerCase()}`}</small>
+									)}
+								</>
 							) : (
-								<a href={linkStatus.value || "#"} className="form-control text-primary" target="_blank" rel="noopener noreferrer">
+								<a
+									href={"#"}
+									onClick={() => linkStatus?.value && window.open(linkStatus?.value)}
+									className="form-control text-primary"
+									target="_blank"
+									rel="noopener noreferrer">
 									Test URL in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
 								</a>
 							)}
 						</div>
-						{data.custom && (
+						{data.addToRegistry ? (
 							<>
 								<div className="form-group">
-									<MultiSelect
-										hasSelectAll={false}
-										options={translations.map(t => ({
-											label: t.title,
-											value: t.slug
+									<Select
+										isMulti
+										options={langs}
+										value={Object.keys(data.translations).map(lang => ({
+											label: data.translations[lang],
+											value: [lang, data.translations[lang]]
 										}))}
-										value={data.translations.map(t => ({
-											label: t,
-											value: t
-										}))}
+										components={{
+											Option,
+											MultiValueLabel
+										}}
 										placeholder="Language translations"
 										onChange={translations =>
 											setData({
 												...data,
-												translations: translations.map(t => t.value)
+												translations: translations.reduce((acc, current) => {
+													return {
+														...acc,
+														[current.value[0]]: current.value[1]
+													};
+												}, {})
 											})
 										}
-										labelledBy="Select available languages"
 									/>
 								</div>
 								<div className="form-group">
-									<MultiSelect
-										hasSelectAll={false}
-										options={technologies.map(t => ({
+									<Select
+										isMulti
+										options={store.technologies.map(t => ({
 											label: t.title,
 											value: t.slug
 										}))}
@@ -276,59 +326,45 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 												technologies: technologies.map(t => t.value)
 											})
 										}
-										labelledBy="Select available technologies"
 									/>
+								</div>
+							</>
+						) : (
+							<>
+								<div className="form-group">
+									<div className="form-check">
+										<input
+											className="form-check-input"
+											type="checkbox"
+											checked={data.target === "blank"}
+											onChange={e =>
+												setData({
+													...data,
+													target: data.target === "blank" ? "self" : "blank"
+												})
+											}
+										/>
+										<label className="form-check-label">Make it open in a new window</label>
+									</div>
 								</div>
 								<div className="form-group">
 									<div className="form-check">
 										<input
 											className="form-check-input"
 											type="checkbox"
-											checked={data.includeInRegistry === "true"}
+											checked={data.mandatory}
 											onChange={e =>
 												setData({
 													...data,
-													includeInRegistry: data.includeInRegistry === "true" ? "false" : "true"
+													mandatory: data.mandatory !== true
 												})
 											}
 										/>
-										<label className="form-check-label">Add to registry for future re-usage</label>
+										<label className="form-check-label">Mandatory: must be completed before graduation</label>
 									</div>
 								</div>
 							</>
 						)}
-						<div className="form-group">
-							<div className="form-check">
-								<input
-									className="form-check-input"
-									type="checkbox"
-									checked={data.target === "blank"}
-									onChange={e =>
-										setData({
-											...data,
-											target: data.target === "blank" ? "self" : "blank"
-										})
-									}
-								/>
-								<label className="form-check-label">Make it open in a new window</label>
-							</div>
-						</div>
-						<div className="form-group">
-							<div className="form-check">
-								<input
-									className="form-check-input"
-									type="checkbox"
-									checked={data.mandatory}
-									onChange={e =>
-										setData({
-											...data,
-											mandatory: data.mandatory !== true
-										})
-									}
-								/>
-								<label className="form-check-label">Mandatory: must be completed before graduation</label>
-							</div>
-						</div>
 					</div>
 					<div className="modal-footer">
 						{formStatus.status === "ok" ? (
@@ -358,17 +394,15 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, technologies, transl
 	);
 };
 EditContentPiece.propTypes = {
-	defaultValue: PropTypes.string,
+	defaultValue: PropTypes.object,
+	style: PropTypes.object,
 	title: PropTypes.string,
-	technologies: PropTypes.array,
-	translations: PropTypes.array,
 	onSave: PropTypes.func.required,
 	onCancel: PropTypes.func
 };
 EditContentPiece.defaultProps = {
 	defaultValue: {},
-	technologies: [],
-	translations: [],
+	style: {},
 	title: null
 };
 export default EditContentPiece;

@@ -6,9 +6,7 @@ import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
 import swal from "sweetalert";
 
-const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning, technologies, translations }) => {
-	const [editMode, setEditMode] = useState(false);
-
+const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable }) => {
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type, data, status },
 		collect: monitor => ({
@@ -21,21 +19,17 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 
 	return (
 		<li className="content-piece" ref={drag}>
-			{editMode && (
-				<EditContentPiece
-					defaultValue={data}
-					onSave={_piece => setEditMode(false) || onEdit(_piece)}
-					onCancel={() => setEditMode(false)}
-					technologies={technologies}
-				/>
-			)}
 			{_title}
-			{withWarning && _status != "published" && (
+			{withWarning && _status.toLowerCase() != "published" && (
 				<Tooltip content={`${_status} (needs to be published)`}>
 					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
 				</Tooltip>
 			)}
-			{onEdit && <i onClick={() => setEditMode(true)} className="fas fa-pencil-alt pointer p-1" />}
+			{isEditable ? (
+				<i onClick={() => onEdit && onEdit(true)} className="fas fa-pencil-alt pointer p-1" />
+			) : (
+				<i onClick={() => onEdit && onEdit(true)} className="fas fa-book pointer p-1" />
+			)}
 			{onDelete && (
 				<i
 					onClick={async () => {
@@ -51,12 +45,6 @@ const ContentPiece = ({ data, onDelete, onEdit, status, previewLink, withWarning
 					className="fas fa-trash-alt pointer p-1"
 				/>
 			)}
-			{previewLink && (
-				<i
-					onClick={() => getLink(data).then(url => window.open(url))}
-					className="fas fa-external-link-square-alt pointer p-1 text-secondary"
-				/>
-			)}
 		</li>
 	);
 };
@@ -65,7 +53,7 @@ ContentPiece.propTypes = {
 	status: PropTypes.string,
 	onDelete: PropTypes.func,
 	onEdit: PropTypes.func,
-	previewLink: PropTypes.bool,
+	isEditable: PropTypes.bool,
 	technologies: PropTypes.array,
 	translations: PropTypes.array,
 	withWarning: PropTypes.bool
@@ -74,9 +62,9 @@ ContentPiece.defaultProps = {
 	onDelete: null,
 	onEdit: null,
 	status: null,
+	isEditable: false,
 	technologies: [],
 	translations: [],
-	previewLink: false,
 	withWarning: false
 };
 export default ContentPiece;

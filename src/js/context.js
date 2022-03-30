@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
+import swal from "sweetalert";
 import { urls, serialize } from "./component/utils";
 import { ToastProvider } from "react-toast-notifications";
 
@@ -524,6 +525,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			getApiSyllabusVersion: async (academy, profile, version) => {
+				console.log("getApiSyllabusVersion", academy, profile, version);
 				const store = getStore();
 				const meta = {
 					academy_author: academy,
@@ -539,6 +541,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					!version ||
 					version == "" ||
 					version == "null" ||
+					version == "new version" ||
 					!academy ||
 					academy == "" ||
 					academy == "null" ||
@@ -571,6 +574,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return await actions.upload({ content: data }, _store.info);
 			},
 			getApiSyllabusVersionForNewDay: async (academy, profile, version) => {
+				console.log("getApiSyllabusVersionForNewDay", academy, profile, version);
 				// ignore version, academy or profile null
 				if (
 					!version ||

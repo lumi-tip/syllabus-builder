@@ -61,7 +61,10 @@ const Main = injectContent(() => {
 				dayNumber={editExtendedDay.position}
 				defaultValue={editExtendedDay.extended_instructions}
 				onSave={extended_instructions => {
-					actions.days().update(editExtendedDay.id, { ...editExtendedDay, extended_instructions });
+					actions.days().update(editExtendedDay.id, {
+						...editExtendedDay,
+						extended_instructions
+					});
 					closeInstructions(editExtendedDay);
 				}}
 				onCancel={() => closeInstructions(editExtendedDay)}
@@ -72,7 +75,12 @@ const Main = injectContent(() => {
 		<>
 			<DndProvider backend={Backend}>
 				<div className="d-flex">
-					<Sidebar content={store} width={sidebarWidth} onRefresh={type => actions.fetch([type], true)} />
+					<Sidebar
+						content={store}
+						width={sidebarWidth}
+						onRefresh={type => actions.fetch([type], true)}
+						onCreateAsset={async piece => await actions.database().add(piece)}
+					/>
 					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
 						<Notifier />
 						<TopBar />
@@ -98,16 +106,33 @@ const Main = injectContent(() => {
 								<Day
 									key={d.id.toString() + d.position.toString()}
 									data={d}
-									onEditInstructions={() => setEditExtendedDay({ ...d, scrollY: window.scrollY })}
+									onEditInstructions={() =>
+										setEditExtendedDay({
+											...d,
+											scrollY: window.scrollY
+										})
+									}
 									onMoveUp={() => {
 										const other = store.days.find(_day => _day.position === d.position - 1);
-										actions.days().update(d.id, { ...d, position: d.position - 1 });
-										actions.days().update(other.id, { ...other, position: other.position + 1 });
+										actions.days().update(d.id, {
+											...d,
+											position: d.position - 1
+										});
+										actions.days().update(other.id, {
+											...other,
+											position: other.position + 1
+										});
 									}}
 									onMoveDown={() => {
 										const other = store.days.find(_day => _day.position === d.position + 1);
-										actions.days().update(d.id, { ...d, position: d.position + 1 });
-										actions.days().update(other.id, { ...other, position: other.position - 1 });
+										actions.days().update(d.id, {
+											...d,
+											position: d.position + 1
+										});
+										actions.days().update(other.id, {
+											...other,
+											position: other.position - 1
+										});
 									}}
 									onDelete={id => {
 										actions.days().delete(id);
