@@ -171,6 +171,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 
 	if (!data) return "Loading...";
 
+	console.log("edit asset data", data);
 	return (
 		<div
 			className="modal show d-block edit-piece"

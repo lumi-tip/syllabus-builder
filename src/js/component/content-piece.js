@@ -8,7 +8,7 @@ import swal from "sweetalert";
 
 const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable }) => {
 	const [{ isDragging }, drag] = useDrag({
-		item: { type: data.type, data, status },
+		item: { type: data.type || "", data, status },
 		collect: monitor => ({
 			isDragging: !!monitor.isDragging()
 		})
@@ -26,9 +26,9 @@ const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable 
 				</Tooltip>
 			)}
 			{isEditable ? (
-				<i onClick={() => onEdit && onEdit(true)} className="fas fa-pencil-alt pointer p-1" />
+				<i onClick={() => onEdit && onEdit(data)} className="fas fa-pencil-alt pointer p-1" />
 			) : (
-				<i onClick={() => onEdit && onEdit(true)} className="fas fa-book pointer p-1" />
+				<i onClick={() => onEdit && onEdit(data)} className="fas fa-book pointer p-1" />
 			)}
 			{onDelete && (
 				<i

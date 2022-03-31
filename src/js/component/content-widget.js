@@ -4,7 +4,6 @@ import ContentPiece from "./content-piece.js";
 
 const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit }) => {
 	const [tagToken, setTagToken] = useState(null);
-
 	return (
 		<div className={`content-widget ${className}`}>
 			<div className="d-flex" style={{ overflow: "hidden" }}>

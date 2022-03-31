@@ -36,8 +36,9 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			{editAsset && (
 				<EditContentPiece
 					defaultValue={editAsset}
-					onEdit={_piece => {
-						// setEditAsset(_piece);
+					onSave={_piece => {
+						setEditAsset(null);
+						onEdit(_piece);
 					}}
 					onCancel={() => setEditAsset(null)}
 				/>
@@ -63,7 +64,7 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
 				{pieces.map((p, i) => {
-					console.log("piece", p);
+					console.log("pieces on day", p);
 					return (
 						<ContentPiece
 							key={i}
@@ -71,7 +72,7 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 							data={p}
 							status={p.status}
 							isEditable={p.custom}
-							onEdit={_piece => onEdit(_piece)}
+							onEdit={_piece => setEditAsset(_piece)}
 							onDelete={() => onDelete(p)}
 						/>
 					);
