@@ -3,11 +3,13 @@ import { ContentContext } from "../context.js";
 import swal from "@sweetalert/with-react";
 import { Notify } from "bc-react-notifier";
 import { UploadSyllabus, SyllabusDetails } from "./modal";
+import SearchSyllabus from "./modals/SearchOnSyllabus";
 import NewDay from "../component/modals/NewDayModal";
 
 export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
+	const [openSearchOnSyllabus, setOpenSearchOnSyllabus] = useState(false);
 	const [syllabusStatus, setSyllabusStatus] = useState({
 		status: "btn-dark",
 		messages: []
@@ -18,6 +20,7 @@ export const TopBar = () => {
 	return (
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
+			{openSearchOnSyllabus && <SearchSyllabus actions={actions} onCancel={() => setOpenSearchOnSyllabus(false)} />}
 			<div className="d-flex">
 				<p className="m-0 p-0 text-left w-100">Academy: {academy ? academy.name : "Uknown"}</p>
 				<div
@@ -115,6 +118,9 @@ export const TopBar = () => {
 				)}
 				<button className="btn btn-dark btn-sm" onClick={() => setOpenSyllabusDetails(true)}>
 					<i className="fas fa-plus" /> Load
+				</button>
+				<button className="btn btn-dark btn-sm" onClick={() => setOpenSearchOnSyllabus(true)}>
+					<i className="fas fa-zoom" /> Search
 				</button>
 			</div>
 		</div>

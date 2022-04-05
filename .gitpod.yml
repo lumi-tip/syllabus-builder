@@ -3,7 +3,7 @@ ports:
     onOpen: open-browser
 tasks:
   - init: >
-      nvm install 14
+      nvm install 14 && npm install
   - command: >
       nvm install 14 &&
       cp .env.example .env &&

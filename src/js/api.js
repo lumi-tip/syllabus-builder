@@ -227,6 +227,12 @@ class Wrapper {
 			},
 			testSyllabus: args => {
 				return this.post(url + "/registry/syllabus/test", args);
+			},
+			searchOnJSON: slug => {
+				return this.get(url + "/admissions/admin/syllabus/asset/" + slug);
+			},
+			replaceOnJSON: (slug, body) => {
+				return this.put(url + "/admissions/admin/syllabus/asset/" + slug, body);
 			}
 		};
 	}

@@ -61,3 +61,13 @@
         }
     }
 }
+.search-replace-results{ 
+    background-color: #545454;
+    color: #dfdfdf;
+    max-height: 250px;
+    overflow-y: auto;
+    text-align: left;
+    font-size: 12px;
+    padding: 5px;
+    .search-replace-results .asset_type{ color: #b8e2ff; }
+}

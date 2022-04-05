@@ -513,6 +513,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
+			searchSyllabus: async function(value) {
+				return API.registry().searchOnJSON(value);
+			},
+			replaceInSyllabus: async function(original, replace, type) {
+				return API.registry().replaceOnJSON(original, {
+					slug: replace,
+					type,
+					simulate: false
+				});
+			},
 			test: async () => {
 				const store = getStore();
 				try {
