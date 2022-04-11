@@ -141,7 +141,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					className="transparent"
 					style={{ width: "300px" }}
 					placeholder="Today's topic (very short)..."
-					maxLength={14}
+					maxLength={25}
 					onChange={label => actions.days().update(_data.id, { ..._data, label })}
 					initialValue={_data.label}
 				/>

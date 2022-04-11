@@ -240,7 +240,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/registry/asset?type=project");
+				return this.get(url + "/registry/asset?type=project&language=us");
 			}
 		};
 	}
@@ -248,7 +248,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?type=exercise");
+				return this.get(url + "/registry/asset?type=exercise&language=us");
 			}
 		};
 	}
@@ -256,7 +256,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?type=quiz");
+				return this.get(url + "/registry/asset?type=quiz&language=us");
 			}
 		};
 	}
@@ -420,7 +420,7 @@ class Wrapper {
 		return {
 			all: () => {
 				//return this.get(url + "/lesson/all/v2");
-				return this.get(url + "/registry/asset?type=lesson");
+				return this.get(url + "/registry/asset?type=lesson&language=us");
 			},
 			get: id => {
 				return this.get(url + "/registry/asset/" + id);
