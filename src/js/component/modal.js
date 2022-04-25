@@ -136,7 +136,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 										}}
 										options={profileOptions
 											.sort((a, b) => (a.name > b.name ? 1 : -1))
-											.filter(p => p.academy_owner == academy)
+											.filter(p => p.academy_owner.id == academy)
 											.map(p => ({
 												value: p,
 												label: p.name
