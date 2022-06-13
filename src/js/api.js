@@ -248,7 +248,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?type=exercise&language=us&external=true");
+				return this.get(url + "/registry/asset?type=exercise&language=us&external=both");
 			}
 		};
 	}
