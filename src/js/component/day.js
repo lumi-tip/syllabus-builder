@@ -69,6 +69,8 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, onSwap }) => 
 					.map((p, i, _pieces) => {
 						return (
 							<ContentPiece
+								withSwap
+								withMandatory
 								key={i}
 								type={p.type}
 								data={p}

@@ -4,6 +4,7 @@ import ContentPiece from "./content-piece.js";
 
 const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit, onSwap }) => {
 	const [tagToken, setTagToken] = useState(null);
+
 	return (
 		<div className={`content-widget ${className}`}>
 			<div className="d-flex" style={{ overflow: "hidden" }}>
@@ -37,6 +38,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 							return (
 								<ContentPiece
 									withWarning
+									withSwap={onSwap !== undefined}
 									key={i}
 									data={l}
 									status={l.status}

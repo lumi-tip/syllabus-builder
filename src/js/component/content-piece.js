@@ -6,7 +6,7 @@ import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
 import swal from "sweetalert";
 
-const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable, onDown, onUp }) => {
+const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable, withMandatory, withSwap, onDown, onUp }) => {
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type || "", data, status },
 		collect: monitor => ({
@@ -19,17 +19,19 @@ const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable,
 
 	return (
 		<li className="content-piece" ref={drag}>
-			<div className="position-swap">
-				<i onClick={() => onUp()} className="fas fa-angle-up pointer" />
-				<i onClick={() => onDown()} className="fas fa-angle-down pointer" />
-			</div>
+			{withSwap && (
+				<div className="position-swap">
+					<i onClick={() => onUp()} className="fas fa-angle-up pointer" />
+					<i onClick={() => onDown()} className="fas fa-angle-down pointer" />
+				</div>
+			)}
 			{_title}
-			{(data.mandatory === undefined || data.mandatory) && (
+			{withMandatory && (data.mandatory === undefined || data.mandatory) && (
 				<Tooltip content={`This project is mandatory for the students`}>
 					<i className="fas fa-asterisk pointer p-1" />
 				</Tooltip>
 			)}
-			{withWarning && _status.toLowerCase() != "published" && (
+			{withWarning && _status.toLowerCase() != "ok" && (
 				<Tooltip content={`${_status} (needs to be published)`}>
 					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
 				</Tooltip>
@@ -65,6 +67,8 @@ ContentPiece.propTypes = {
 	onDown: PropTypes.func,
 	onUp: PropTypes.func,
 	isEditable: PropTypes.bool,
+	withSwap: PropTypes.bool,
+	withMandatory: PropTypes.bool,
 	technologies: PropTypes.array,
 	translations: PropTypes.array,
 	withWarning: PropTypes.bool
@@ -76,6 +80,8 @@ ContentPiece.defaultProps = {
 	isEditable: false,
 	technologies: [],
 	translations: [],
-	withWarning: false
+	withWarning: false,
+	withMandatory: false,
+	withSwap: false
 };
 export default ContentPiece;
