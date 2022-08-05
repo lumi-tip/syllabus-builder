@@ -31,7 +31,7 @@ const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable,
 					<i className="fas fa-asterisk pointer p-1" />
 				</Tooltip>
 			)}
-			{withWarning && _status.toLowerCase() != "ok" && (
+			{withWarning && _status.toLowerCase() != "published" && (
 				<Tooltip content={`${_status} (needs to be published)`}>
 					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
 				</Tooltip>
