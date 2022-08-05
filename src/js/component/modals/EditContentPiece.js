@@ -171,7 +171,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 
 	if (!data) return "Loading...";
 
-	console.log("edit asset data", data);
+	// console.log("edit asset data", data);
 	return (
 		<div
 			className="modal show d-block edit-piece"
@@ -333,36 +333,34 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 						) : (
 							<>
 								<div className="form-group">
-									<div className="form-check">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											checked={data.target === "blank"}
-											onChange={e =>
-												setData({
-													...data,
-													target: data.target === "blank" ? "self" : "blank"
-												})
-											}
-										/>
-										<label className="form-check-label">Make it open in a new window</label>
-									</div>
+									<input
+										className={`form-check-input cm-toggle ${data.target === "blank" ? "cm-toggle-checked" : ""}`}
+										type="checkbox"
+										checked={data.target === "blank"}
+										onClick={e =>
+											setData({
+												...data,
+												target: data.target === "blank" ? "self" : "blank"
+											})
+										}
+									/>
+									<label className="form-check-label">Make it open in a new window</label>
 								</div>
 								<div className="form-group">
-									<div className="form-check">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											checked={data.mandatory}
-											onChange={e =>
-												setData({
-													...data,
-													mandatory: data.mandatory !== true
-												})
-											}
-										/>
-										<label className="form-check-label">Mandatory: must be completed before graduation</label>
-									</div>
+									<input
+										key={data.mandatory}
+										className={`form-check-input cm-toggle ${data.mandatory ? "cm-toggle-checked" : ""}`}
+										type="checkbox"
+										checked={data.mandatory}
+										onClick={e => {
+											// console.log("mandatory clicked", data.mandatory);
+											setData({
+												...data,
+												mandatory: data.mandatory === undefined ? false : !data.mandatory
+											});
+										}}
+									/>
+									<label className="form-check-label">Mandatory: must be completed before graduation</label>
 								</div>
 							</>
 						)}

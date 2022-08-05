@@ -14,7 +14,7 @@ const icons = {
 	project: "fas fa-laptop-code",
 	quiz: "fas fa-clipboard-check"
 };
-const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
+const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, onSwap }) => {
 	const [editAsset, setEditAsset] = useState(null);
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
@@ -36,9 +36,10 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			{editAsset && (
 				<EditContentPiece
 					defaultValue={editAsset}
-					onSave={_piece => {
+					onSave={async _piece => {
 						setEditAsset(null);
 						onEdit(_piece);
+						return _piece;
 					}}
 					onCancel={() => setEditAsset(null)}
 				/>
@@ -63,20 +64,25 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			</h4>
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
-				{pieces.map((p, i) => {
-					console.log("pieces on day", p);
-					return (
-						<ContentPiece
-							key={i}
-							type={p.type}
-							data={p}
-							status={p.status}
-							isEditable={p.custom}
-							onEdit={_piece => setEditAsset(_piece)}
-							onDelete={() => onDelete(p)}
-						/>
-					);
-				})}
+				{pieces
+					.sort((a, b) => (a.position > b.position ? -1 : 1))
+					.map((p, i, _pieces) => {
+						return (
+							<ContentPiece
+								key={i}
+								type={p.type}
+								data={p}
+								status={p.status}
+								isEditable={p.custom}
+								onEdit={_piece => {
+									setEditAsset(_piece);
+								}}
+								onUp={() => onSwap(p, _pieces[i - 1])}
+								onDown={() => onSwap(p, _pieces[i + 1])}
+								onDelete={() => onDelete(p)}
+							/>
+						);
+					})}
 			</ul>
 		</div>
 	);
@@ -89,7 +95,8 @@ Column.propTypes = {
 	translations: PropTypes.array,
 	onDrop: PropTypes.func,
 	onDelete: PropTypes.func,
-	onEdit: PropTypes.func
+	onEdit: PropTypes.func,
+	onSwap: PropTypes.func
 };
 Column.defaultProps = {
 	pieces: [],
@@ -280,6 +287,20 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 										});
 									});
 							}}
+							onSwap={(a, b) => {
+								console.log("swap", a, b);
+								let fromPosition = a?.position;
+								let toPosition = b?.position;
+								if (a !== undefined && b !== undefined)
+									actions.days().update(_data.id, {
+										..._data,
+										[m.storeName]: _data[m.storeName].map(i => {
+											if (i.slug === a.slug) i.position = toPosition;
+											else if (i.slug === b.slug) i.position = fromPosition;
+											return i;
+										})
+									});
+							}}
 							onDrop={async item => {
 								const exists = actions.days().findPiece(item, m.storeName);
 
@@ -311,6 +332,10 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 										})
 									});
 								}
+
+								// the position of this new item should be the smallest in the list
+								if (item.position === undefined)
+									item.data.position = _data[m.storeName].sort((a, b) => (a.position > b.position ? 1 : -1))[0].position - 1;
 
 								actions.pieces().in(item, {
 									id: _data.id,

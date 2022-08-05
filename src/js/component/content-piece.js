@@ -6,7 +6,7 @@ import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
 import swal from "sweetalert";
 
-const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable }) => {
+const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable, onDown, onUp }) => {
 	const [{ isDragging }, drag] = useDrag({
 		item: { type: data.type || "", data, status },
 		collect: monitor => ({
@@ -19,7 +19,16 @@ const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable 
 
 	return (
 		<li className="content-piece" ref={drag}>
+			<div className="position-swap">
+				<i onClick={() => onUp()} className="fas fa-angle-up pointer" />
+				<i onClick={() => onDown()} className="fas fa-angle-down pointer" />
+			</div>
 			{_title}
+			{(data.mandatory === undefined || data.mandatory) && (
+				<Tooltip content={`This project is mandatory for the students`}>
+					<i className="fas fa-asterisk pointer p-1" />
+				</Tooltip>
+			)}
 			{withWarning && _status.toLowerCase() != "published" && (
 				<Tooltip content={`${_status} (needs to be published)`}>
 					<i className="fas fa-exclamation-circle pointer p-1 text-danger" />
@@ -53,6 +62,8 @@ ContentPiece.propTypes = {
 	status: PropTypes.string,
 	onDelete: PropTypes.func,
 	onEdit: PropTypes.func,
+	onDown: PropTypes.func,
+	onUp: PropTypes.func,
 	isEditable: PropTypes.bool,
 	technologies: PropTypes.array,
 	translations: PropTypes.array,

@@ -3,102 +3,269 @@
 @import "modals";
 @import "timeline";
 
-body{ background: black; color: #717171; }
-.select-option:hover{ background: #aeb9d5; }
-.pointer{ cursor: pointer; }
-ul li{ list-style: none; }
-li.content-piece{ 
-    font-size: 12px; display: inline-block; background: #BDBDBD; padding: 3px; 
+body {
+    background: black;
+    color: #717171;
+}
+
+.select-option:hover {
+    background: #aeb9d5;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+ul li {
+    list-style: none;
+}
+
+li.content-piece {
+    font-size: 12px;
+    display: inline-block;
+    background: #BDBDBD;
+    padding: 3px;
     border-radius: 3px;
     margin: 1px;
-    i:hover{ background: rgba(0, 0, 0, 0.2) }
-}
-li.content-piece:hover{  background: #ededed; }
 
-.bg-white-light{ background: rgba(255,255,255,0.7) !important;}
-input, textarea{ font-size: 14px; }
-input.transparent, textarea.transparent{
+    i:hover {
+        background: rgba(0, 0, 0, 0.2)
+    }
+}
+
+li.content-piece:hover {
+    background: #ededed;
+}
+
+.bg-white-light {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+input,
+textarea {
+    font-size: 14px;
+}
+
+input.transparent,
+textarea.transparent {
     background: none;
     border: none;
+
     &:focus {
-        outline:none;
+        outline: none;
     }
-    &::placeholder{
+
+    &::placeholder {
         color: #404040;
     }
 }
 
-.content-widget{
+.content-widget {
     font-size: 12px;
-    h3{ 
-        font-size: 16px; text-decoration: underline; cursor: pointer; text-transform: capitalize; 
+
+    h3 {
+        font-size: 16px;
+        text-decoration: underline;
+        cursor: pointer;
+        text-transform: capitalize;
         float: left;
     }
-    select{font-size: 12px;}
-    .search{font-size: 20px;}
+
+    select {
+        font-size: 12px;
+    }
+
+    .search {
+        font-size: 20px;
+    }
 }
-.left-side{
+
+.left-side {
     overflow-y: auto;
     position: fixed;
     height: 100vh;
     padding: 5px;
-    .content{
+
+    .content {
         background: grey;
         padding: 5px;
         margin-bottom: 5px;
-        ul{ padding: 0; }
-        li{cursor: pointer;}
+
+        ul {
+            padding: 0;
+        }
+
+        li {
+            cursor: pointer;
+        }
     }
 }
-.day{
+
+.day {
     color: #303030;
     border-radius: 5px;
     margin-bottom: 5px;
     background: #e4e4e4;
-    input, textarea{
+
+    input,
+    textarea {
         border-radius: 5px;
     }
-    h3{ font-size: 18px; padding: 5px 5px 0px 25px; }
-    h4{ font-size: 16px; padding: 5px 5px 0px 5px; color: $gray-900; }
-    .drag-up,.drag-down{ left: 0; position: absolute; background: black; color: white; padding: 0px 3px; z-index: 2; }
-    .drag-up{ top: 0; border-radius: 5px 0px 0px 0px; }
-    .drag-down{ bottom: 0; border-radius: 0px 0px 0px 5px; }
-    .column{
+
+    h3 {
+        font-size: 18px;
+        padding: 5px 5px 0px 25px;
+    }
+
+    h4 {
+        font-size: 16px;
+        padding: 5px 5px 0px 5px;
+        color: $gray-900;
+    }
+
+    .drag-up,
+    .drag-down {
+        left: 0;
+        position: absolute;
+        background: black;
+        color: white;
+        padding: 0px 3px;
+        z-index: 2;
+    }
+
+    .drag-up {
+        top: 0;
+        border-radius: 5px 0px 0px 0px;
+    }
+
+    .drag-down {
+        bottom: 0;
+        border-radius: 0px 0px 0px 5px;
+    }
+
+    .column {
         padding: 5px;
         width: 25%;
         margin: 2px;
     }
 }
-.bcnotifier{
+
+.bcnotifier {
     display: none;
-    margin: 0; padding: 0;
-    li{ padding: 0; }
-    &.active{ display: block;}
-    .alert{ margin: 0; padding: 0;
-        &.alert-info{ background-color: transparent; border: none; }
+    margin: 0;
+    padding: 0;
+
+    li {
+        padding: 0;
+    }
+
+    &.active {
+        display: block;
+    }
+
+    .alert {
+        margin: 0;
+        padding: 0;
+
+        &.alert-info {
+            background-color: transparent;
+            border: none;
+        }
     }
 }
-.hbar{
+
+.hbar {
     height: 50px;
 }
-.topbar .noti-canvas{
+
+.topbar .noti-canvas {
     background: #BDBDBD;
     padding: 5px;
     text-align: left;
     margin-bottom: 0 0 10px 0;
 }
 
-.spin{
+.position-swap {
+    display: inline-block;
+    width: 20px;
+}
+
+.position-swap i {
+    display: block;
+    padding: 0px 3px;
+    margin: 0px;
+}
+
+.position-swap i:nth-child(2) {
+    margin-top: -5px;
+}
+
+.spin {
     animation-name: spining;
     animation-duration: 5000ms;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
+
 @keyframes spining {
     from {
-        transform:rotate(0deg);
+        transform: rotate(0deg);
     }
+
     to {
-        transform:rotate(360deg);
+        transform: rotate(360deg);
     }
+}
+
+
+/* Toggle Button */
+.cm-toggle {
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    border: 0;
+    outline: 0;
+    cursor: pointer;
+    margin: 10px;
+}
+
+
+/* To create surface of toggle button */
+.cm-toggle:after {
+    content: '';
+    width: 38px;
+    height: 20px;
+    display: inline-block;
+    background: rgba(196, 195, 195, 0.55);
+    border-radius: 18px;
+    clear: both;
+}
+
+
+/* Contents before checkbox to create toggle handle */
+.cm-toggle:before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0px;
+    border-radius: 50%;
+    background: rgb(255, 255, 255);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+
+/* Shift the handle to left on check event */
+.cm-toggle:checked:before,
+.cm-toggle-checked:before {
+    left: 20px;
+    box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Background color when toggle button will be active */
+.cm-toggle:checked:after,
+.cm-toggle-checked:after {
+    background: #16a085;
 }

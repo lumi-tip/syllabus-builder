@@ -7,6 +7,8 @@ import { ToastProvider } from "react-toast-notifications";
 
 export const ContentContext = React.createContext({});
 
+const defaultVal = (value, def) => (value === undefined ? def : value);
+
 const newDay = (id = 0, position = 0, seed = {}) => ({
 	label: "",
 	"key-concepts": [],
@@ -232,14 +234,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 								technologies: d.technologies || [],
 								lessons:
 									d.lessons !== undefined
-										? d.lessons.map(l => {
+										? d.lessons.map((l, position) => {
+												l.position = defaultVal(l.position, position);
 												l.type = "lesson";
 												return l;
 										  })
 										: (d.lessons = []),
 								replits:
 									d.replits !== undefined
-										? d.replits.map(l => {
+										? d.replits.map((l, position) => {
+												l.position = defaultVal(l.position, position);
 												l.type = "replit";
 												return l;
 										  })
@@ -247,27 +251,31 @@ const getState = ({ getStore, getActions, setStore }) => {
 								//from the json it comes like an assignment, but its really a project
 								projects:
 									d.assignments !== undefined
-										? d.assignments.map(p => {
+										? d.assignments.map((a, position) => {
 												const project = projects.find(_pro =>
-													p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
+													a.slug !== undefined ? _pro.slug === a.slug : _pro.slug === a
 												);
 												if (project === undefined) {
 													if (typeof p === "object") {
-														actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+														actions.report().add("warning", `Project not found ${a.slug || a} on position ${i + 1}`, a);
 														return {
-															...p,
+															...a,
 															type: "project"
 														};
 													} else {
-														actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+														actions.report().add("error", `Invalid project ${a} on position ${i + 1}`, a);
 														return {
 															type: "project",
-															slug: p,
+															slug: a,
 															title: "Invalid project"
 														};
 													}
 												}
 
+												project.target = a.target;
+												project.position = defaultVal(a.position, position);
+												project.title = a.title;
+												project.mandatory = a.mandatory;
 												return project;
 										  })
 										: (d.assignments = []),
@@ -275,7 +283,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 									d.quizzes !== undefined
 										? d.quizzes
 												.filter(f => f.slug != undefined)
-												.map(l => {
+												.map((l, position) => {
+													l.position = defaultVal(l.position, position);
 													l.type = "quiz";
 													return l;
 												})
@@ -373,29 +382,33 @@ const getState = ({ getStore, getActions, setStore }) => {
 							slug: p.slug,
 							title: p.title,
 							target: p.target,
+							position: p.position,
 							url: p.url,
-							mandatory: p.mandatory
+							mandatory: defaultVal(p.mandatory, true)
 						})),
 						replits: d.replits.map(e => ({
 							title: e.info != undefined ? e.info.title : e.title,
 							slug: e.info != undefined ? e.info.slug : e.slug,
+							position: e.info != undefined ? e.info.position : e.position,
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						})),
 						quizzes: d.quizzes.map(e => ({
 							title: e.info != undefined ? e.info.name : e.title,
 							target: e.info != undefined ? e.info.target : e.target,
 							slug: e.info != undefined ? e.info.slug : e.slug,
+							position: e.info != undefined ? e.info.position : e.position,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						})),
 						lessons: d.lessons.map(e => ({
 							title: e.title,
 							slug: e.slug.substr(e.slug.indexOf("]") + 1), //remove status like [draft]
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							position: e.info != undefined ? e.info.position : e.position,
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						}))
 					}))
 				};
@@ -486,6 +499,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
+			// only used to update the original asset from the database
 			database: function() {
 				const store = getStore();
 				return {

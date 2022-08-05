@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import ContentPiece from "./content-piece.js";
 
-const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit }) => {
+const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit, onSwap }) => {
 	const [tagToken, setTagToken] = useState(null);
 	return (
 		<div className={`content-widget ${className}`}>
@@ -33,8 +33,18 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 							}
 							return true;
 						})
-						.map((l, i) => {
-							return <ContentPiece withWarning key={i} data={l} status={l.status} onEdit={data => onEdit(l)} />;
+						.map((l, i, _pieces) => {
+							return (
+								<ContentPiece
+									withWarning
+									key={i}
+									data={l}
+									status={l.status}
+									onEdit={data => onEdit(data)}
+									onUp={() => onSwap(_pieces[i], _pieces[i - 1])}
+									onDown={() => onSwap(_pieces[i], _pieces[i + 1])}
+								/>
+							);
 						})}
 				</ul>
 			)}
@@ -46,6 +56,7 @@ ContentWidget.propTypes = {
 	type: PropTypes.string,
 	onRefresh: PropTypes.func,
 	onEdit: PropTypes.func,
+	onSwap: PropTypes.func,
 	onCollapse: PropTypes.func,
 	className: PropTypes.string,
 	loading: PropTypes.bool,
