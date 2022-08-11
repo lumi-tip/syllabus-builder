@@ -335,9 +335,12 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									});
 								}
 
+								// if the new column is empty this will be the first in possition
+								if (item.position === undefined && _data[m.storeName].length === 0) item.data.position = 0;
 								// the position of this new item should be the smallest in the list
-								if (item.position === undefined)
+								else if (item.position === undefined) {
 									item.data.position = _data[m.storeName].sort((a, b) => (a.position > b.position ? 1 : -1))[0].position - 1;
+								}
 
 								actions.pieces().in(item, {
 									id: _data.id,
