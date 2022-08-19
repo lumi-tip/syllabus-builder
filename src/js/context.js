@@ -92,6 +92,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									.all()
 									.then(_data => {
 										let data = _data.data || _data;
+										data = data.results || data;
 										if (!Array.isArray(data)) data = Object.values(data);
 										const newStore = {
 											[mapEntity[entity]]: data
