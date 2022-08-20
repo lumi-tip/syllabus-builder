@@ -15,7 +15,11 @@ body {
 .pointer {
     cursor: pointer;
 }
-
+.trash-day{
+    position: absolute;
+    right: 10px;
+    top: 5px;
+}
 ul li {
     list-style: none;
 }

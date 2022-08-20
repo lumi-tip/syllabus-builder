@@ -22,17 +22,17 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 					{!newDay ? (
 						<>
 							<div className="modal-header">
-								<h5 className="modal-title">New Day</h5>
+								<h5 className="modal-title">New module</h5>
 							</div>
 							<div className="modal-body text-center">
-								<p>You can import a day from another syllabus o add a brand new day </p>
+								<p>You can import a module from another syllabus o add a brand new module </p>
 							</div>
 							<div className="modal-footer">
 								<button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => onConfirm(false)}>
 									Close
 								</button>
 								<button type="button" className="btn btn-primary" onClick={() => setNewDay(true)}>
-									Import a day{" "}
+									Import a module{" "}
 								</button>
 								<button
 									type="button"
@@ -41,14 +41,14 @@ const NewDayModal = ({ onConfirm, store, actions, index = null }) => {
 										actions.days().add(index);
 										onConfirm(false);
 									}}>
-									Add a new day
+									Add a new module
 								</button>
 							</div>
 						</>
 					) : (
 						<>
 							<div className="modal-header">
-								<h5 className="modal-title">New Day</h5>
+								<h5 className="modal-title">New Module</h5>
 							</div>
 							<div className="modal-body p-0">
 								<div className="row">

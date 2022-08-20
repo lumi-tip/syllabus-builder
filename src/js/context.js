@@ -232,6 +232,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								...d,
 								id: i + 1,
 								position: i + 1,
+								duration_in_days: d.duration_in_days || 1,
 								technologies: d.technologies || [],
 								lessons:
 									d.lessons !== undefined
@@ -371,6 +372,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					...store.info,
 					days: store.days.map(d => ({
 						...d,
+						duration_in_days: d.duration_in_days || 1,
 						projects: undefined,
 						project:
 							d.projects.length == 0

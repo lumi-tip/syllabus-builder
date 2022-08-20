@@ -141,20 +141,32 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<i className="fas fa-chevron-down" />
 				</div>
 			)}
-			<h3>
-				Module {_data.position}:{" "}
-				<div className={"pointer float-right"} onClick={() => onDelete(_data.id)}>
+			<div className="d-flex">
+				<div className={"pointer trash-day"} onClick={() => onDelete(_data.id)}>
 					<i className="fas fa-trash" />
 				</div>
+				<h3>Module {_data.position}: </h3>
 				<SmartInput
 					className="transparent"
-					style={{ width: "300px" }}
-					placeholder="Today's topic (very short)..."
+					style={{ width: "fit-content", maxWidth: "300px", minWidth: "100px" }}
+					placeholder="Type Today's topic (very short)..."
 					maxLength={25}
 					onChange={label => actions.days().update(_data.id, { ..._data, label })}
 					initialValue={_data.label}
 				/>
-			</h3>
+				<div className="pt-1">
+					Duration:
+					<SmartInput
+						className="border border-secondary"
+						type="number"
+						style={{ width: "40px" }}
+						maxLength={2}
+						onChange={v => actions.days().update(_data.id, { ..._data, duration_in_days: parseInt(v) })}
+						initialValue={_data.duration_in_days.toString()}
+					/>
+					Days
+				</div>
+			</div>
 			<div className="row no-gutters">
 				<div className="col-6 pl-1">
 					<SmartInput
