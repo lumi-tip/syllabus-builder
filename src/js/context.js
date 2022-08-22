@@ -51,7 +51,8 @@ const defaultSyllabusInfo = {
 	version: "",
 	profile: null,
 	description: "",
-	academy_author: null
+	academy_author: null,
+	duration_in_days: 0
 };
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
@@ -217,6 +218,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					let content = JSON.parse(data.content);
+
+					let { duration_in_days, status, duration_in_hours } = content; // get general info form the syllabus
+
 					let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
 					actions.report().clear(); //clear noticications
 
@@ -294,9 +298,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 							};
 						})
 					});
+
 					actions.setInfo({
 						slug: info.profile,
 						profile: info.profile,
+						duration_in_days: duration_in_days || 0,
+						duration_in_hours: duration_in_hours || 0,
 						label,
 						description,
 						version: info.version
@@ -352,6 +359,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 								actions.setInfo({
 									slug: info.profile,
 									profile: info.profile,
+									duration_in_days: info.duration_in_days,
+									duration_in_hours: info.duration_in_hours,
+									status: info.status,
 									label,
 									description,
 									version: info.version

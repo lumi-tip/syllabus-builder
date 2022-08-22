@@ -10,6 +10,7 @@ export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
 	const [openSearchOnSyllabus, setOpenSearchOnSyllabus] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [syllabusStatus, setSyllabusStatus] = useState({
 		status: "btn-dark",
 		messages: []
@@ -17,6 +18,7 @@ export const TopBar = () => {
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 	const academy = store.academies.find(a => a.id == store.info.academy_author);
+	const total_days = store.days.reduce((prev, curr) => prev + (curr.duration_in_days || 1), 0);
 	return (
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
@@ -31,9 +33,18 @@ export const TopBar = () => {
 				</div>
 			</div>
 			<div className="d-flex">
-				<p className="mt-0 p-0 text-left w-100">
-					Syllabus: {store.info.slug && store.info.slug != "" ? `${store.info.slug} v${store.info.version}` : "No syllabus selected"}
-				</p>
+				{store.info.slug && store.info.slug != "" ? (
+					<p className="mt-0 p-0 text-left w-100">
+						<span>
+							Syllabus: {store.info.slug} v{store.info.version} -
+						</span>
+						<span className={`ml-1 ${store.info.duration_in_days < total_days ? "text-danger" : ""}`}>
+							Days: {total_days} / {store.info.duration_in_days}
+						</span>
+					</p>
+				) : (
+					<p className="mt-0 p-0 text-left w-100">No syllabus selected</p>
+				)}
 			</div>
 			{openNoti && (
 				<ul className="noti-canvas">
@@ -88,14 +99,40 @@ export const TopBar = () => {
 							}}>
 							<i className="fas fa-ban" /> Clear
 						</button>
-						{!["", "new version"].includes(store.info.version) && store.info.version && (
-							<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmEditSillabus(store, actions)}>
-								<i className="fas fa-save" /> Save
+						<div className="dropdown d-inline">
+							<button
+								className="btn btn-primary btn-sm mr-2 dropdown-toggle"
+								type="button"
+								disabled={loading}
+								id="dropdownMenuButton"
+								data-toggle="dropdown"
+								aria-haspopup="true"
+								aria-expanded="false">
+								{loading ? (
+									"Loading..."
+								) : (
+									<>
+										<i className="fas fa-save" /> Save
+									</>
+								)}
 							</button>
-						)}
-						<button className="btn btn-primary btn-sm mr-2" onClick={() => confirmSaveSillabus(store, actions)}>
-							<i className="fas fa-save" /> Save as new...
-						</button>
+							<div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								{!["", "new version"].includes(store.info.version) && store.info.version && (
+									<a
+										className="dropdown-item"
+										href="#"
+										onClick={() => setLoading(true) || confirmEditSillabus(store, actions).then(() => setLoading(false))}>
+										Update <strong>same version</strong>
+									</a>
+								)}
+								<a
+									className="dropdown-item"
+									href="#"
+									onClick={() => setLoading(true) || confirmSaveSillabus(store, actions).then(() => setLoading(false))}>
+									Create new version
+								</a>
+							</div>
+						</div>
 						<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.download()}>
 							<i className="fas fa-file-download" /> Export
 						</button>
@@ -127,11 +164,42 @@ export const TopBar = () => {
 	);
 };
 
+const waitSeconds = miliseconds =>
+	new Promise((resolve, reject) => {
+		setTimeout(() => {
+			resolve(true);
+		}, miliseconds);
+	});
 const confirmEditSillabus = async (store, actions) => {
-	if (store.info.slug !== "" && store.days.length > 0) {
+	let errors = [];
+	await waitSeconds(2000); //wait to seconds
+	const total_days = store.days.reduce((prev, curr) => prev + (curr.duration_in_days || 1), 0);
+	if (total_days > store.info.duration_in_days) {
+		errors.push({
+			title: `Syllabus has to many days: ${total_days}`,
+			text: `The syllabus should have no more than ${store.info.duration_in_days} days, currently it has ${total_days}. You can either delete some days or update the total expected days on the admin.`
+		});
+	}
+	if (store.info.slug === "") {
+		errors.push({
+			title: "Syllabus details can't be empty",
+			text: "Please fill the syllabus details to save"
+		});
+	}
+	if (store.days.length === 0) {
+		errors.push({
+			title: "Syllabus without days",
+			text: "Syllabus can't be saved without days, please add new days to the syllabus"
+		});
+	}
+
+	if (errors.length > 0) {
+		await swal({ ...errors[0] });
+		return false;
+	} else {
 		const willEdit = await swal({
 			title: "Are you sure?",
-			text: "Update a PREVIOUS version " + store.info.version,
+			text: `Update a PREVIOUS version ${store.info.version} with ${total_days} days`,
 			icon: "warning",
 			buttons: true,
 			dangerMode: true
@@ -140,32 +208,20 @@ const confirmEditSillabus = async (store, actions) => {
 			try {
 				//                                      ↓ false means saving under the same version
 				const data = await actions.saveSyllabus(false);
-				swal("Syllabus version " + store.info.version + " update successfully", {
+				await swal("Syllabus version " + store.info.version + " update successfully", {
 					icon: "success"
 				});
 			} catch (error) {
 				console.error("Error updating syllabus: ", error);
-				swal(error.message || error.msg || error, {
+				await swal(error.message || error.msg || error, {
 					icon: "error"
 				});
 			}
+			return true;
 		} else {
-			swal("Operation canceled by user");
+			await swal("Operation canceled by user");
+			return false;
 		}
-	} else if (store.info.slug === "") {
-		swal({
-			title: "Syllabus details can't be empty",
-			text: "Please fill the syllabus details to save",
-			icon: "error",
-			button: "OK"
-		});
-	} else if (store.days.length === 0) {
-		swal({
-			title: "Syllabus without days",
-			text: "A new syllabus version can't be saved without days, please add new days to the syllabus",
-			icon: "error",
-			button: "OK"
-		});
 	}
 };
 
