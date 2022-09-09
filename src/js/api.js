@@ -1,6 +1,6 @@
 /* global fetch, localStorage, window */
 import swal from "sweetalert";
-import getCurrentUrl from "./utils/get-current-url";
+import { getCurrentUrl } from "./utils/url";
 import { getAPIErrors } from "./component/utils";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");

@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
 import NewDay from "./component/modals/NewDayModal";
-import getCurrentUrl from "./utils/get-current-url";
+import { getCurrentUrl, getUrlParams } from "./utils/url";
 
 //include your index.scss file into the bundle
 
@@ -24,6 +24,7 @@ const params = new URLSearchParams(window.location.search);
 const API_KEY = params.get("token");
 
 const Main = injectContent(() => {
+	const params = getUrlParams();
 	const { store, actions } = useContext(ContentContext);
 	const [sidebarWidth, setSidebarWidth] = useState("350px");
 	const [editExtendedDay, setEditExtendedDay] = useState(null);

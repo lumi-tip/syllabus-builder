@@ -13,18 +13,7 @@ const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
 	const [loading, setLoading] = useState(false);
 	return (
 		<div className="sidebar position-fixed" style={{ width }}>
-			{editAsset && (
-				<EditContentPiece
-					style={{ position: "static" }}
-					defaultValue={editAsset}
-					onSave={async _piece => {
-						const result = await onCreateAsset(_piece);
-						setEditAsset(null);
-						return result;
-					}}
-					onCancel={() => setEditAsset(null)}
-				/>
-			)}
+			{editAsset && <EditContentPiece style={{ position: "static" }} defaultValue={editAsset} onCancel={() => setEditAsset(null)} />}
 			{currentType ? (
 				<div className="d-flex mb-2">
 					<button

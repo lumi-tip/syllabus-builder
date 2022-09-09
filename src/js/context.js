@@ -4,7 +4,7 @@ import API from "./api.js";
 import swal from "sweetalert";
 import { urls, serialize } from "./component/utils";
 import { ToastProvider } from "react-toast-notifications";
-
+import { getUrlParams } from "./utils/url";
 export const ContentContext = React.createContext({});
 
 const defaultVal = (value, def) => (value === undefined ? def : value);
@@ -84,7 +84,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			fetch: (models, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
-				console.log("fetching ", models);
+				// console.log("fetching ", models);
 				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
@@ -306,7 +306,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						duration_in_hours: duration_in_hours || 0,
 						label,
 						description,
-						version: info.version
+						version: content.version
 					});
 				} else
 					new Promise((resolve, reject) => {
@@ -567,7 +567,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const meta = {
 					academy_author: academy,
 					profile,
-					version,
 					slug: profile
 				};
 				const _store = { ...store, info: { ...store.info, ...meta } };
@@ -760,7 +759,12 @@ export function injectContent(Child) {
 		useEffect(() => {
 			const slug = window.location.hash.replace("#", "");
 			const previousStore = localStorage.getItem("syllabus-" + slug);
-			if (typeof previousStore === "string" && previousStore != "") {
+			const params = getUrlParams();
+
+			if (params.academy && params.syllabus) {
+				API.setOptions({ academy: params.academy });
+				state.actions.getApiSyllabusVersion(params.academy, params.syllabus, params.version || "latest");
+			} else if (typeof previousStore === "string" && previousStore != "") {
 				const newStore = JSON.parse(previousStore);
 				state.actions.setStore(newStore);
 				API.setOptions({ academy: newStore.info.academy_author });

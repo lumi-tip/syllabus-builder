@@ -1,10 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { ContentContext } from "../context.js";
 import swal from "@sweetalert/with-react";
 import { Notify } from "bc-react-notifier";
 import { UploadSyllabus, SyllabusDetails } from "./modal";
+import Dropdown from "./dropdown";
 import SearchSyllabus from "./modals/SearchOnSyllabus";
-import NewDay from "../component/modals/NewDayModal";
+import API from "../api.js";
 
 export const TopBar = () => {
 	const { store, actions } = useContext(ContentContext);
@@ -19,6 +20,7 @@ export const TopBar = () => {
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 	const academy = store.academies.find(a => a.id == store.info.academy_author);
 	const total_days = store.days.reduce((prev, curr) => prev + (curr.duration_in_days || 1), 0);
+
 	return (
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
@@ -34,14 +36,20 @@ export const TopBar = () => {
 			</div>
 			<div className="d-flex">
 				{store.info.slug && store.info.slug != "" ? (
-					<p className="mt-0 p-0 text-left w-100">
-						<span>
-							Syllabus: {store.info.slug} v{store.info.version} -
-						</span>
+					<div className="mt-0 p-0 text-left w-100">
+						<span>Syllabus: {store.info.slug} </span>
+						<Dropdown
+							label={`v${store.info.version}`}
+							options={async () => {
+								const versions = await API.profile().version(store.info.slug);
+								return versions.map(v => ({ label: `v${v.version}`, value: v }));
+							}}
+							onChange={opt => actions.getApiSyllabusVersion(academy.id, store.info.slug, opt.value.version)}
+						/>
 						<span className={`ml-1 ${store.info.duration_in_days < total_days ? "text-danger" : ""}`}>
-							Days: {total_days} / {store.info.duration_in_days}
+							takes {total_days} of {store.info.duration_in_days} planned days.
 						</span>
-					</p>
+					</div>
 				) : (
 					<p className="mt-0 p-0 text-left w-100">No syllabus selected</p>
 				)}
@@ -121,7 +129,11 @@ export const TopBar = () => {
 									<a
 										className="dropdown-item"
 										href="#"
-										onClick={() => setLoading(true) || confirmEditSillabus(store, actions).then(() => setLoading(false))}>
+										onClick={e => {
+											e.preventDefault();
+											setLoading(true);
+											confirmEditSillabus(store, actions).then(() => setLoading(false));
+										}}>
 										Update <strong>same version</strong>
 									</a>
 								)}
