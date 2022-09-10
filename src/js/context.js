@@ -176,6 +176,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 									? d.assignments.map(p => {
 											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
 											if (project === undefined) {
+												console.log("project not found", p);
 												if (typeof p === "object") {
 													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
 													return {
@@ -183,6 +184,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 														type: "project"
 													};
 												} else {
+													console.log("invalid project", p);
 													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
 													return {
 														type: "project",
@@ -262,13 +264,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 													a.slug !== undefined ? _pro.slug === a.slug : _pro.slug === a
 												);
 												if (project === undefined) {
-													if (typeof p === "object") {
+													if (typeof a === "object") {
 														actions.report().add("warning", `Project not found ${a.slug || a} on position ${i + 1}`, a);
 														return {
 															...a,
 															type: "project"
 														};
 													} else {
+														console.log("invalid project", a);
 														actions.report().add("error", `Invalid project ${a} on position ${i + 1}`, a);
 														return {
 															type: "project",
@@ -306,7 +309,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 						duration_in_hours: duration_in_hours || 0,
 						label,
 						description,
-						version: content.version
+						version: content.version,
+						status: content.status
 					});
 				} else
 					new Promise((resolve, reject) => {

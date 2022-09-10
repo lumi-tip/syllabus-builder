@@ -37,18 +37,25 @@ export const TopBar = () => {
 			<div className="d-flex">
 				{store.info.slug && store.info.slug != "" ? (
 					<div className="mt-0 p-0 text-left w-100">
-						<span>Syllabus: {store.info.slug} </span>
+						<span>Syllabus: {store.info.slug}</span>
 						<Dropdown
 							label={`v${store.info.version}`}
 							options={async () => {
-								const versions = await API.profile().version(store.info.slug);
+								const versions = await API.profile(store.info.slug).getAllVersions();
 								return versions.map(v => ({ label: `v${v.version}`, value: v }));
 							}}
 							onChange={opt => actions.getApiSyllabusVersion(academy.id, store.info.slug, opt.value.version)}
 						/>
 						<span className={`ml-1 ${store.info.duration_in_days < total_days ? "text-danger" : ""}`}>
-							takes {total_days} of {store.info.duration_in_days} planned days.
+							takes {total_days} of {store.info.duration_in_days} planned days, status:
 						</span>
+						<Dropdown
+							label={store.info.status}
+							options={async () => {
+								return ["DRAFT", "PUBLISHED"].filter(v => v != store.info.version).map(v => ({ label: v, value: v }));
+							}}
+							onChange={opt => API.profile(store.info.slug).updateVersion(store.info.version, { status: opt.value })}
+						/>
 					</div>
 				) : (
 					<p className="mt-0 p-0 text-left w-100">No syllabus selected</p>

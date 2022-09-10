@@ -90,7 +90,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	useEffect(() => {
 		const profileEffects = async () => {
 			actions.cleanSyllabus({ academy, profile: profile?.slug });
-			let versions = await API.profile().version(profile?.slug);
+			let versions = await API.profile(profile?.slug).getAllVersions();
 			if (versions.length === 0) versions = [{ version: "new version", value: "new version" }];
 			setVersionOptions(versions.sort((a, b) => (a.version > b.version ? 1 : -1)));
 		};

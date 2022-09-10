@@ -383,13 +383,13 @@ class Wrapper {
 			}
 		};
 	}
-	profile() {
+	profile(syllabusSlug) {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
 				return this.get(url + "/admissions/syllabus");
 			},
-			version: syllabusSlug => {
+			getAllVersions: () => {
 				return this.get(`${url}/admissions/syllabus/${syllabusSlug}/version`);
 			},
 			get: id => {
@@ -400,6 +400,9 @@ class Wrapper {
 			},
 			update: (id, args) => {
 				return this.post(url + "/profile/" + id, args);
+			},
+			updateVersion: (versionNumber, args) => {
+				return this.put(`${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}`, args);
 			},
 			delete: id => {
 				return this.delete(url + "/profile/" + id);

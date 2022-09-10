@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 const Dropdown = ({ label, options, onChange }) => {
-	const [loading, setLoading] = useState(false);
+	const [status, setStatus] = useState(false);
 	const [optValues, setOptValues] = useState([]);
 
 	useEffect(() => {
@@ -13,12 +13,18 @@ const Dropdown = ({ label, options, onChange }) => {
 			<button
 				className="btn btn-light text-secondary btn-sm p-0 dropdown-toggle"
 				type="button"
-				disabled={loading}
+				disabled={status === "loading"}
 				id="dropdownMenuButton"
 				data-toggle="dropdown"
 				aria-haspopup="true"
 				aria-expanded="false">
-				{loading ? <i className="fas fa-sync spin" /> : label}
+				{status === "loading" ? (
+					<i className="fas fa-sync spin" />
+				) : status === "error" ? (
+					<i className="fas fa-exclamation-circle text-danger"></i>
+				) : (
+					label
+				)}
 			</button>
 			<div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
 				{optValues.length == 0 && <span>No options</span>}
@@ -30,8 +36,10 @@ const Dropdown = ({ label, options, onChange }) => {
 						onClick={e => {
 							e.preventDefault();
 							if (onChange) {
-								setLoading(true);
-								onChange(o).then(() => setLoading(false));
+								setStatus(true);
+								onChange(o)
+									.then(() => setStatus("success"))
+									.catch(() => setStatus("error"));
 							}
 						}}>
 						{o.label}
