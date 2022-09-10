@@ -54,7 +54,11 @@ export const TopBar = () => {
 							options={async () => {
 								return ["DRAFT", "PUBLISHED"].filter(v => v != store.info.version).map(v => ({ label: v, value: v }));
 							}}
-							onChange={opt => API.profile(store.info.slug).updateVersion(store.info.version, { status: opt.value })}
+							onChange={opt =>
+								API.profile(store.info.slug)
+									.updateVersion(store.info.version, { status: opt.value })
+									.then(() => actions.setInfo({ status: opt.value }))
+							}
 						/>
 					</div>
 				) : (
