@@ -1,8 +1,13 @@
 
 
+.sidebar-btn{
+    z-index: 100;
+    top: 56px;
+    left: 10px;
+}
 .sidebar{
     width: 300px;
-    z-index: 1;
+    z-index: 100;
     background: #272727;
     color: white;
     height: 100vh;

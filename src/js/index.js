@@ -24,9 +24,8 @@ const params = new URLSearchParams(window.location.search);
 const API_KEY = params.get("token");
 
 const Main = injectContent(() => {
-	const params = getUrlParams();
 	const { store, actions } = useContext(ContentContext);
-	const [sidebarWidth, setSidebarWidth] = useState("350px");
+	const [sidebarWidth, setSidebarWidth] = useState("300px");
 	const [editExtendedDay, setEditExtendedDay] = useState(null);
 	const [openNewDay, setOpenNewDay] = useState(false);
 	const [index, setIndex] = useState(0);
@@ -78,9 +77,9 @@ const Main = injectContent(() => {
 				<div className="d-flex">
 					<Sidebar
 						content={store}
-						width={sidebarWidth}
 						onRefresh={type => actions.fetch([type], true)}
 						onCreateAsset={async piece => await actions.database().add(piece)}
+						onCollapse={() => setSidebarWidth(sidebarWidth === "0px" ? "300px" : "0px")}
 					/>
 					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
 						<Notifier />

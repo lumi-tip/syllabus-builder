@@ -181,14 +181,20 @@ textarea.transparent {
 .hbar {
     height: 50px;
 }
-
+.topbar{
+    z-index: 99 !important;
+    border-bottom: solid 2px #3b3b3b;
+}
 .topbar .noti-canvas {
     background: #BDBDBD;
     padding: 5px;
     text-align: left;
     margin-bottom: 0 0 10px 0;
 }
-
+.btn-black{
+    background: #161819 !important;
+    border: none !important;
+}
 .position-swap {
     display: inline-block;
     width: 20px;

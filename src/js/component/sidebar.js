@@ -5,12 +5,23 @@ import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
 import { useToasts } from "react-toast-notifications";
 
-const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
+const Sidebar = ({ content, onRefresh, onCollapse, width }) => {
 	const { addToast } = useToasts();
 	const [currentType, setCurrentType] = useState(null);
 	const [editAsset, setEditAsset] = useState(null);
 	const [searchToken, setSearchToken] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [collapsed, setCollapsed] = useState(false);
+
+	if (collapsed)
+		return (
+			<button
+				className="btn btn-sm btn-dark br-0 back-btn position-fixed sidebar-btn"
+				onClick={() => setCollapsed(!collapsed) || onCollapse(!collapsed)}>
+				<i className="fas fa-plus-circle"></i> Add content
+			</button>
+		);
+
 	return (
 		<div className="sidebar position-fixed" style={{ width }}>
 			{editAsset && <EditContentPiece style={{ position: "static" }} defaultValue={editAsset} onCancel={() => setEditAsset(null)} />}
@@ -62,7 +73,17 @@ const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
 					</button>
 				</div>
 			) : (
-				<p className="m-0 p-2">Registry</p>
+				<div className="d-flex">
+					<p className="m-0 p-2 w-100">Registry</p>
+					<button
+						style={{
+							width: "90px"
+						}}
+						className="btn btn-sm btn-dark btn-black br-0 back-btn m-2"
+						onClick={() => setCollapsed(!collapsed) || onCollapse(!collapsed)}>
+						<i className="fas fa-angle-double-left"></i>
+					</button>
+				</div>
 			)}
 			{mappers
 				.filter(w => !currentType || w.type === currentType)
@@ -94,13 +115,13 @@ const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
 };
 Sidebar.propTypes = {
 	onRefresh: PropTypes.func,
-	onCreateAsset: PropTypes.func,
+	onCollapse: PropTypes.func,
 	content: PropTypes.object,
 	width: PropTypes.string
 };
 Sidebar.defaultProps = {
 	onRefresh: null,
-	onCreateAsset: null,
+	onCollapse: null,
 	width: "300px",
 	content: {}
 };

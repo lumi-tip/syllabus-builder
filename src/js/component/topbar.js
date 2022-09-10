@@ -168,7 +168,7 @@ export const TopBar = () => {
 				<button className="btn btn-dark btn-sm" onClick={() => setOpenSyllabusDetails(true)}>
 					<i className="fas fa-plus" /> Load
 				</button>
-				<button className="btn btn-dark btn-sm" onClick={() => setOpenSearchOnSyllabus(true)}>
+				<button className="btn btn-dark btn-sm ml-2" onClick={() => setOpenSearchOnSyllabus(true)}>
 					<i className="fas fa-zoom" /> Search
 				</button>
 			</div>
