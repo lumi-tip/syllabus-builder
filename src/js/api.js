@@ -226,7 +226,7 @@ class Wrapper {
 				return this.post(url + "/registry/asset", args);
 			},
 			testSyllabus: args => {
-				return this.post(url + "/registry/syllabus/test", args);
+				return this.post(url + "/admissions/syllabus/test", args);
 			},
 			searchOnJSON: slug => {
 				return this.get(url + "/admissions/admin/syllabus/asset/" + slug);

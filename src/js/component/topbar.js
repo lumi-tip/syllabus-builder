@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { ContentContext } from "../context.js";
 import swal from "@sweetalert/with-react";
 import { Notify } from "bc-react-notifier";
-import { UploadSyllabus, SyllabusDetails } from "./modal";
+import { UploadSyllabus, SyllabusDetails, IntegrityReport } from "./modal";
 import Dropdown from "./dropdown";
 import SearchSyllabus from "./modals/SearchOnSyllabus";
 import API from "../api.js";
@@ -14,7 +14,8 @@ export const TopBar = () => {
 	const [loading, setLoading] = useState(false);
 	const [syllabusStatus, setSyllabusStatus] = useState({
 		status: "btn-dark",
-		messages: []
+		messages: [],
+		showReport: false
 	});
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
@@ -25,6 +26,9 @@ export const TopBar = () => {
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
 			{openSearchOnSyllabus && <SearchSyllabus actions={actions} onCancel={() => setOpenSearchOnSyllabus(false)} />}
+			{syllabusStatus.showReport && syllabusStatus.messages && (
+				<IntegrityReport messages={syllabusStatus.messages} onClose={() => setSyllabusStatus({ ...syllabusStatus, showReport: false })} />
+			)}
 			<div className="d-flex">
 				<p className="m-0 p-0 text-left w-100">Academy: {academy ? academy.name : "Uknown"}</p>
 				<div
@@ -83,23 +87,30 @@ export const TopBar = () => {
 							onClick={() => {
 								actions
 									.test()
-									.then(data =>
+									.then(report =>
 										setSyllabusStatus({
-											status: "btn-success",
-											messages: []
+											status: report.errors > 0 ? "btn-danger" : report.warnings > 0 ? "btn-warning" : "btn-success",
+											messages: report,
+											showReport: true
 										})
 									)
-									.catch(async error => {
+									.catch(async report => {
+										let _report = report;
+										const showReport = Array.isArray(_report.msg?.errors);
 										setSyllabusStatus({
+											showReport,
 											status: "btn-danger",
-											messages: [error.detail || error.msg]
+											messages: showReport ? _report.msg : null
 										});
-										await swal({
-											title: "Errors found on syllabus",
-											text: error.detail || error.msg,
-											icon: "error",
-											dangerMode: true
-										});
+										if (showReport) {
+											return _report.msg;
+										} else
+											return await swal({
+												title: "Errors found on syllabus",
+												text: "Please test your syllabus before submiting and review the integrity report.",
+												icon: "error",
+												dangerMode: true
+											});
 									});
 							}}>
 							<i className="fas fa-check" /> Test

@@ -91,6 +91,8 @@ export const getAPIErrors = payload => {
 
 	if (payload.detail !== undefined || payload.details !== undefined) return payload.detail || payload.details;
 
+	if (Array.isArray(payload.errors)) return payload;
+
 	for (let field in payload) {
 		errors.push(`Invalid ${field}: ${payload[field]}`);
 	}

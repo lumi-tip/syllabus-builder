@@ -557,10 +557,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			test: async () => {
 				const store = getStore();
 				try {
-					const resp = await API.registry().testSyllabus({
+					const report = await API.registry().testSyllabus({
 						days: store.days
 					});
-					return true;
+					return report;
 				} catch (error) {
 					throw error;
 				}
