@@ -226,7 +226,7 @@ class Wrapper {
 				return this.post(url + "/registry/asset", args);
 			},
 			testSyllabus: args => {
-				return this.post(url + "/admissions/syllabus/test", args);
+				return this.post(url + "/admissions/syllabus/test?ignore=assignments", args);
 			},
 			searchOnJSON: slug => {
 				return this.get(url + "/admissions/admin/syllabus/asset/" + slug);
@@ -402,7 +402,8 @@ class Wrapper {
 				return this.post(url + "/profile/" + id, args);
 			},
 			updateVersion: (versionNumber, args) => {
-				return this.put(`${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}`, args);
+				console.log("welelele", `${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}?ignore=projects`);
+				return this.put(`${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}?ignore=projects`, args);
 			},
 			delete: id => {
 				return this.delete(url + "/profile/" + id);

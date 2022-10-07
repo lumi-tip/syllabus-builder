@@ -448,8 +448,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (!newVersion && store.info.version == "null") throw Error("Please pick a syllabus version");
 				else if (store.info.version === "new") newVersion = true;
 				const url = newVersion
-					? API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version"
-					: API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version/" + store.info.version;
+					? API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version" + "?ignore=projects"
+					: API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version/" + store.info.version + "?ignore=projects";
+				console.log("wajajaja", url);
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const resp = await fetch(url, {
