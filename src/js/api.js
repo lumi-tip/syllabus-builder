@@ -402,7 +402,6 @@ class Wrapper {
 				return this.post(url + "/profile/" + id, args);
 			},
 			updateVersion: (versionNumber, args) => {
-				console.log("welelele", `${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}?ignore=projects`);
 				return this.put(`${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}?ignore=projects`, args);
 			},
 			delete: id => {
