@@ -2,12 +2,13 @@ import React, { useContext, useState, useEffect } from "react";
 import { ContentContext } from "../context.js";
 import swal from "@sweetalert/with-react";
 import { Notify } from "bc-react-notifier";
+import PropTypes from "prop-types";
 import { UploadSyllabus, SyllabusDetails, IntegrityReport } from "./modal";
 import Dropdown from "./dropdown";
 import SearchSyllabus from "./modals/SearchOnSyllabus";
 import API from "../api.js";
 
-export const TopBar = () => {
+export const TopBar = ({ readOnly }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [openNoti, setOpenNoti] = useState(false);
 	const [openSearchOnSyllabus, setOpenSearchOnSyllabus] = useState(false);
@@ -25,7 +26,7 @@ export const TopBar = () => {
 	return (
 		<div className="topbar text-right px-3 pt-1 pb-2 position-sticky sticky-top bg-light">
 			{openSyllabusDetails && <SyllabusDetails onConfirm={confirm => setOpenSyllabusDetails(false)} />}
-			{openSearchOnSyllabus && <SearchSyllabus actions={actions} onCancel={() => setOpenSearchOnSyllabus(false)} />}
+			{openSearchOnSyllabus && <SearchSyllabus readOnly={readOnly} actions={actions} onCancel={() => setOpenSearchOnSyllabus(false)} />}
 			{syllabusStatus.showReport && syllabusStatus.messages && (
 				<IntegrityReport messages={syllabusStatus.messages} onClose={() => setSyllabusStatus({ ...syllabusStatus, showReport: false })} />
 			)}
@@ -53,17 +54,21 @@ export const TopBar = () => {
 						<span className={`ml-1 ${store.info.duration_in_days < total_days ? "text-danger" : ""}`}>
 							takes {total_days} of {store.info.duration_in_days} planned days, status:
 						</span>
-						<Dropdown
-							label={store.info.status}
-							options={async () => {
-								return ["DRAFT", "PUBLISHED"].filter(v => v != store.info.version).map(v => ({ label: v, value: v }));
-							}}
-							onChange={opt =>
-								API.profile(store.info.slug)
-									.updateVersion(store.info.version, { status: opt.value })
-									.then(() => actions.setInfo({ status: opt.value }))
-							}
-						/>
+						{readOnly ? (
+							<span>{store.info.status}</span>
+						) : (
+							<Dropdown
+								label={store.info.status}
+								options={async () => {
+									return ["DRAFT", "PUBLISHED"].filter(v => v != store.info.version).map(v => ({ label: v, value: v }));
+								}}
+								onChange={opt =>
+									API.profile(store.info.slug)
+										.updateVersion(store.info.version, { status: opt.value })
+										.then(() => actions.setInfo({ status: opt.value }))
+								}
+							/>
+						)}
 					</div>
 				) : (
 					<p className="mt-0 p-0 text-left w-100">No syllabus selected</p>
@@ -80,7 +85,7 @@ export const TopBar = () => {
 				</ul>
 			)}
 			<div>
-				{notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
+				{!readOnly && notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
 						<button
 							className={`btn ${syllabusStatus.status} btn-sm mr-2`}
@@ -196,6 +201,13 @@ export const TopBar = () => {
 			</div>
 		</div>
 	);
+};
+TopBar.propTypes = {
+	readOnly: PropTypes.bool
+};
+
+TopBar.defaultProps = {
+	readOnly: true
 };
 
 const waitSeconds = miliseconds =>

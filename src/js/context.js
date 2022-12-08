@@ -221,7 +221,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					let content = JSON.parse(data.content);
 
-					let { duration_in_days, status, duration_in_hours } = content; // get general info form the syllabus
+					let { duration_in_days, status, duration_in_hours, academy_owner } = content; // get general info form the syllabus
 
 					let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
 					actions.report().clear(); //clear noticications
@@ -305,6 +305,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					actions.setInfo({
 						slug: info.profile,
 						profile: info.profile,
+						academy_author: academy_owner.id || academy_owner,
 						duration_in_days: duration_in_days || 0,
 						duration_in_hours: duration_in_hours || 0,
 						label,
@@ -321,7 +322,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								} else throw new Error("There was an error code " + resp.status);
 							})
 							.then(json => {
-								let { days, label, description, weeks } = json;
+								let { days, label, description, weeks, academy_owner } = json;
 								if (weeks)
 									days = weeks
 										.map(w => w.days)
@@ -363,6 +364,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								actions.setInfo({
 									slug: info.profile,
 									profile: info.profile,
+									academy_author: academy_owner.id || academy_owner,
 									duration_in_days: info.duration_in_days,
 									duration_in_hours: info.duration_in_hours,
 									status: info.status,
@@ -768,7 +770,13 @@ export function injectContent(Child) {
 
 			if (params.academy && params.syllabus) {
 				API.setOptions({ academy: params.academy });
-				state.actions.getApiSyllabusVersion(params.academy, params.syllabus, params.version || "latest");
+				state.actions.getApiSyllabusVersion(params.academy, params.syllabus, params.version || "latest").catch(e => {
+					console.error(e);
+					swal({
+						icon: "error",
+						text: `Error fetching syllabus, we could find a 'latest' version for syllabus ${params.syllabus} and academy ${params.academy}`
+					});
+				});
 			} else if (typeof previousStore === "string" && previousStore != "") {
 				const newStore = JSON.parse(previousStore);
 				state.actions.setStore(newStore);

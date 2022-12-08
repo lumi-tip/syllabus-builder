@@ -103,7 +103,9 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	useEffect(() => {
 		const versionEffects = async () => {
 			// actions.cleanSyllabus({ academy, profile: profile?.slug });
-			if (version) actions.getApiSyllabusVersion(academy, profile?.slug, version.value || version);
+			if (version) {
+				actions.getApiSyllabusVersion(academy, profile?.slug, version.value || version);
+			}
 		};
 
 		if (version) versionEffects();

@@ -51,6 +51,9 @@ class Wrapper {
 	setOptions(options) {
 		this.options = Object.assign(this.options, options);
 	}
+	getOption(key) {
+		return this.options[key];
+	}
 	fetch(...args) {
 		return fetch(...args);
 	}

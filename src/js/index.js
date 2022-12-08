@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
 import NewDay from "./component/modals/NewDayModal";
+import API from "./api.js";
 import { getCurrentUrl, getUrlParams } from "./utils/url";
 
 //include your index.scss file into the bundle
@@ -31,6 +32,8 @@ const Main = injectContent(() => {
 	const [index, setIndex] = useState(0);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
+
+	const readOnly = store.info?.academy_author != params.get("academy");
 
 	useEffect(() => {
 		actions.getMe();
@@ -83,8 +86,13 @@ const Main = injectContent(() => {
 					/>
 					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
 						<Notifier />
-						<TopBar />
-						<div className="hbar" />
+						<TopBar readOnly={readOnly} />
+						{readOnly ? (
+							<div className="alert alert-warning m-0 rounded-0">You cannot update this syllabus, read only mode is active.</div>
+						) : (
+							<div className="hbar" />
+						)}
+
 						{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} index={index} />}
 						{sortedDays.length === 0 &&
 							notInfoEmpty("profile") &&
