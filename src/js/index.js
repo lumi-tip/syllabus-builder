@@ -33,7 +33,8 @@ const Main = injectContent(() => {
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 
-	const readOnly = store.info?.academy_author != params.get("academy");
+	const academyFromUrl = params.get("academy");
+	const readOnly = (!academyFromUrl && typeof academyFromUrl == undefined) || store.info?.academy_author != params.get("academy");
 
 	useEffect(() => {
 		actions.getMe();
@@ -88,7 +89,10 @@ const Main = injectContent(() => {
 						<Notifier />
 						<TopBar readOnly={readOnly} />
 						{readOnly ? (
-							<div className="alert alert-warning m-0 rounded-0">You cannot update this syllabus, read only mode is active.</div>
+							<div className="alert alert-warning m-0 rounded-0">
+								{!academyFromUrl && <p className="m-0">Please specify your academy id on the URL QueryString.</p>}
+								<span>You cannot update this syllabus, read only mode is active.</span>
+							</div>
 						) : (
 							<div className="hbar" />
 						)}
