@@ -243,7 +243,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/registry/asset?limit=300&type=project&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + "/registry/asset?limit=300&asset_type=project&language=us&visibility=PUBLIC,UNLISTED");
 			}
 		};
 	}
@@ -251,7 +251,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&type=exercise&language=us&external=both&visibility=PUBLIC,UNLISTED");
+				return this.get(url + "/registry/asset?limit=300&asset_type=exercise&language=us&external=both&visibility=PUBLIC,UNLISTED");
 			}
 		};
 	}
@@ -259,7 +259,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&type=quiz&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + "/registry/asset?limit=300&asset_type=quiz&language=us&visibility=PUBLIC,UNLISTED");
 			}
 		};
 	}
@@ -425,7 +425,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&type=lesson&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + "/registry/asset?limit=300&asset_type=lesson&language=us&visibility=PUBLIC,UNLISTED");
 			},
 			get: id => {
 				return this.get(url + "/registry/asset/" + id);
