@@ -1,21 +1,14 @@
-@import "~bootstrap/scss/bootstrap.scss";
-@import "sidebar";
-@import "modals";
-@import "timeline";
-
 body {
     background: black;
     color: #717171;
 }
-
 .select-option:hover {
     background: #aeb9d5;
 }
-
 .pointer {
     cursor: pointer;
 }
-.trash-day{
+.trash-day {
     position: absolute;
     right: 10px;
     top: 5px;
@@ -23,175 +16,141 @@ body {
 ul li {
     list-style: none;
 }
-
 li.content-piece {
     font-size: 12px;
     display: inline-block;
-    background: #BDBDBD;
+    background: #bdbdbd;
     padding: 3px;
     border-radius: 3px;
     margin: 1px;
-
-    i:hover {
-        background: rgba(0, 0, 0, 0.2)
-    }
 }
-
+li.content-piece i:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
 li.content-piece:hover {
     background: #ededed;
 }
-
 .bg-white-light {
     background: rgba(255, 255, 255, 0.7) !important;
 }
-
-input,
-textarea {
+input, textarea {
     font-size: 14px;
 }
-
-input.transparent,
-textarea.transparent {
+input.transparent, textarea.transparent {
     background: none;
     border: none;
-
-    &:focus {
-        outline: none;
-    }
-
-    &::placeholder {
-        color: #404040;
-    }
 }
-
+input.transparent:focus, textarea.transparent:focus {
+    outline: none;
+}
+input.transparent::placeholder, textarea.transparent::placeholder {
+    color: #404040;
+}
 .content-widget {
     font-size: 12px;
-
-    h3 {
-        font-size: 16px;
-        text-decoration: underline;
-        cursor: pointer;
-        text-transform: capitalize;
-        float: left;
-    }
-
-    select {
-        font-size: 12px;
-    }
-
-    .search {
-        font-size: 20px;
-    }
 }
-
+.content-widget h3 {
+    font-size: 16px;
+    text-decoration: underline;
+    cursor: pointer;
+    text-transform: capitalize;
+    float: left;
+}
+.content-widget select {
+    font-size: 12px;
+}
+.content-widget .search {
+    font-size: 20px;
+}
 .left-side {
     overflow-y: auto;
     position: fixed;
     height: 100vh;
     padding: 5px;
-
-    .content {
-        background: grey;
-        padding: 5px;
-        margin-bottom: 5px;
-
-        ul {
-            padding: 0;
-        }
-
-        li {
-            cursor: pointer;
-        }
-    }
 }
-
+.left-side .content {
+    background: grey;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+.left-side .content ul {
+    padding: 0;
+}
+.left-side .content li {
+    cursor: pointer;
+}
 .day {
     color: #303030;
     border-radius: 5px;
     margin-bottom: 5px;
     background: #e4e4e4;
-
-    input,
-    textarea {
-        border-radius: 5px;
-    }
-
-    h3 {
-        font-size: 18px;
-        padding: 5px 5px 0px 25px;
-    }
-
-    h4 {
-        font-size: 16px;
-        padding: 5px 5px 0px 5px;
-        color: $gray-900;
-    }
-
-    .drag-up,
-    .drag-down {
-        left: 0;
-        position: absolute;
-        background: black;
-        color: white;
-        padding: 0px 3px;
-        z-index: 2;
-    }
-
-    .drag-up {
-        top: 0;
-        border-radius: 5px 0px 0px 0px;
-    }
-
-    .drag-down {
-        bottom: 0;
-        border-radius: 0px 0px 0px 5px;
-    }
-
-    .column {
-        padding: 5px;
-        width: 25%;
-        margin: 2px;
-    }
 }
-
+.day input, .day textarea {
+    border-radius: 5px;
+}
+.day h3 {
+    font-size: 18px;
+    padding: 5px 5px 0px 25px;
+}
+.day h4 {
+    font-size: 16px;
+    padding: 5px 5px 0px 5px;
+    color: #404040;
+}
+.day .drag-up, .day .drag-down {
+    left: 0;
+    position: absolute;
+    background: black;
+    color: white;
+    padding: 0px 3px;
+    z-index: 2;
+}
+.day .drag-up {
+    top: 0;
+    border-radius: 5px 0px 0px 0px;
+}
+.day .drag-down {
+    bottom: 0;
+    border-radius: 0px 0px 0px 5px;
+}
+.day .column {
+    padding: 5px;
+    width: 25%;
+    margin: 2px;
+}
 .bcnotifier {
     display: none;
     margin: 0;
     padding: 0;
-
-    li {
-        padding: 0;
-    }
-
-    &.active {
-        display: block;
-    }
-
-    .alert {
-        margin: 0;
-        padding: 0;
-
-        &.alert-info {
-            background-color: transparent;
-            border: none;
-        }
-    }
 }
-
+.bcnotifier li {
+    padding: 0;
+}
+.bcnotifier.active {
+    display: block;
+}
+.bcnotifier .alert {
+    margin: 0;
+    padding: 0;
+}
+.bcnotifier .alert.alert-info {
+    background-color: transparent;
+    border: none;
+}
 .hbar {
     height: 50px;
 }
-.topbar{
+.topbar {
     z-index: 99 !important;
     border-bottom: solid 2px #3b3b3b;
 }
 .topbar .noti-canvas {
-    background: #BDBDBD;
+    background: #bdbdbd;
     padding: 5px;
     text-align: left;
     margin-bottom: 0 0 10px 0;
 }
-.btn-black{
+.btn-black {
     background: #161819 !important;
     border: none !important;
 }
@@ -199,35 +158,28 @@ textarea.transparent {
     display: inline-block;
     width: 20px;
 }
-
 .position-swap i {
     display: block;
     padding: 0px 3px;
     margin: 0px;
 }
-
 .position-swap i:nth-child(2) {
     margin-top: -5px;
 }
-
 .spin {
     animation-name: spining;
     animation-duration: 5000ms;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
-
 @keyframes spining {
     from {
         transform: rotate(0deg);
-    }
-
+   }
     to {
         transform: rotate(360deg);
-    }
+   }
 }
-
-
 /* Toggle Button */
 .cm-toggle {
     -webkit-appearance: none;
@@ -238,8 +190,6 @@ textarea.transparent {
     cursor: pointer;
     margin: 10px;
 }
-
-
 /* To create surface of toggle button */
 .cm-toggle:after {
     content: '';
@@ -250,8 +200,6 @@ textarea.transparent {
     border-radius: 18px;
     clear: both;
 }
-
-
 /* Contents before checkbox to create toggle handle */
 .cm-toggle:before {
     content: '';
@@ -262,20 +210,15 @@ textarea.transparent {
     left: 0;
     top: 0px;
     border-radius: 50%;
-    background: rgb(255, 255, 255);
+    background: #fff;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
-
-
 /* Shift the handle to left on check event */
-.cm-toggle:checked:before,
-.cm-toggle-checked:before {
+.cm-toggle:checked:before, .cm-toggle-checked:before {
     left: 20px;
     box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.6);
 }
-
 /* Background color when toggle button will be active */
-.cm-toggle:checked:after,
-.cm-toggle-checked:after {
+.cm-toggle:checked:after, .cm-toggle-checked:after {
     background: #16a085;
 }

@@ -159,6 +159,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<SmartInput
 						className="border border-secondary"
 						type="number"
+						step="0.5"
 						style={{ width: "40px" }}
 						maxLength={2}
 						onChange={v => actions.days().update(_data.id, { ..._data, duration_in_days: parseInt(v) })}

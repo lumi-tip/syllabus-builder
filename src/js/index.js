@@ -3,7 +3,13 @@ import React, { useContext, useState } from "react";
 import ReactDOM from "react-dom";
 import "bootstrap";
 import "jquery";
-import "../styles/index.scss";
+
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/index.css";
+import "../styles/_modals.css";
+import "../styles/_sidebar.css";
+import "../styles/_timeline.css";
+
 import { Day, Sidebar } from "./component";
 import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
