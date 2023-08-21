@@ -162,7 +162,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 						step="0.5"
 						style={{ width: "40px" }}
 						maxLength={2}
-						onChange={v => actions.days().update(_data.id, { ..._data, duration_in_days: parseInt(v) })}
+						onChange={v => actions.days().update(_data.id, { ..._data, duration_in_days: parseFloat(v) })}
 						initialValue={_data.duration_in_days?.toString() || 1}
 					/>
 					Days
