@@ -3,6 +3,7 @@
 !.env.example
 
 # track this file .gitignore (i.e. do NOT ignore it)
+!.devcontainer
 !.gitignore
 !.gitpod.yml
 !.github
