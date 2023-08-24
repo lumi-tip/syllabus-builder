@@ -4,6 +4,8 @@ import { getCurrentUrl } from "./utils/url";
 import { getAPIErrors } from "./component/utils";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
+const params = new URLSearchParams(window.location.search);
+const lang = params.get("lang") || "us";
 
 class Wrapper {
 	constructor() {
@@ -58,7 +60,6 @@ class Wrapper {
 		return fetch(...args);
 	}
 	req(method, path, args) {
-		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
 
 		let opts = {
@@ -243,7 +244,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: syllabus_slug => {
-				return this.get(url + "/registry/asset?limit=300&asset_type=project&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + `/registry/asset?limit=300&asset_type=project&language=${lang}&visibility=PUBLIC,UNLISTED`);
 			}
 		};
 	}
@@ -251,7 +252,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&asset_type=exercise&language=us&external=both&visibility=PUBLIC,UNLISTED");
+				return this.get(url + `/registry/asset?limit=300&asset_type=exercise&language=${lang}&external=both&visibility=PUBLIC,UNLISTED`);
 			}
 		};
 	}
@@ -259,7 +260,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&asset_type=quiz&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + `/registry/asset?limit=300&asset_type=quiz&language=${lang}&visibility=PUBLIC,UNLISTED`);
 			}
 		};
 	}
@@ -425,7 +426,7 @@ class Wrapper {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
-				return this.get(url + "/registry/asset?limit=300&asset_type=lesson&language=us&visibility=PUBLIC,UNLISTED");
+				return this.get(url + `/registry/asset?limit=300&asset_type=lesson&language=${lang}&visibility=PUBLIC,UNLISTED`);
 			},
 			get: id => {
 				return this.get(url + "/registry/asset/" + id);
