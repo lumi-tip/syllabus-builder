@@ -232,7 +232,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 							[],
 							weeks.map(w => w.days)
 						);
-					setStore({
+					let _newStore = {
 						days: days.map((d, i) => {
 							return {
 								...d,
@@ -300,9 +300,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 										: (d.quizzes = [])
 							};
 						})
-					});
+					};
+					setStore(_newStore);
 
-					actions.setInfo({
+					let _info = {
 						slug: info.profile,
 						profile: info.profile,
 						academy_author: academy_owner.id || academy_owner,
@@ -312,7 +313,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 						description,
 						version: content.version,
 						status: content.status
-					});
+					};
+					actions.setInfo(_info);
+
+					return {
+						..._newStore,
+						info: _info
+					};
 				} else
 					new Promise((resolve, reject) => {
 						return fetch(data)
@@ -483,7 +490,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			clear: () => {
 				const store = getStore();
-				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
+				localStorage.removeItem("syllabus-" + store.info.slug);
+				localStorage.removeItem("syllabus-");
 				setStore({
 					days: [],
 					report: [],
@@ -759,7 +767,29 @@ export function injectContent(Child) {
 					const currentStore = state.actions.getStore();
 					const store = Object.assign(currentStore, updatedStore);
 					setState({ store, actions: { ...state.actions } });
-					localStorage.setItem("syllabus-" + store.info.slug, JSON.stringify(store));
+
+					const {
+						duration_in_days,
+						status,
+						slug,
+						duration_in_hours,
+						academy_author,
+						academy_owner,
+						...rest
+					} = state.actions.serialize().json;
+					const _aca = academy_owner || academy_author;
+
+					localStorage.setItem(
+						"syllabus-" + (store.info.slug || slug),
+						JSON.stringify({
+							slug,
+							duration_in_days,
+							status,
+							duration_in_hours,
+							academy_owner: _aca ? _aca.id || _aca : null,
+							json: rest
+						})
+					);
 				}
 			})
 		);
@@ -778,8 +808,9 @@ export function injectContent(Child) {
 					});
 				});
 			} else if (typeof previousStore === "string" && previousStore != "") {
-				const newStore = JSON.parse(previousStore);
+				const newStore = state.actions.upload({ content: previousStore });
 				state.actions.setStore(newStore);
+				console.log("newStore", newStore, JSON.parse(previousStore));
 				API.setOptions({ academy: newStore.info.academy_author });
 			}
 

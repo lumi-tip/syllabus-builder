@@ -24,6 +24,7 @@ import API from "./api.js";
 import { getCurrentUrl, getUrlParams } from "./utils/url";
 
 //include your index.scss file into the bundle
+const SIDEBAR_WIDTH = "300px";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 
@@ -32,7 +33,8 @@ const API_KEY = params.get("token");
 
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
-	const [sidebarWidth, setSidebarWidth] = useState("300px");
+
+	const [collapsed, setCollapsed] = useState(true);
 	const [editExtendedDay, setEditExtendedDay] = useState(null);
 	const [openNewDay, setOpenNewDay] = useState(false);
 	const [index, setIndex] = useState(0);
@@ -49,6 +51,10 @@ const Main = injectContent(() => {
 				return "Are you sure you want to exit?";
 			};
 	}, []);
+
+	useEffect(() => {
+		if (!readOnly) setCollapsed(false);
+	}, [readOnly]);
 
 	if (!API_KEY) {
 		const callbackUrl = getCurrentUrl();
@@ -85,13 +91,16 @@ const Main = injectContent(() => {
 		<>
 			<DndProvider backend={Backend}>
 				<div className="d-flex">
-					<Sidebar
-						content={store}
-						onRefresh={type => actions.fetch([type], true)}
-						onCreateAsset={async piece => await actions.database().add(piece)}
-						onCollapse={() => setSidebarWidth(sidebarWidth === "0px" ? "300px" : "0px")}
-					/>
-					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
+					{!readOnly && (
+						<Sidebar
+							content={store}
+							readOnly={readOnly}
+							onRefresh={type => actions.fetch([type], true)}
+							onCreateAsset={async piece => await actions.database().add(piece)}
+							onCollapse={() => setCollapsed(!collapsed)}
+						/>
+					)}
+					<div className="timeline" style={{ marginLeft: collapsed ? 0 : SIDEBAR_WIDTH }}>
 						<Notifier />
 						<TopBar readOnly={readOnly} />
 						{readOnly ? (
