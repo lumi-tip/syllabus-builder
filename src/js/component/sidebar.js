@@ -6,14 +6,20 @@ import SearchInput from "./searchInput";
 import EditContentPiece from "./modals/EditContentPiece";
 import { useToasts } from "react-toast-notifications";
 
+const params = new URLSearchParams(window.location.search);
+
 const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 	const { addToast } = useToasts();
 	const [currentType, setCurrentType] = useState(null);
 	const [editAsset, setEditAsset] = useState(null);
-	const [searchToken, setSearchToken] = useState("");
+	const [searchFilters, setSearchFilters] = useState({
+		keyword: "",
+		academy: null
+	});
 	const [loading, setLoading] = useState(false);
 	const [collapsed, setCollapsed] = useState(false);
-
+	const academyFromUrl = params.get("academy");
+	console.log("academyFromUrl", academyFromUrl);
 	if (collapsed)
 		return (
 			<button
@@ -27,53 +33,75 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 		<div className="sidebar position-fixed" style={{ width }}>
 			{editAsset && <EditContentPiece style={{ position: "static" }} defaultValue={editAsset} onCancel={() => setEditAsset(null)} />}
 			{currentType ? (
-				<div className="d-flex mb-2">
-					<button
-						style={{
-							width: "90px"
-						}}
-						className="btn btn-sm btn-dark br-0 back-btn"
-						onClick={() => {
-							setSearchToken("");
-							setCurrentType(null);
-						}}>
-						<i className="fas fa-angle-left"></i> Back
-					</button>
-					<SearchInput
-						className="search w-100"
-						placeholder={`Search ${currentType}...`}
-						onSearch={_keyword => {
-							onSearch(currentType, _keyword);
-							setSearchToken(_keyword);
-						}}
-					/>
-					<button
-						className="btn btn-sm btn-dark"
-						onClick={() => {
-							setLoading(true);
-							Promise.all(onSearch(currentType, searchToken)).then(() => {
-								setLoading(false);
-								addToast(`Sync ${currentType} successfully`, {
-									appearance: "success"
+				<div>
+					<div className="d-flex mb-2">
+						<button
+							style={{
+								width: "90px"
+							}}
+							className="btn btn-sm btn-dark br-0 back-btn"
+							onClick={() => {
+								setSearchFilters({ ...searchFilters, keyword: "" });
+								setCurrentType(null);
+							}}>
+							<i className="fas fa-angle-left"></i> Back
+						</button>
+						<div className="w-100">&nbsp;</div>
+						<button
+							className="btn btn-sm btn-dark"
+							onClick={() => {
+								setLoading(true);
+								Promise.all(onSearch(currentType, searchFilters)).then(() => {
+									setLoading(false);
+									addToast(`Sync ${currentType} successfully`, {
+										appearance: "success"
+									});
 								});
-							});
-						}}>
-						<i className={"fas fa-sync" + (loading ? " spin" : "")}></i>
-					</button>
-					<button
-						className="btn btn-sm btn-dark"
-						onClick={() => {
-							setEditAsset({
-								custom: true,
-								type: currentType,
-								addToRegistry: true,
-								target: "blank",
-								translations: {},
-								technologies: []
-							});
-						}}>
-						<i className="fas fa-plus"></i>
-					</button>
+							}}>
+							<i className={"fas fa-sync" + (loading ? " spin" : "")}></i>
+						</button>
+						<button
+							className="btn btn-sm btn-dark"
+							onClick={() => {
+								setEditAsset({
+									custom: true,
+									type: currentType,
+									addToRegistry: true,
+									target: "blank",
+									translations: {},
+									technologies: []
+								});
+							}}>
+							<i className="fas fa-plus"></i>
+						</button>
+					</div>
+					<div className="input-group mb-3">
+						<div className="input-group-prepend">
+							<button className="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+								{searchFilters.academy ? "Mine" : "All"}
+							</button>
+							<div className="dropdown-menu">
+								<a
+									className="dropdown-item"
+									href="#"
+									onClick={e => {
+										e.preventDefault();
+										setSearchFilters({ ...searchFilters, academy: searchFilters.academy ? null : academyFromUrl });
+									}}>
+									{searchFilters.academy ? `All shared ${currentType}'s` : "From my academy only"}
+								</a>
+							</div>
+						</div>
+						<SearchInput
+							className="form-control"
+							placeholder={`Search ${currentType}...`}
+							onSearch={_keyword => {
+								const _newSearch = { ...searchFilters, keyword: _keyword };
+								onSearch(currentType, _newSearch);
+								setSearchFilters(_newSearch);
+							}}
+						/>
+					</div>
 				</div>
 			) : (
 				<div className="d-flex">
@@ -97,14 +125,7 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 							isExpanded={w.type === currentType}
 							onCollapse={() => setCurrentType(w.type)}
 							total={content[w.storeName + "Total"]}
-							pieces={content[w.storeName].filter(p => {
-								return (
-									!searchToken.toLowerCase() ||
-									(p.slug && typeof p.slug === "object" ? p.slug.slug.includes(searchToken) : p.slug.includes(searchToken)) ||
-									(p.title && p.title.toLowerCase().includes(searchToken)) ||
-									(p.info && p.info.name && p.info.name.toLowerCase().includes(searchToken))
-								);
-							})}
+							pieces={content[w.storeName]}
 							onEdit={_asset => {
 								setEditAsset({
 									..._asset,

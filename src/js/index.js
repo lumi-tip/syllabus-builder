@@ -95,9 +95,9 @@ const Main = injectContent(() => {
 						<Sidebar
 							content={store}
 							readOnly={readOnly}
-							onSearch={(type, keyword) => actions.fetch([type], { like: keyword }, true)}
+							onSearch={(type, search) => actions.fetch([type], { like: search.keyword, academy: search.academy }, true)}
 							onCreateAsset={async piece => await actions.database().add(piece)}
-							onCollapse={() => console.log("colapsing") || setCollapsed(!collapsed)}
+							onCollapse={() => setCollapsed(!collapsed)}
 						/>
 					)}
 					<div className="timeline" style={{ marginLeft: collapsed ? 0 : SIDEBAR_WIDTH }}>

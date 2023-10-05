@@ -28,6 +28,17 @@ API.setOptions({
 	apiPathV2: process.env.API_URL + "/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
+
+function removeNull(obj) {
+	const newObj = { ...obj };
+	for (const key in newObj) {
+		if (newObj[key] === null || newObj[key] === undefined) {
+			delete newObj[key];
+		}
+	}
+	return newObj;
+}
+
 const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
@@ -84,6 +95,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			fetch: (models, filters = {}, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
+				filters = removeNull(filters);
 
 				return models.map(
 					entity =>
@@ -843,6 +855,7 @@ export function injectContent(Child) {
 			}
 
 			state.actions.count(["lesson", "quiz", "project", "replit", "technology", "translation"]);
+			state.actions.fetch(["technology"]);
 			window.store = state.store;
 		}, []);
 		return (
