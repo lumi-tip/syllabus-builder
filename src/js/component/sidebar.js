@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { ContentWidget } from "./";
 import { mappers } from "./utils";
+import SearchInput from "./searchInput";
 import EditContentPiece from "./modals/EditContentPiece";
 import { useToasts } from "react-toast-notifications";
 
-const Sidebar = ({ content, onRefresh, onCollapse, width }) => {
+const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 	const { addToast } = useToasts();
 	const [currentType, setCurrentType] = useState(null);
 	const [editAsset, setEditAsset] = useState(null);
@@ -38,17 +39,19 @@ const Sidebar = ({ content, onRefresh, onCollapse, width }) => {
 						}}>
 						<i className="fas fa-angle-left"></i> Back
 					</button>
-					<input
+					<SearchInput
 						className="search w-100"
 						placeholder={`Search ${currentType}...`}
-						onChange={e => setSearchToken(e.target.value)}
-						value={searchToken}
+						onSearch={_keyword => {
+							onSearch(currentType, _keyword);
+							setSearchToken(_keyword);
+						}}
 					/>
 					<button
 						className="btn btn-sm btn-dark"
 						onClick={() => {
 							setLoading(true);
-							Promise.all(onRefresh(currentType)).then(() => {
+							Promise.all(onSearch(currentType, searchToken)).then(() => {
 								setLoading(false);
 								addToast(`Sync ${currentType} successfully`, {
 									appearance: "success"
@@ -93,6 +96,7 @@ const Sidebar = ({ content, onRefresh, onCollapse, width }) => {
 							type={w.type}
 							isExpanded={w.type === currentType}
 							onCollapse={() => setCurrentType(w.type)}
+							total={content[w.storeName + "Total"]}
 							pieces={content[w.storeName].filter(p => {
 								return (
 									!searchToken.toLowerCase() ||
@@ -114,13 +118,13 @@ const Sidebar = ({ content, onRefresh, onCollapse, width }) => {
 	);
 };
 Sidebar.propTypes = {
-	onRefresh: PropTypes.func,
+	onSearch: PropTypes.func,
 	onCollapse: PropTypes.func,
 	content: PropTypes.object,
 	width: PropTypes.string
 };
 Sidebar.defaultProps = {
-	onRefresh: null,
+	onSearch: null,
 	onCollapse: null,
 	width: "300px",
 	content: {}

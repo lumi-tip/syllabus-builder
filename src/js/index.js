@@ -53,7 +53,7 @@ const Main = injectContent(() => {
 	}, []);
 
 	useEffect(() => {
-		if (!readOnly) setCollapsed(false);
+		setCollapsed(readOnly);
 	}, [readOnly]);
 
 	if (!API_KEY) {
@@ -95,9 +95,9 @@ const Main = injectContent(() => {
 						<Sidebar
 							content={store}
 							readOnly={readOnly}
-							onRefresh={type => actions.fetch([type], true)}
+							onSearch={(type, keyword) => actions.fetch([type], { like: keyword }, true)}
 							onCreateAsset={async piece => await actions.database().add(piece)}
-							onCollapse={() => setCollapsed(!collapsed)}
+							onCollapse={() => console.log("colapsing") || setCollapsed(!collapsed)}
 						/>
 					)}
 					<div className="timeline" style={{ marginLeft: collapsed ? 0 : SIDEBAR_WIDTH }}>

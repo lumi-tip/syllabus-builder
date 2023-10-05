@@ -5,6 +5,7 @@ import { getAPIErrors } from "./component/utils";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 const params = new URLSearchParams(window.location.search);
+const PAGE_SIZE = 100;
 const lang = params.get("lang") || "us";
 
 class Wrapper {
@@ -152,6 +153,29 @@ class Wrapper {
 				});
 		});
 	}
+	filter(_baseQuery) {
+		return async (filters = {}) => {
+			let results = [];
+			let total = PAGE_SIZE;
+			let offset = 0;
+			while (total === PAGE_SIZE) {
+				const _data = await this.get(
+					`${_baseQuery}&limit=${PAGE_SIZE}&offset=${offset * PAGE_SIZE}&${new URLSearchParams(filters).toString()}`
+				);
+				if (_data.count === undefined) return _data;
+				total = _data.count;
+				results = results.concat(_data.results);
+				offset++;
+			}
+			return results;
+		};
+	}
+	count(_baseQuery) {
+		return async () => {
+			const data = await this.get(`${_baseQuery}&limit=1`);
+			return data.count || data.length;
+		};
+	}
 	_encodeKeys(obj) {
 		for (let key in obj) {
 			let newkey = key.replace("-", "_");
@@ -242,26 +266,26 @@ class Wrapper {
 	}
 	project() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=project&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
-			all: syllabus_slug => {
-				return this.get(url + `/registry/asset?limit=300&asset_type=project&language=${lang}&visibility=PUBLIC,UNLISTED`);
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	replit() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=exercise&language=${lang}&external=both&visibility=PUBLIC,UNLISTED`;
 		return {
-			all: () => {
-				return this.get(url + `/registry/asset?limit=300&asset_type=exercise&language=${lang}&external=both&visibility=PUBLIC,UNLISTED`);
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	quiz() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=quiz&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
-			all: () => {
-				return this.get(url + `/registry/asset?limit=300&asset_type=quiz&language=${lang}&visibility=PUBLIC,UNLISTED`);
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	user() {
@@ -424,10 +448,10 @@ class Wrapper {
 
 	lesson() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=lesson&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
-			all: () => {
-				return this.get(url + `/registry/asset?limit=300&asset_type=lesson&language=${lang}&visibility=PUBLIC,UNLISTED`);
-			},
+			filter: this.filter(_query),
+			count: this.count(_query),
 			get: id => {
 				return this.get(url + "/registry/asset/" + id);
 			}
@@ -435,18 +459,18 @@ class Wrapper {
 	}
 	technology() {
 		let url = this.options.apiPathV2;
+		const _query = url + "/registry/technology?";
 		return {
-			all: () => {
-				return this.get(url + "/registry/technology");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	translation() {
 		let url = this.options.apiPathV2;
+		const _query = url + "/registry/translation?";
 		return {
-			all: () => {
-				return this.get(url + "/registry/translation");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	catalog() {

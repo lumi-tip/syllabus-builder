@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import ContentPiece from "./content-piece.js";
 
-const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit, onSwap }) => {
+const ContentWidget = ({ pieces, total, type, className, onRefresh, isExpanded, loading, onCollapse, onEdit, onSwap }) => {
 	const [tagToken, setTagToken] = useState(null);
 
 	return (
@@ -10,7 +10,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 			<div className="d-flex" style={{ overflow: "hidden" }}>
 				{!isExpanded && (
 					<button className="btn btn-sm btn-dark w-100 text-left text-capitalize mb-2" onClick={() => onCollapse()}>
-						{type + " "} <div className="badge badge-light bg-small float-right mt-1">{pieces.length} found</div>
+						{type + " "} <div className="badge badge-light bg-small float-right mt-1">{total} found</div>
 					</button>
 				)}
 				{onRefresh && (
@@ -55,6 +55,7 @@ const ContentWidget = ({ pieces, type, className, onRefresh, isExpanded, loading
 };
 ContentWidget.propTypes = {
 	pieces: PropTypes.array,
+	total: PropTypes.number,
 	type: PropTypes.string,
 	onRefresh: PropTypes.func,
 	onEdit: PropTypes.func,
@@ -67,6 +68,7 @@ ContentWidget.propTypes = {
 
 ContentWidget.defaultProps = {
 	type: "",
+	total: 0,
 	className: "",
 	isExpanded: false,
 	onRefresh: null,

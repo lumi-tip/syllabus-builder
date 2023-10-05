@@ -82,41 +82,69 @@ const getState = ({ getStore, getActions, setStore }) => {
 					academies: data.roles.map(r => r.academy)
 				});
 			},
-			fetch: (models, forceUpdate = false) => {
+			fetch: (models, filters = {}, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
-				// console.log("fetching ", models);
+
 				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
-							if (forceUpdate || !Array.isArray(mapEntity[entity]) || mapEntity[entity].length == 0)
-								API[entity]()
-									.all()
-									.then(_data => {
-										let data = _data.data || _data;
-										data = data.results || data;
-										if (!Array.isArray(data)) data = Object.values(data);
-										const newStore = {
-											[mapEntity[entity]]: data
-												.filter(e => {
-													const keep =
-														typeof e.lang === "undefined" ||
-														e.lang == "us" ||
-														e.lang == "en" ||
-														["project", "replit", "exercise", "lesson"].includes(entity);
-													if (!keep) console.log(`entity ${entity} was filted`, e);
-													return keep;
+							if (!forceUpdate && Array.isArray(mapEntity[entity]) && mapEntity[entity].length > 0) {
+								console.error(`Can't fetch ${entity} because its already fetched`);
+								resolve(false);
+								return false;
+							}
+
+							const _entity = API[entity]();
+							_entity
+								.filter(filters)
+								.then(_data => {
+									let data = _data.data || _data;
+									data = data.results || data;
+									if (!Array.isArray(data)) data = Object.values(data);
+									const newStore = {
+										[mapEntity[entity]]: data
+											.filter(e => {
+												const keep =
+													typeof e.lang === "undefined" ||
+													e.lang == "us" ||
+													e.lang == "en" ||
+													["project", "replit", "exercise", "lesson"].includes(entity);
+												if (!keep) console.log(`entity ${entity} was filted`, e);
+												return keep;
+											})
+											.map(e =>
+												serialize({
+													...e,
+													type: entity
 												})
-												.map(e =>
-													serialize({
-														...e,
-														type: entity
-													})
-												)
-										};
-										setStore(newStore);
-										resolve(data);
-									})
-									.catch(error => reject(error));
+											)
+									};
+									console.log("newStore", newStore);
+									setStore(newStore);
+									resolve(data);
+								})
+								.catch(error => console.log(`Error fetching ${entity}`) || reject(error));
+						})
+				);
+			},
+			count: (models, filters = {}, forceUpdate = false) => {
+				if (!Array.isArray(models)) models = [models];
+
+				return models.map(
+					entity =>
+						new Promise((resolve, reject) => {
+							console.log("counting ", entity);
+							const _entity = API[entity]();
+							_entity
+								.count(filters)
+								.then(total => {
+									const newStore = {
+										[mapEntity[entity] + "Total"]: total
+									};
+									setStore(newStore);
+									resolve(total);
+								})
+								.catch(error => console.log(`Error fetching count for ${entity}`) || reject(error));
 						})
 				);
 			},
@@ -306,7 +334,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					let _info = {
 						slug: info.profile,
 						profile: info.profile,
-						academy_author: academy_owner.id || academy_owner,
+						academy_author: academy_owner?.id || academy_owner,
 						duration_in_days: duration_in_days || 0,
 						duration_in_hours: duration_in_hours || 0,
 						label,
@@ -371,7 +399,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								actions.setInfo({
 									slug: info.profile,
 									profile: info.profile,
-									academy_author: academy_owner.id || academy_owner,
+									academy_author: academy_owner?.id || academy_owner,
 									duration_in_days: info.duration_in_days,
 									duration_in_hours: info.duration_in_hours,
 									status: info.status,
@@ -766,6 +794,7 @@ export function injectContent(Child) {
 				setStore: updatedStore => {
 					const currentStore = state.actions.getStore();
 					const store = Object.assign(currentStore, updatedStore);
+					console.log("store lessons", store.lessons);
 					setState({ store, actions: { ...state.actions } });
 
 					const {
@@ -810,11 +839,10 @@ export function injectContent(Child) {
 			} else if (typeof previousStore === "string" && previousStore != "") {
 				const newStore = state.actions.upload({ content: previousStore });
 				state.actions.setStore(newStore);
-				console.log("newStore", newStore, JSON.parse(previousStore));
 				API.setOptions({ academy: newStore.info.academy_author });
 			}
 
-			state.actions.fetch(["lesson", "quiz", "project", "replit", "technology", "translation"]);
+			state.actions.count(["lesson", "quiz", "project", "replit", "technology", "translation"]);
 			window.store = state.store;
 		}, []);
 		return (
