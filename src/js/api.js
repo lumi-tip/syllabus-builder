@@ -266,7 +266,7 @@ class Wrapper {
 	}
 	project() {
 		let url = this.options.apiPathV2;
-		const _query = url + `/registry/asset?asset_type=project&language=${lang}&visibility=PUBLIC,UNLISTED`;
+		const _query = url + `/registry/asset?asset_type=PROJECT&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
 			filter: this.filter(_query),
 			count: this.count(_query)
@@ -274,7 +274,7 @@ class Wrapper {
 	}
 	replit() {
 		let url = this.options.apiPathV2;
-		const _query = url + `/registry/asset?asset_type=exercise&language=${lang}&external=both&visibility=PUBLIC,UNLISTED`;
+		const _query = url + `/registry/asset?asset_type=EXERCISE&language=${lang}&external=both&visibility=PUBLIC,UNLISTED`;
 		return {
 			filter: this.filter(_query),
 			count: this.count(_query)
@@ -282,7 +282,7 @@ class Wrapper {
 	}
 	quiz() {
 		let url = this.options.apiPathV2;
-		const _query = url + `/registry/asset?asset_type=quiz&language=${lang}&visibility=PUBLIC,UNLISTED`;
+		const _query = url + `/registry/asset?asset_type=QUIZ&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
 			filter: this.filter(_query),
 			count: this.count(_query)
@@ -448,7 +448,7 @@ class Wrapper {
 
 	lesson() {
 		let url = this.options.apiPathV2;
-		const _query = url + `/registry/asset?asset_type=lesson&language=${lang}&visibility=PUBLIC,UNLISTED`;
+		const _query = url + `/registry/asset?asset_type=LESSON&language=${lang}&visibility=PUBLIC,UNLISTED`;
 		return {
 			filter: this.filter(_query),
 			count: this.count(_query),
