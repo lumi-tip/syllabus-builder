@@ -102,6 +102,7 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 							}}
 						/>
 					</div>
+					You have to type to load the {currentType}s
 				</div>
 			) : (
 				<div className="d-flex">

@@ -274,7 +274,8 @@ class Wrapper {
 	}
 	replit() {
 		let url = this.options.apiPathV2;
-		const _query = url + `/registry/asset?asset_type=EXERCISE&language=${lang}&external=both&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
+		const _query =
+			url + `/registry/asset?asset_type=EXERCISE&language=${lang}&external=both&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
 		return {
 			filter: this.filter(_query),
 			count: this.count(_query)
