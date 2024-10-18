@@ -9,7 +9,7 @@
 	"scripts": {
 		"c9": "webpack-dev-server --mode development --open --host $IP --port $PORT --config webpack.dev.js",
 		"gitpod": "webpack-dev-server --mode development --open --port 3000 --config webpack.dev.js",
-		"start": "webpack-dev-server --mode development --hot --config webpack.dev.js",
+		"start": "set NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --mode development --hot --config webpack.dev.js",
 		"build": "webpack --mode production --config webpack.prod.js",
 		"now-build": "webpack --mode production --config webpack.prod.js",
 		"deploy": "node deploy-to-github.js"
