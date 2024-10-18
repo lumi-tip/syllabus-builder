@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { ContentWidget } from "./";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
-import { useToasts } from "react-toast-notifications";
+import { toast } from "react-toastify";
 
 const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
-	const { addToast } = useToasts();
 	const [currentType, setCurrentType] = useState(null);
 	const [editAsset, setEditAsset] = useState(null);
 	const [searchToken, setSearchToken] = useState("");
 	const [loading, setLoading] = useState(false);
+	
 	return (
 		<div className="sidebar position-fixed" style={{ width }}>
 			{editAsset && (
@@ -50,9 +50,7 @@ const Sidebar = ({ content, onRefresh, onCreateAsset, width }) => {
 							setLoading(true);
 							Promise.all(onRefresh(currentType)).then(() => {
 								setLoading(false);
-								addToast(`Sync ${currentType} successfully`, {
-									appearance: "success"
-								});
+								toast.success(`Sync ${currentType} successfully`);
 							});
 						}}>
 						<i className={"fas fa-sync" + (loading ? " spin" : "")}></i>

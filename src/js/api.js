@@ -1,5 +1,4 @@
-/* global fetch, localStorage, window */
-import swal from "sweetalert";
+import Swal from "sweetalert2";
 import getCurrentUrl from "./utils/get-current-url";
 import { getAPIErrors } from "./component/utils";
 
@@ -88,7 +87,7 @@ class Wrapper {
 			this.fetch(path, opts)
 				.then(async resp => {
 					if (resp.status === 401) {
-						const answer = await swal({
+						const answer = await Swal({
 							title: "Token expired!",
 							buttons: ["Ignore", "Login"],
 							text: "Please login to continue",

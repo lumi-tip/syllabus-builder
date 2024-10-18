@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { ContentContext } from "../context.js";
-import swal from "@sweetalert/with-react";
+import Swal from "sweetalert2";
 import { Notify } from "bc-react-notifier";
 import { UploadSyllabus, SyllabusDetails } from "./modal";
 import SearchSyllabus from "./modals/SearchOnSyllabus";
@@ -64,7 +64,7 @@ export const TopBar = () => {
 											status: "btn-danger",
 											messages: [error.detail || error.msg]
 										});
-										await swal({
+										await Swal({
 											title: "Errors found on syllabus",
 											text: error.detail || error.msg,
 											icon: "error",
@@ -77,7 +77,7 @@ export const TopBar = () => {
 						<button
 							className="btn btn-danger btn-sm mr-2"
 							onClick={async () => {
-								const yes = await swal({
+								const yes = await Swal({
 									title: "Are you sure?",
 									text: "Make sure to save or download first or you will loose your progress",
 									icon: "warning",
@@ -129,7 +129,7 @@ export const TopBar = () => {
 
 const confirmEditSillabus = async (store, actions) => {
 	if (store.info.slug !== "" && store.days.length > 0) {
-		const willEdit = await swal({
+		const willEdit = await Swal({
 			title: "Are you sure?",
 			text: "Update a PREVIOUS version " + store.info.version,
 			icon: "warning",
@@ -140,27 +140,27 @@ const confirmEditSillabus = async (store, actions) => {
 			try {
 				//                                      ↓ false means saving under the same version
 				const data = await actions.saveSyllabus(false);
-				swal("Syllabus version " + store.info.version + " update successfully", {
+				Swal("Syllabus version " + store.info.version + " update successfully", {
 					icon: "success"
 				});
 			} catch (error) {
 				console.error("Error updating syllabus: ", error);
-				swal(error.message || error.msg || error, {
+				Swal(error.message || error.msg || error, {
 					icon: "error"
 				});
 			}
 		} else {
-			swal("Operation canceled by user");
+			Swal("Operation canceled by user");
 		}
 	} else if (store.info.slug === "") {
-		swal({
+		Swal({
 			title: "Syllabus details can't be empty",
 			text: "Please fill the syllabus details to save",
 			icon: "error",
 			button: "OK"
 		});
 	} else if (store.days.length === 0) {
-		swal({
+		Swal({
 			title: "Syllabus without days",
 			text: "A new syllabus version can't be saved without days, please add new days to the syllabus",
 			icon: "error",
@@ -171,7 +171,7 @@ const confirmEditSillabus = async (store, actions) => {
 
 const confirmSaveSillabus = async (store, actions) => {
 	if (store.info.slug !== "" && store.days.length > 0) {
-		const willSave = await swal({
+		const willSave = await Swal({
 			title: "Are you sure?",
 			text: `Creating a NEW syllabus version for ${store.info.slug} academy ${store.info.academy_author}?`,
 			icon: "warning",
@@ -183,27 +183,27 @@ const confirmSaveSillabus = async (store, actions) => {
 				//                              ⬇ true means new version number
 				const data = await actions.saveSyllabus(true);
 				actions.setInfo({ version: data.version });
-				swal(`New syllabus ${data.json.slug} v${data.version} saved successfully`, {
+				Swal(`New syllabus ${data.json.slug} v${data.version} saved successfully`, {
 					icon: "success"
 				});
 			} catch (error) {
 				console.error("Error: ", error);
-				swal(error.message || error, {
+				Swal(error.message || error, {
 					icon: "error"
 				});
 			}
 		} else {
-			swal("Operation canceled by user");
+			Swal("Operation canceled by user");
 		}
 	} else if (store.info.slug === "") {
-		swal({
+		Swal({
 			title: "Syllabus details can't be empty",
 			text: "Please fill the syllabus details to save",
 			icon: "error",
 			button: "OK"
 		});
 	} else if (store.days.length === 0) {
-		swal({
+		Swal({
 			title: "Syllabus without days",
 			text: "A new syllabus version can't be saved without days, please add new days to the syllabus",
 			icon: "error",

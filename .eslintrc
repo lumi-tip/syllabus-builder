@@ -1,5 +1,8 @@
 {
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false
+  },
   "plugins": [
     "react"
   ],
@@ -20,7 +23,6 @@
     "no-console": 1,
     "no-process-env": 0,
     "semi": ["error", "always"],
-    "allowImportExportEverywhere": false,
     "comma-dangle": [1, { //when to use the last comma
         "arrays": "never",
         "objects": "never",

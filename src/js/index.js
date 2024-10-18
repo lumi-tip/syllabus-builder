@@ -1,15 +1,14 @@
 //import react into the bundle
 import React, { useContext, useState } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import "bootstrap";
 import "jquery";
 import "../styles/index.scss";
 import { Day, Sidebar } from "./component";
 import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
-import Backend from "react-dnd-html5-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { Notifier } from "bc-react-notifier";
-import swal from "sweetalert";
 import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
@@ -35,7 +34,7 @@ const Main = injectContent(() => {
 	useEffect(() => {
 		actions.getMe();
 		if (process.env.ENV !== "development")
-			window.onbeforeunload = function() {
+			window.onbeforeunload = function () {
 				return "Are you sure you want to exit?";
 			};
 	}, []);
@@ -73,7 +72,7 @@ const Main = injectContent(() => {
 
 	return (
 		<>
-			<DndProvider backend={Backend}>
+			<DndProvider backend={HTML5Backend}>
 				<div className="d-flex">
 					<Sidebar
 						content={store}
@@ -158,4 +157,4 @@ const Main = injectContent(() => {
 });
 
 //render your react application
-ReactDOM.render(<Main />, document.querySelector("#app"));
+createRoot(document.querySelector("#app")).render(<Main/>);

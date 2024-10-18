@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { ContentContext } from "../context.js";
 import SmartInput from "./smart-input";
 import Select from "react-select";
-import swal from "sweetalert";
+import Swal from "sweetalert2";
 import API from "../api.js";
 import MDEditor from "@uiw/react-md-editor";
 import PropTypes from "prop-types";

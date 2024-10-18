@@ -3,7 +3,7 @@ import PropTypes, { object } from "prop-types";
 import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
-import swal from "sweetalert";
+import Swal from "sweetalert2";
 import Select from "react-select";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
@@ -287,7 +287,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								let confirm =
 									exists.found === false || exists.day.id === _data.id
 										? "replace"
-										: await swal({
+										: await Swal({
 												title: "Are you sure?",
 												text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
 												icon: "warning",

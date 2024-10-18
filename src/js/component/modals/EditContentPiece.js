@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import { getLink, useDebounce } from "../utils";
 import Flag from "../flags/flags";
 import API from "../../api";
-import swal from "sweetalert";
 import Select, { components, MultiValueGenericProps } from "react-select";
 
 const Option = properties =>

@@ -1,7 +1,7 @@
-@import "~bootstrap/scss/bootstrap.scss";
-@import "sidebar";
-@import "modals";
-@import "timeline";
+@use "~bootstrap/scss/bootstrap.scss";
+@use "_sidebar.scss";
+@use "_modals.scss";
+@use "_timeline.scss";
 
 body{ background: black; color: #717171; }
 .select-option:hover{ background: #aeb9d5; }
@@ -59,7 +59,7 @@ input.transparent, textarea.transparent{
         border-radius: 5px;
     }
     h3{ font-size: 18px; padding: 5px 5px 0px 25px; }
-    h4{ font-size: 16px; padding: 5px 5px 0px 5px; color: $gray-900; }
+    h4{ font-size: 16px; padding: 5px 5px 0px 5px; color: '#212529'; }
     .drag-up,.drag-down{ left: 0; position: absolute; background: black; color: white; padding: 0px 3px; z-index: 2; }
     .drag-up{ top: 0; border-radius: 5px 0px 0px 0px; }
     .drag-down{ bottom: 0; border-radius: 0px 0px 0px 5px; }

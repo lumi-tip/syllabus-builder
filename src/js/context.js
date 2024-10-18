@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import API from "./api.js";
-import swal from "sweetalert";
 import { urls, serialize } from "./component/utils";
-import { ToastProvider } from "react-toast-notifications";
+import { ToastContainer } from "react-toastify";
 
 export const ContentContext = React.createContext({});
 
@@ -155,50 +154,50 @@ const getState = ({ getStore, getActions, setStore }) => {
 							lessons:
 								d.lessons !== undefined
 									? d.lessons.map(l => {
-											l.type = "lesson";
-											return l;
-									  })
+										l.type = "lesson";
+										return l;
+									})
 									: (d.lessons = []),
 							replits:
 								d.replits !== undefined
 									? d.replits.map(l => {
-											l.type = "replit";
-											return l;
-									  })
+										l.type = "replit";
+										return l;
+									})
 									: (d.replits = []),
 							//from the json it comes like an assignment, but its really a project
 							projects:
 								d.assignments !== undefined
 									? d.assignments.map(p => {
-											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
-											if (project === undefined) {
-												if (typeof p === "object") {
-													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
-													return {
-														...p,
-														type: "project"
-													};
-												} else {
-													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
-													return {
-														type: "project",
-														slug: p,
-														title: "Invalid project"
-													};
-												}
+										const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
+										if (project === undefined) {
+											if (typeof p === "object") {
+												actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+												return {
+													...p,
+													type: "project"
+												};
+											} else {
+												actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+												return {
+													type: "project",
+													slug: p,
+													title: "Invalid project"
+												};
 											}
+										}
 
-											return project;
-									  })
+										return project;
+									})
 									: (d.assignments = []),
 							quizzes:
 								d.quizzes !== undefined
 									? d.quizzes
-											.filter(f => f.slug != undefined)
-											.map(l => {
-												l.type = "quiz";
-												return l;
-											})
+										.filter(f => f.slug != undefined)
+										.map(l => {
+											l.type = "quiz";
+											return l;
+										})
 									: (d.quizzes = [])
 						};
 					})
@@ -233,52 +232,52 @@ const getState = ({ getStore, getActions, setStore }) => {
 								lessons:
 									d.lessons !== undefined
 										? d.lessons.map(l => {
-												l.type = "lesson";
-												return l;
-										  })
+											l.type = "lesson";
+											return l;
+										})
 										: (d.lessons = []),
 								replits:
 									d.replits !== undefined
 										? d.replits.map(l => {
-												l.type = "replit";
-												return l;
-										  })
+											l.type = "replit";
+											return l;
+										})
 										: (d.replits = []),
 								//from the json it comes like an assignment, but its really a project
 								projects:
 									d.assignments !== undefined
 										? d.assignments.map(p => {
-												const project = projects.find(_pro =>
-													p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
-												);
-												if (project === undefined) {
-													if (typeof p === "object") {
-														actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
-														return {
-															...p,
-															type: "project"
-														};
-													} else {
-														actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
-														return {
-															type: "project",
-															slug: p,
-															title: "Invalid project"
-														};
-													}
+											const project = projects.find(_pro =>
+												p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
+											);
+											if (project === undefined) {
+												if (typeof p === "object") {
+													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+													return {
+														...p,
+														type: "project"
+													};
+												} else {
+													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+													return {
+														type: "project",
+														slug: p,
+														title: "Invalid project"
+													};
 												}
+											}
 
-												return project;
-										  })
+											return project;
+										})
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
 										? d.quizzes
-												.filter(f => f.slug != undefined)
-												.map(l => {
-													l.type = "quiz";
-													return l;
-												})
+											.filter(f => f.slug != undefined)
+											.map(l => {
+												l.type = "quiz";
+												return l;
+											})
 										: (d.quizzes = [])
 							};
 						})
@@ -312,27 +311,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 											technologies: d.technologies || [],
 											lessons: d.lessons
 												? d.lessons.map(l => ({
-														...l,
-														type: "lesson"
-												  }))
+													...l,
+													type: "lesson"
+												}))
 												: [],
 											replits: d.replits
 												? d.replits.map(l => ({
-														...l,
-														type: "replit"
-												  }))
+													...l,
+													type: "replit"
+												}))
 												: [],
 											projects: d.assignments
 												? d.assignments.map(a => ({
-														...projects.find(p => p.slug === a),
-														type: "project"
-												  }))
+													...projects.find(p => p.slug === a),
+													type: "project"
+												}))
 												: [],
 											quizzes: d.quizzes
 												? d.quizzes.map(l => ({
-														...l,
-														type: "quiz"
-												  }))
+													...l,
+													type: "quiz"
+												}))
 												: [],
 											"key-concepts": d["key-concepts"] || []
 										}));
@@ -366,9 +365,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 							d.projects.length == 0
 								? undefined
 								: {
-										title: d.projects[0].title,
-										instructions: `${urls.project}${d.projects[0].slug}`
-								  },
+									title: d.projects[0].title,
+									instructions: `${urls.project}${d.projects[0].slug}`
+								},
 						assignments: d.projects.map(p => ({
 							slug: p.slug,
 							title: p.title,
@@ -463,7 +462,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				});
 			},
-			pieces: function() {
+			pieces: function () {
 				const store = getStore();
 				return {
 					in: (piece, day) => {
@@ -486,13 +485,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-			database: function() {
+			database: function () {
 				const store = getStore();
 				return {
-					add: async data => {
+					add: async (data) => {
 						const { includeInRegistry, custom, ..._asset } = data;
 						if (includeInRegistry === undefined || !includeInRegistry) return _asset;
-
+					
 						try {
 							const resp = await API.registry().createAsset({
 								asset_type: _asset.type === "replit" ? "EXERCISE" : _asset.type.toUpperCase(),
@@ -502,21 +501,22 @@ const getState = ({ getStore, getActions, setStore }) => {
 							setStore({
 								[mapEntity[_asset.type]]: store[mapEntity[_asset.type]].concat(_asset)
 							});
-
+					
 							data.custom = false;
 							data.includeInRegistry = false;
-
+					
 							return true;
 						} catch (error) {
-							throw error;
+							console.error("Error while creating asset in registry:", error);
+							throw new Error(`Failed to create asset: ${error.message}`);
 						}
 					}
 				};
 			},
-			searchSyllabus: async function(value) {
+			searchSyllabus: async function (value) {
 				return API.registry().searchOnJSON(value);
 			},
-			replaceInSyllabus: async function(original, replace, type) {
+			replaceInSyllabus: async function (original, replace, type) {
 				return API.registry().replaceOnJSON(original, {
 					slug: replace,
 					type,
@@ -531,7 +531,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					});
 					return true;
 				} catch (error) {
-					throw error;
+					console.error("Error during syllabus test:", error);
+					throw new Error(`Syllabus test failed: ${error.message}`);
 				}
 			},
 			getApiSyllabusVersion: async (academy, profile, version) => {
@@ -584,7 +585,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return await actions.upload({ content: data }, _store.info);
 			},
 			getApiSyllabusVersionForNewDay: async (academy, profile, version) => {
-				console.log("getApiSyllabusVersionForNewDay", academy, profile, version);
+				// console.log("getApiSyllabusVersionForNewDay", academy, profile, version);
 				// ignore version, academy or profile null
 				if (
 					!version ||
@@ -744,9 +745,8 @@ export function injectContent(Child) {
 		}, []);
 		return (
 			<ContentContext.Provider value={state}>
-				<ToastProvider placement="bottom-right" autoDismiss={true}>
-					<Child {...props} />
-				</ToastProvider>
+				<ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
+				<Child {...props} />
 			</ContentContext.Provider>
 		);
 	};

@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useDrag } from "react-dnd";
-import { Tooltip } from "react-lightweight-tooltip";
+import { Tooltip } from "react-tooltip";
 import EditContentPiece from "./modals/EditContentPiece";
 import { getTitle, getStatus, getLink } from "./utils";
-import swal from "sweetalert";
+import Swal from "sweetalert2";
 
 const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable }) => {
 	const [{ isDragging }, drag] = useDrag({
-		item: { type: data.type || "", data, status },
+		type: data.type || "DEFAULT_TYPE",
+		item: { data, status },
 		collect: monitor => ({
 			isDragging: !!monitor.isDragging()
 		})
@@ -33,7 +34,7 @@ const ContentPiece = ({ data, onDelete, onEdit, status, withWarning, isEditable 
 			{onDelete && (
 				<i
 					onClick={async () => {
-						const confirm = await swal({
+						const confirm = await Swal({
 							title: "Are you sure?",
 							text: `Do you want to remove this content from the syllabus?`,
 							icon: "warning",
