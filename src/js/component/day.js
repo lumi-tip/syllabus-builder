@@ -291,14 +291,17 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 												title: "Are you sure?",
 												text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
 												icon: "warning",
-												buttons: item.type === "project" ? {
-													replace: "Move item",
-													cancel: true
-												} : {
-													duplicate: "Copy item",
-													replace: "Move item",
-													cancel: true
-												},
+												buttons:
+													item.type === "project"
+														? {
+																replace: "Move item",
+																cancel: true
+														  }
+														: {
+																duplicate: "Copy item",
+																replace: "Move item",
+																cancel: true
+														  },
 												dangerMode: true
 										  });
 
