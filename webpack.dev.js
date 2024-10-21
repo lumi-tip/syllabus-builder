@@ -14,7 +14,7 @@ module.exports = merge(common, {
   // },
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist'), // Cambia 'contentBase' por 'static'
+      directory: path.join(__dirname, 'dist'),
     },
     hot: true,
     allowedHosts: 'all',
