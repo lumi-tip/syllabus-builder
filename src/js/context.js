@@ -508,6 +508,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 							return true;
 						} catch (error) {
+							console.error("Error testing syllabus:", error);
 							throw error;
 						}
 					}
@@ -531,6 +532,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					});
 					return true;
 				} catch (error) {
+					console.error("Error testing syllabus:", error);
 					throw error;
 				}
 			},

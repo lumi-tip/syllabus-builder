@@ -20,7 +20,7 @@
     "no-console": 1,
     "no-process-env": 0,
     "semi": ["error", "always"],
-    "allowImportExportEverywhere": false,
+    "allowImportExportEverywhere": 0,
     "comma-dangle": [1, { //when to use the last comma
         "arrays": "never",
         "objects": "never",
