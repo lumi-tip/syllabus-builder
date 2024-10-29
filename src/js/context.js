@@ -728,23 +728,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					},
 					basicFormat: () => {
 						const store = getStore();
-						const firstDay = store.days[0];
 					
-						// Determina la clave de idioma inicial
-						let foundLanguageKey = null;
-					
-						if (typeof firstDay.label === "object") {
-							if (firstDay.label.us) {
-								foundLanguageKey = "us";
-							} else {
-								const firstNonEmptyKey = Object.keys(firstDay.label).find(key => firstDay.label[key]);
-								foundLanguageKey = firstNonEmptyKey || null;
-							}
-						}
-					
-						if (foundLanguageKey === null && (!firstDay.label.us || !firstDay.description.us)) {
-							foundLanguageKey = "us";
-						}
+						const foundLanguageKey = "us";
 					
 						const newDays = store.days.map(day => {
 							const defaultLabel = typeof day.label === "object" ? "" : day.label;
