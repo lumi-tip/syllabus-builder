@@ -689,10 +689,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 							days: store.days.map(day => {
 								const updatedLabel = { ...day.label };
 								const updatedDescription = { ...day.description };
-				
+
 								delete updatedLabel[langKey];
 								delete updatedDescription[langKey];
-				
+
 								return {
 									...day,
 									label: updatedLabel,
@@ -730,16 +730,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 						const store = getStore();
 						const firstDay = store.days[0];
 					
-						const foundLanguageKey = typeof firstDay.label === "object" 
-							? Object.keys(firstDay.label).find(key => firstDay.label[key])
-							: null;
+						let foundLanguageKey = null;
+						if (typeof firstDay.label === "object") {
+							foundLanguageKey = firstDay.label.us 
+								? "us" 
+								: Object.keys(firstDay.label).find(key => firstDay.label[key]);
+						}
 					
 						const newDays = store.days.map(day => {
 							const defaultLabel = typeof day.label === "object" ? "" : day.label;
 							const defaultDescription = typeof day.description === "object" ? "" : day.description;
 					
-							const newLabel = foundLanguageKey ? day.label[foundLanguageKey] || defaultLabel : defaultLabel;
-							const newDescription = foundLanguageKey ? day.description[foundLanguageKey] || defaultDescription : defaultDescription;
+							const newLabel = foundLanguageKey 
+								? day.label[foundLanguageKey] || defaultLabel 
+								: defaultLabel;
+							const newDescription = foundLanguageKey 
+								? day.description[foundLanguageKey] || defaultDescription 
+								: defaultDescription;
 					
 							return {
 								...day,
