@@ -312,7 +312,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									});
 							}}
 							onSwap={(a, b) => {
-								console.log("swap", a, b);
 								let fromPosition = a?.position;
 								let toPosition = b?.position;
 								if (a !== undefined && b !== undefined)

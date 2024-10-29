@@ -19,7 +19,7 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 	const [loading, setLoading] = useState(false);
 	const [collapsed, setCollapsed] = useState(false);
 	const academyFromUrl = params.get("academy");
-	console.log("academyFromUrl", academyFromUrl);
+
 	if (collapsed)
 		return (
 			<button

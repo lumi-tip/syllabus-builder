@@ -121,7 +121,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 													e.lang == "us" ||
 													e.lang == "en" ||
 													["project", "replit", "exercise", "lesson"].includes(entity);
-												if (!keep) console.log(`entity ${entity} was filted`, e);
+												//if (!keep) console.log(`entity ${entity} was filted`, e);
 												return keep;
 											})
 											.map(e =>
@@ -145,7 +145,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				return models.map(
 					entity =>
 						new Promise((resolve, reject) => {
-							console.log("counting ", entity);
 							const _entity = API[entity]();
 							_entity
 								.count(filters)
@@ -806,7 +805,6 @@ export function injectContent(Child) {
 				setStore: updatedStore => {
 					const currentStore = state.actions.getStore();
 					const store = Object.assign(currentStore, updatedStore);
-					console.log("store lessons", store.lessons);
 					setState({ store, actions: { ...state.actions } });
 
 					const {
