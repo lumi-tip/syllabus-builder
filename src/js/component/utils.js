@@ -8,7 +8,6 @@ export const urls = {
 };
 
 export const getLink = async data => {
-	console.log("Get link for ", data);
 	if (!data) throw Error("No data url");
 	if (data.url) return data.url;
 
