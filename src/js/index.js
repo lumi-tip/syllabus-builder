@@ -185,5 +185,4 @@ const Main = injectContent(() => {
 });
 
 //render your react application
-// eslint-disable-next-line react/no-deprecated
 ReactDOM.render(<Main />, document.querySelector("#app"));

@@ -13,11 +13,9 @@ module.exports = merge(common, {
   //   publicPath: '/'
   // },
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
+    contentBase:  './dist',
     hot: true,
-    allowedHosts: 'all',
+    disableHostCheck: true,
     historyApiFallback: true
   },
   plugins: [

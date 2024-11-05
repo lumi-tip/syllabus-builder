@@ -276,12 +276,6 @@ export const TopBar = ({ readOnly }) => {
 			<div>
 				{!readOnly && notInfoEmpty("profile") && notInfoEmpty("academy_author") && notInfoEmpty("slug") && notInfoEmpty("version") && (
 					<>
-						<button className="btn btn-dark btn-sm mr-2" onClick={handleBasicFormat}>
-							Basic Format
-						</button>
-						<button className="btn btn-dark btn-sm mr-2" onClick={() => actions.days().translationFormat(languagesArr)}>
-							Translation Format
-						</button>
 						<button
 							className={`btn ${syllabusStatus.status} btn-sm mr-2`}
 							onClick={() => {
