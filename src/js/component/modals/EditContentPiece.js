@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { ContentContext } from "../../context.js";
 import PropTypes from "prop-types";
-import { getLink, useDebounce } from "../utils";
+import { getLink, useDebounce, getSlug } from "../utils";
 import Flag from "../flags/flags";
 import API from "../../api";
 import swal from "sweetalert";
@@ -26,6 +26,7 @@ const MultiValueLabel = properties => {
 const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 	const { store, actions } = useContext(ContentContext);
 	const [data, _setData] = useState(null);
+	const [databaseAsset, _setDatabaseAsset] = useState(null);
 	const [editMode, setEditMode] = useState(false);
 	const [formStatus, setFormStatus] = useState({
 		status: "ok",
@@ -50,6 +51,11 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 
 	useEffect(() => {
 		if (data && !data.custom) {
+			API.registry()
+				.getAsset(getSlug(data))
+				.then(asset => {
+					if (asset && asset.id) _setDatabaseAsset(asset);
+				});
 			getLink(data)
 				.then(url =>
 					url && url != ""
@@ -139,8 +145,8 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 		}
 
 		try {
-			const asset = await API.registry().getAsset(_slug);
 			if (data.custom) {
+				const asset = await API.registry().getAsset(data.slug);
 				setFormStatus({
 					status: "error",
 					messages: [`Slug is already taken by ${asset.asset_type.toLowerCase()}: ${asset.title}`]
@@ -269,14 +275,29 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 									)}
 								</>
 							) : (
-								<a
-									href={"#"}
-									onClick={() => linkStatus?.value && window.open(linkStatus?.value)}
-									className="form-control text-primary"
-									target="_blank"
-									rel="noopener noreferrer">
-									Test URL in new window <i className="fas fa-external-link-square-alt p-1 text-secondary" />
-								</a>
+								<div className="d-flex">
+									<div className="d-block w-50">
+										<a
+											href={"#"}
+											onClick={() => linkStatus?.value && window.open(linkStatus?.value)}
+											className="form-control text-primary"
+											target="_blank"
+											rel="noopener noreferrer">
+											Public URL <i className="fas fa-external-link-square-alt p-1 text-secondary" />
+										</a>
+										{databaseAsset && databaseAsset.status != "PUBLISHED" && (
+											<small className="form-text text-muted">{`This lesson is ${databaseAsset.status}, the public link will probably be broken`}</small>
+										)}
+									</div>
+									<a
+										href={"#"}
+										onClick={() => databaseAsset?.readme_url && window.open(databaseAsset?.readme_url)}
+										className="form-control text-primary w-50"
+										target="_blank"
+										rel="noopener noreferrer">
+										Source URL <i className="fas fa-external-link-square-alt p-1 text-secondary" />
+									</a>
+								</div>
 							)}
 						</div>
 						{data.addToRegistry ? (
@@ -331,36 +352,34 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 						) : (
 							<>
 								<div className="form-group">
-									<div className="form-check">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											checked={data.target === "blank"}
-											onChange={e =>
-												setData({
-													...data,
-													target: data.target === "blank" ? "self" : "blank"
-												})
-											}
-										/>
-										<label className="form-check-label">Make it open in a new window</label>
-									</div>
+									<input
+										className={`form-check-input cm-toggle ${data.target === "blank" ? "cm-toggle-checked" : ""}`}
+										type="checkbox"
+										checked={data.target === "blank"}
+										onClick={e =>
+											setData({
+												...data,
+												target: data.target === "blank" ? "self" : "blank"
+											})
+										}
+									/>
+									<label className="form-check-label">Make it open in a new window</label>
 								</div>
 								<div className="form-group">
-									<div className="form-check">
-										<input
-											className="form-check-input"
-											type="checkbox"
-											checked={data.mandatory}
-											onChange={e =>
-												setData({
-													...data,
-													mandatory: data.mandatory !== true
-												})
-											}
-										/>
-										<label className="form-check-label">Mandatory: must be completed before graduation</label>
-									</div>
+									<input
+										key={data.mandatory}
+										className={`form-check-input cm-toggle ${data.mandatory ? "cm-toggle-checked" : ""}`}
+										type="checkbox"
+										checked={data.mandatory}
+										onClick={e => {
+											// console.log("mandatory clicked", data.mandatory);
+											setData({
+												...data,
+												mandatory: data.mandatory === undefined ? false : !data.mandatory
+											});
+										}}
+									/>
+									<label className="form-check-label">Mandatory: must be completed before graduation</label>
 								</div>
 							</>
 						)}

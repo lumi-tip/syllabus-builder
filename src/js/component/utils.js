@@ -7,20 +7,18 @@ export const urls = {
 	replit: "https://breathecode.herokuapp.com/v1/registry/asset/"
 };
 
+export const getSlug = data => {
+	let slug = data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
+	slug = slug.substr(slug.indexOf("]") + 1);
+	return slug;
+};
+
 export const getLink = async data => {
 	if (!data) throw Error("No data url");
 	if (data.url) return data.url;
 
-	let slug = data.slug !== undefined ? data.slug.split(".")[0] : data.info.slug;
-	slug = slug.substr(slug.indexOf("]") + 1);
+	let slug = getSlug(data);
 	const url = typeof urls[data.type] !== "undefined" ? urls[data.type] + slug : "/undefined_url_for_" + data.type;
-
-	if (data.type === "replit") {
-		const resp = await fetch(url);
-		if (!resp.ok) throw Error("Link URL is invalid");
-		const info = await resp.json();
-		return info.url;
-	}
 
 	return url;
 };
@@ -89,6 +87,8 @@ export const getAPIErrors = payload => {
 	let errors = [];
 
 	if (payload.detail !== undefined || payload.details !== undefined) return payload.detail || payload.details;
+
+	if (Array.isArray(payload.errors)) return payload;
 
 	for (let field in payload) {
 		errors.push(`Invalid ${field}: ${payload[field]}`);

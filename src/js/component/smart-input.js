@@ -45,11 +45,11 @@ const SmartInput = ({ className, placeholder, onChange, initialValue, type, styl
 				}}
 			/>
 		);
-	else if (type === "text")
+	else if (["text", "number"].includes(type))
 		return (
 			<input
 				{...rest}
-				type="text"
+				type={type}
 				style={style}
 				className={className}
 				placeholder={placeholder}

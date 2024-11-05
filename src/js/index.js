@@ -3,7 +3,13 @@ import React, { useContext, useState } from "react";
 import ReactDOM from "react-dom";
 import "bootstrap";
 import "jquery";
-import "../styles/index.scss";
+
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/index.css";
+import "../styles/_modals.css";
+import "../styles/_sidebar.css";
+import "../styles/_timeline.css";
+
 import { Day, Sidebar } from "./component";
 import { ContentContext, injectContent } from "./context.js";
 import { DndProvider } from "react-dnd";
@@ -14,9 +20,11 @@ import { useEffect } from "react";
 import { TopBar } from "./component/topbar";
 import { ExtendedInstructions } from "./component/modal";
 import NewDay from "./component/modals/NewDayModal";
-import getCurrentUrl from "./utils/get-current-url";
+import API from "./api.js";
+import { getCurrentUrl, getUrlParams } from "./utils/url";
 
 //include your index.scss file into the bundle
+const SIDEBAR_WIDTH = "300px";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
 
@@ -25,12 +33,16 @@ const API_KEY = params.get("token");
 
 const Main = injectContent(() => {
 	const { store, actions } = useContext(ContentContext);
-	const [sidebarWidth, setSidebarWidth] = useState("350px");
+
+	const [collapsed, setCollapsed] = useState(true);
 	const [editExtendedDay, setEditExtendedDay] = useState(null);
 	const [openNewDay, setOpenNewDay] = useState(false);
 	const [index, setIndex] = useState(0);
 	const sortedDays = store.days.sort((a, b) => (a.position < b.position ? -1 : 1));
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
+
+	const academyFromUrl = params.get("academy");
+	const readOnly = (!academyFromUrl && typeof academyFromUrl == undefined) || store.info?.academy_author != params.get("academy");
 
 	useEffect(() => {
 		actions.getMe();
@@ -39,6 +51,10 @@ const Main = injectContent(() => {
 				return "Are you sure you want to exit?";
 			};
 	}, []);
+
+	useEffect(() => {
+		setCollapsed(readOnly);
+	}, [readOnly]);
 
 	if (!API_KEY) {
 		const callbackUrl = getCurrentUrl();
@@ -75,16 +91,27 @@ const Main = injectContent(() => {
 		<>
 			<DndProvider backend={Backend}>
 				<div className="d-flex">
-					<Sidebar
-						content={store}
-						width={sidebarWidth}
-						onRefresh={type => actions.fetch([type], true)}
-						onCreateAsset={async piece => await actions.database().add(piece)}
-					/>
-					<div className="timeline" style={{ marginLeft: sidebarWidth }}>
+					{!readOnly && (
+						<Sidebar
+							content={store}
+							readOnly={readOnly}
+							onSearch={(type, search) => actions.fetch([type], { like: search.keyword, academy: search.academy }, true)}
+							onCreateAsset={async piece => await actions.database().add(piece)}
+							onCollapse={() => setCollapsed(!collapsed)}
+						/>
+					)}
+					<div className="timeline" style={{ marginLeft: collapsed ? 0 : SIDEBAR_WIDTH }}>
 						<Notifier />
-						<TopBar />
-						<div className="hbar" />
+						<TopBar readOnly={readOnly} />
+						{readOnly ? (
+							<div className="alert alert-warning m-0 rounded-0">
+								{!academyFromUrl && <p className="m-0">Please specify your academy id on the URL QueryString.</p>}
+								<span>You cannot update this syllabus, read only mode is active.</span>
+							</div>
+						) : (
+							<div className="hbar" />
+						)}
+
 						{openNewDay && <NewDay onConfirm={() => setOpenNewDay(false)} store={store} actions={actions} index={index} />}
 						{sortedDays.length === 0 &&
 							notInfoEmpty("profile") &&
