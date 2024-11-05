@@ -19,7 +19,7 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 	const [loading, setLoading] = useState(false);
 	const [collapsed, setCollapsed] = useState(false);
 	const academyFromUrl = params.get("academy");
-	console.log("academyFromUrl", academyFromUrl);
+
 	if (collapsed)
 		return (
 			<button
@@ -102,7 +102,7 @@ const Sidebar = ({ content, onCollapse, width, onSearch }) => {
 							}}
 						/>
 					</div>
-					You have to type to load the {currentType}s
+					{!searchFilters || (!searchFilters.keyword && <span>You have to type to load the {currentType}s</span>)}
 				</div>
 			) : (
 				<div className="d-flex">

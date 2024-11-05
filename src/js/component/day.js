@@ -4,9 +4,10 @@ import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
 import swal from "sweetalert";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
+import api from "../api";
 
 const icons = {
 	lesson: "fas fa-book",
@@ -221,7 +222,19 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							);
 						})}
 					{addNewTech ? (
-						<Select
+						<AsyncSelect
+							loadOptions={async searchToken => {
+								try {
+									const technologies = await api.technology().filter({ like: searchToken });
+									return technologies.map(tech => ({
+										value: tech.slug,
+										label: tech.title
+									}));
+								} catch (error) {
+									console.error("Error fetching technologies:", error);
+									return [];
+								}
+							}}
 							styles={selectStyles}
 							label="Add technologies"
 							onChange={t => {
@@ -231,10 +244,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								});
 								setAddNewTech(false);
 							}}
-							options={store.technologies.map(t => ({
-								value: t.slug,
-								label: t.title
-							}))}
 						/>
 					) : (
 						<button className="btn btn-sm btn-dark" style={{ fontSize: "10px" }} onClick={() => setAddNewTech(true)}>
@@ -303,7 +312,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									});
 							}}
 							onSwap={(a, b) => {
-								console.log("swap", a, b);
 								let fromPosition = a?.position;
 								let toPosition = b?.position;
 								if (a !== undefined && b !== undefined)
