@@ -1,7 +1,11 @@
 {
 	"name": "react-hello",
 	"engines": {
+<<<<<<< HEAD
 		"node": "20.x"
+=======
+		"node": "16.x"
+>>>>>>> origin
 	},
 	"version": "1.0.1",
 	"description": "",
@@ -35,16 +39,27 @@
 		"file-loader": "^6.2.0",
 		"gh-pages": "^1.2.0",
 		"html-loader": "^0.5.5",
+<<<<<<< HEAD
 		"html-webpack-plugin": "^5.5.0",
+=======
+		"html-webpack-plugin": "^3.2.0",
+>>>>>>> origin
 		"parse-github-url": "^1.0.2",
 		"prettier": "^1.14.3",
 		"remote-origin-url": "^1.0.0",
+<<<<<<< HEAD
 		"sass": "1.32",
 		"sass-loader": "^12.6.0",
 		"style-loader": "^3.3.3",
 		"webpack": "^5.95.0",
 		"webpack-cli": "^5.1.4",
 		"webpack-dev-server": "^4.11.1",
+=======
+		"style-loader": "^0.19.0",
+		"webpack": "^4.41.2",
+		"webpack-cli": "^3.3.0",
+		"webpack-dev-server": "^3.11.2",
+>>>>>>> origin
 		"webpack-merge": "^5.8.0"
 	},
 	"babel": {

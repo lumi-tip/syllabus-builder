@@ -1,0 +1,52 @@
+.sidebar-btn {
+    z-index: 100;
+    top: 56px;
+    left: 10px;
+  }
+  .sidebar {
+    width: 300px;
+    z-index: 100;
+    background: #272727;
+    color: white;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar {
+    width: 10px;
+  }
+  .sidebar::-webkit-scrollbar-track {
+    background: #b3b1b1;
+    border-radius: 10px;
+  }
+  .sidebar::-webkit-scrollbar-thumb {
+    background: #dfc346;
+    border-radius: 10px;
+  }
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: #646464;
+    border-radius: 10px;
+  }
+  .sidebar::-webkit-scrollbar-thumb:active {
+    background: #444;
+    border-radius: 10px;
+  }
+  .sidebar .back-btn {
+    width: 85px;
+  }
+  .sidebar .content {
+    padding: 0px 10px;
+  }
+  .sidebar .modal-dialog {
+    margin: 0;
+    color: black;
+  }
+  .sidebar .modal-dialog .modal-content {
+    border-radius: 0;
+  }
+  .sidebar li.content-piece {
+    background: #464646;
+  }
+  .sidebar li.content-piece:hover {
+    background: #5a5a5a;
+  }
+  

@@ -7,7 +7,7 @@ import API from "../../api";
 import swal from "sweetalert";
 import Select, { components, MultiValueGenericProps } from "react-select";
 
-const SearchSyllabus = ({ onSave, onCancel, actions }) => {
+const SearchSyllabus = ({ onSave, onCancel, actions, readOnly }) => {
 	const [searchFor, setSearchFor] = useState("");
 	const [replaceFor, setReplaceFor] = useState(null);
 	const [error, setError] = useState(null);
@@ -145,7 +145,7 @@ const SearchSyllabus = ({ onSave, onCancel, actions }) => {
 								Close
 							</button>
 							<button className="btn btn-primary btn-small">Search</button>
-							{replaceFor !== null && (
+							{!readOnly && replaceFor !== null && (
 								<button onClick={() => onReplace()} type="button" className="btn btn-warning btn-small">
 									Replace
 								</button>
@@ -158,12 +158,14 @@ const SearchSyllabus = ({ onSave, onCancel, actions }) => {
 	);
 };
 SearchSyllabus.propTypes = {
+	readOnly: PropTypes.bool,
 	onSave: PropTypes.func.required,
 	onCancel: PropTypes.func,
 	actions: PropTypes.objact
 };
 SearchSyllabus.defaultProps = {
 	onSave: null,
+	readOnly: true,
 	onCancel: null
 };
 export default SearchSyllabus;

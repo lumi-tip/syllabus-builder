@@ -4,8 +4,10 @@ import API from "./api.js";
 import swal from "sweetalert";
 import { urls, serialize } from "./component/utils";
 import { ToastProvider } from "react-toast-notifications";
-
+import { getUrlParams } from "./utils/url";
 export const ContentContext = React.createContext({});
+
+const defaultVal = (value, def) => (value === undefined ? def : value);
 
 const newDay = (id = 0, position = 0, seed = {}) => ({
 	label: "",
@@ -26,6 +28,17 @@ API.setOptions({
 	apiPathV2: process.env.API_URL + "/v1"
 	// apiPathV2: "https://8000-b748e395-8aa2-4f7e-bfc5-0b7234f4f182.ws-us03.gitpod.io/v1"
 });
+
+function removeNull(obj) {
+	const newObj = { ...obj };
+	for (const key in newObj) {
+		if (newObj[key] === null || newObj[key] === undefined) {
+			delete newObj[key];
+		}
+	}
+	return newObj;
+}
+
 const mapEntity = {
 	lesson: "lessons",
 	project: "projects",
@@ -49,7 +62,8 @@ const defaultSyllabusInfo = {
 	version: "",
 	profile: null,
 	description: "",
-	academy_author: null
+	academy_author: null,
+	duration_in_days: 0
 };
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
@@ -80,6 +94,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					academies: data.roles.map(r => r.academy)
 				});
 			},
+<<<<<<< HEAD
 			setSyllabusErrors: (errors) => {
 				setStore({
 					syllabus_errors: errors
@@ -110,18 +125,71 @@ const getState = ({ getStore, getActions, setStore }) => {
 														e.lang == "en" ||
 														["project", "replit", "exercise", "lesson"].includes(entity);
 													return keep;
+=======
+			fetch: (models, filters = {}, forceUpdate = false) => {
+				if (!Array.isArray(models)) models = [models];
+				filters = removeNull(filters);
+
+				return models.map(
+					entity =>
+						new Promise((resolve, reject) => {
+							if (!forceUpdate && Array.isArray(mapEntity[entity]) && mapEntity[entity].length > 0) {
+								console.error(`Can't fetch ${entity} because its already fetched`);
+								resolve(false);
+								return false;
+							}
+
+							const _entity = API[entity]();
+							_entity
+								.filter(filters)
+								.then(_data => {
+									let data = _data.data || _data;
+									data = data.results || data;
+									if (!Array.isArray(data)) data = Object.values(data);
+									const newStore = {
+										[mapEntity[entity]]: data
+											.filter(e => {
+												const keep =
+													typeof e.lang === "undefined" ||
+													e.lang == "us" ||
+													e.lang == "en" ||
+													["project", "replit", "exercise", "lesson"].includes(entity);
+												//if (!keep) console.log(`entity ${entity} was filted`, e);
+												return keep;
+											})
+											.map(e =>
+												serialize({
+													...e,
+													type: entity
+>>>>>>> origin
 												})
-												.map(e =>
-													serialize({
-														...e,
-														type: entity
-													})
-												)
-										};
-										setStore(newStore);
-										resolve(data);
-									})
-									.catch(error => reject(error));
+											)
+									};
+									console.log("newStore", newStore);
+									setStore(newStore);
+									resolve(data);
+								})
+								.catch(error => console.log(`Error fetching ${entity}`) || reject(error));
+						})
+				);
+			},
+			count: (models, filters = {}, forceUpdate = false) => {
+				if (!Array.isArray(models)) models = [models];
+
+				return models.map(
+					entity =>
+						new Promise((resolve, reject) => {
+							const _entity = API[entity]();
+							_entity
+								.count(filters)
+								.then(total => {
+									const newStore = {
+										[mapEntity[entity] + "Total"]: total
+									};
+									setStore(newStore);
+									resolve(total);
+								})
+								.catch(error => console.log(`Error fetching count for ${entity}`) || reject(error));
 						})
 				);
 			},
@@ -179,6 +247,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 							projects:
 								d.assignments !== undefined
 									? d.assignments.map(p => {
+<<<<<<< HEAD
 										const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
 										if (project === undefined) {
 											if (typeof p === "object") {
@@ -194,6 +263,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 													slug: p,
 													title: "Invalid project"
 												};
+=======
+											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
+											if (project === undefined) {
+												console.log("project not found", p);
+												if (typeof p === "object") {
+													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+													return {
+														...p,
+														type: "project"
+													};
+												} else {
+													console.log("invalid project", p);
+													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+													return {
+														type: "project",
+														slug: p,
+														title: "Invalid project"
+													};
+												}
+>>>>>>> origin
 											}
 										}
 
@@ -223,6 +312,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				if (typeof data.content === "string" && !data.content.startsWith("http")) {
 					let content = JSON.parse(data.content);
+
+					let { duration_in_days, status, duration_in_hours, academy_owner } = content; // get general info form the syllabus
+
 					let json = typeof content.json === "string" ? (json = JSON.parse(content.json)) : content.json;
 					actions.report().clear(); //clear noticications
 
@@ -232,15 +324,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 							[],
 							weeks.map(w => w.days)
 						);
-					setStore({
+					let _newStore = {
 						days: days.map((d, i) => {
 							return {
 								...d,
 								id: i + 1,
 								position: i + 1,
+								duration_in_days: d.duration_in_days || 1,
 								technologies: d.technologies || [],
 								lessons:
 									d.lessons !== undefined
+<<<<<<< HEAD
 										? d.lessons.map(l => {
 											l.type = "lesson";
 											return l;
@@ -252,10 +346,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 											l.type = "replit";
 											return l;
 										})
+=======
+										? d.lessons.map((l, position) => {
+												l.position = defaultVal(l.position, position);
+												l.type = "lesson";
+												return l;
+										  })
+										: (d.lessons = []),
+								replits:
+									d.replits !== undefined
+										? d.replits.map((l, position) => {
+												l.position = defaultVal(l.position, position);
+												l.type = "replit";
+												return l;
+										  })
+>>>>>>> origin
 										: (d.replits = []),
 								//from the json it comes like an assignment, but its really a project
 								projects:
 									d.assignments !== undefined
+<<<<<<< HEAD
 										? d.assignments.map(p => {
 											const project = projects.find(_pro =>
 												p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
@@ -274,31 +384,83 @@ const getState = ({ getStore, getActions, setStore }) => {
 														slug: p,
 														title: "Invalid project"
 													};
+=======
+										? d.assignments.map((a, position) => {
+												const project = projects.find(_pro =>
+													a.slug !== undefined ? _pro.slug === a.slug : _pro.slug === a
+												);
+												if (project === undefined) {
+													if (typeof a === "object") {
+														actions.report().add("warning", `Project not found ${a.slug || a} on position ${i + 1}`, a);
+														return {
+															...a,
+															type: "project"
+														};
+													} else {
+														console.log("invalid project", a);
+														actions.report().add("error", `Invalid project ${a} on position ${i + 1}`, a);
+														return {
+															type: "project",
+															slug: a,
+															title: "Invalid project"
+														};
+													}
+>>>>>>> origin
 												}
 											}
 
+<<<<<<< HEAD
 											return project;
 										})
+=======
+												project.target = a.target;
+												project.position = defaultVal(a.position, position);
+												project.title = a.title;
+												project.mandatory = a.mandatory;
+												return project;
+										  })
+>>>>>>> origin
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
 										? d.quizzes
+<<<<<<< HEAD
 											.filter(f => f.slug != undefined)
 											.map(l => {
 												l.type = "quiz";
 												return l;
 											})
+=======
+												.filter(f => f.slug != undefined)
+												.map((l, position) => {
+													l.position = defaultVal(l.position, position);
+													l.type = "quiz";
+													return l;
+												})
+>>>>>>> origin
 										: (d.quizzes = [])
 							};
 						})
-					});
-					actions.setInfo({
+					};
+					setStore(_newStore);
+
+					let _info = {
 						slug: info.profile,
 						profile: info.profile,
+						academy_author: academy_owner?.id || academy_owner,
+						duration_in_days: duration_in_days || 0,
+						duration_in_hours: duration_in_hours || 0,
 						label,
 						description,
-						version: info.version
-					});
+						version: content.version,
+						status: content.status
+					};
+					actions.setInfo(_info);
+
+					return {
+						..._newStore,
+						info: _info
+					};
 				} else
 					new Promise((resolve, reject) => {
 						return fetch(data)
@@ -308,7 +470,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								} else throw new Error("There was an error code " + resp.status);
 							})
 							.then(json => {
-								let { days, label, description, weeks } = json;
+								let { days, label, description, weeks, academy_owner } = json;
 								if (weeks)
 									days = weeks
 										.map(w => w.days)
@@ -350,6 +512,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 								actions.setInfo({
 									slug: info.profile,
 									profile: info.profile,
+									academy_author: academy_owner?.id || academy_owner,
+									duration_in_days: info.duration_in_days,
+									duration_in_hours: info.duration_in_hours,
+									status: info.status,
 									label,
 									description,
 									version: info.version
@@ -370,6 +536,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					...store.info,
 					days: store.days.map(d => ({
 						...d,
+						duration_in_days: d.duration_in_days || 1,
 						projects: undefined,
 						project:
 							d.projects.length == 0
@@ -382,29 +549,33 @@ const getState = ({ getStore, getActions, setStore }) => {
 							slug: p.slug,
 							title: p.title,
 							target: p.target,
+							position: p.position,
 							url: p.url,
-							mandatory: p.mandatory
+							mandatory: defaultVal(p.mandatory, true)
 						})),
 						replits: d.replits.map(e => ({
 							title: e.info != undefined ? e.info.title : e.title,
 							slug: e.info != undefined ? e.info.slug : e.slug,
+							position: e.info != undefined ? e.info.position : e.position,
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						})),
 						quizzes: d.quizzes.map(e => ({
 							title: e.info != undefined ? e.info.name : e.title,
 							target: e.info != undefined ? e.info.target : e.target,
 							slug: e.info != undefined ? e.info.slug : e.slug,
+							position: e.info != undefined ? e.info.position : e.position,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						})),
 						lessons: d.lessons.map(e => ({
 							title: e.title,
 							slug: e.slug.substr(e.slug.indexOf("]") + 1), //remove status like [draft]
 							target: e.info != undefined ? e.info.target : e.target,
 							url: e.info != undefined ? e.info.url : e.url,
-							mandatory: e.info != undefined ? e.info.mandatory : e.mandatory
+							position: e.info != undefined ? e.info.position : e.position,
+							mandatory: e.info != undefined ? defaultVal(e.info.mandatory, true) : defaultVal(e.mandatory, true)
 						}))
 					}))
 				};
@@ -427,8 +598,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				if (!newVersion && store.info.version == "null") throw Error("Please pick a syllabus version");
 				else if (store.info.version === "new") newVersion = true;
 				const url = newVersion
-					? API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version"
-					: API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version/" + store.info.version;
+					? API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version" + "?ignore=projects"
+					: API.options.apiPathV2 + "/admissions/syllabus/" + store.info.profile + "/version/" + store.info.version + "?ignore=projects";
+
 				const params = new URLSearchParams(window.location.search);
 				const apiKey = params.get("token");
 				const resp = await fetch(url, {
@@ -459,7 +631,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 			clear: () => {
 				const store = getStore();
-				localStorage.removeItem("syllabus-" + store.info.slug, JSON.stringify(store));
+				localStorage.removeItem("syllabus-" + store.info.slug);
+				localStorage.removeItem("syllabus-");
 				setStore({
 					days: [],
 					report: [],
@@ -495,7 +668,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
+<<<<<<< HEAD
 			database: function () {
+=======
+			// only used to update the original asset from the database
+			database: function() {
+>>>>>>> origin
 				const store = getStore();
 				return {
 					add: async data => {
@@ -536,10 +714,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			test: async () => {
 				const store = getStore();
 				try {
-					const resp = await API.registry().testSyllabus({
+					const report = await API.registry().testSyllabus({
 						days: store.days
 					});
-					return true;
+					return report;
 				} catch (error) {
 					console.error("Error testing syllabus:", error);
 					throw error;
@@ -550,7 +728,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const meta = {
 					academy_author: academy,
 					profile,
-					version,
 					slug: profile
 				};
 				const _store = { ...store, info: { ...store.info, ...meta } };
@@ -798,20 +975,54 @@ export function injectContent(Child) {
 					const currentStore = state.actions.getStore();
 					const store = Object.assign(currentStore, updatedStore);
 					setState({ store, actions: { ...state.actions } });
-					localStorage.setItem("syllabus-" + store.info.slug, JSON.stringify(store));
+
+					const {
+						duration_in_days,
+						status,
+						slug,
+						duration_in_hours,
+						academy_author,
+						academy_owner,
+						...rest
+					} = state.actions.serialize().json;
+					const _aca = academy_owner || academy_author;
+
+					localStorage.setItem(
+						"syllabus-" + (store.info.slug || slug),
+						JSON.stringify({
+							slug,
+							duration_in_days,
+							status,
+							duration_in_hours,
+							academy_owner: _aca ? _aca.id || _aca : null,
+							json: rest
+						})
+					);
 				}
 			})
 		);
 		useEffect(() => {
 			const slug = window.location.hash.replace("#", "");
 			const previousStore = localStorage.getItem("syllabus-" + slug);
-			if (typeof previousStore === "string" && previousStore != "") {
-				const newStore = JSON.parse(previousStore);
+			const params = getUrlParams();
+
+			if (params.academy && params.syllabus) {
+				API.setOptions({ academy: params.academy });
+				state.actions.getApiSyllabusVersion(params.academy, params.syllabus, params.version || "latest").catch(e => {
+					console.error(e);
+					swal({
+						icon: "error",
+						text: `Error fetching syllabus, we could find a 'latest' version for syllabus ${params.syllabus} and academy ${params.academy}`
+					});
+				});
+			} else if (typeof previousStore === "string" && previousStore != "") {
+				const newStore = state.actions.upload({ content: previousStore });
 				state.actions.setStore(newStore);
 				API.setOptions({ academy: newStore.info.academy_author });
 			}
 
-			state.actions.fetch(["lesson", "quiz", "project", "replit", "technology", "translation"]);
+			state.actions.count(["lesson", "quiz", "project", "replit", "technology", "translation"]);
+			state.actions.fetch(["technology"]);
 			window.store = state.store;
 		}, []);
 		return (

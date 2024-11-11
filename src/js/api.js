@@ -1,8 +1,11 @@
 import swal from "sweetalert";
-import getCurrentUrl from "./utils/get-current-url";
+import { getCurrentUrl } from "./utils/url";
 import { getAPIErrors } from "./component/utils";
 
 const apiUrl = (process.env.API_URL || "https://breathecode.herokuapp.com").replace(/\/$/, "");
+const params = new URLSearchParams(window.location.search);
+const PAGE_SIZE = 100;
+const lang = params.get("lang") || "us";
 
 class Wrapper {
 	constructor() {
@@ -50,11 +53,13 @@ class Wrapper {
 	setOptions(options) {
 		this.options = Object.assign(this.options, options);
 	}
+	getOption(key) {
+		return this.options[key];
+	}
 	fetch(...args) {
 		return fetch(...args);
 	}
 	req(method, path, args) {
-		const params = new URLSearchParams(window.location.search);
 		const apiKey = params.get("token");
 
 		let opts = {
@@ -147,6 +152,29 @@ class Wrapper {
 				});
 		});
 	}
+	filter(_baseQuery) {
+		return async (filters = {}) => {
+			let results = [];
+			let total = PAGE_SIZE;
+			let offset = 0;
+			while (total === PAGE_SIZE) {
+				const _data = await this.get(
+					`${_baseQuery}&limit=${PAGE_SIZE}&offset=${offset * PAGE_SIZE}&${new URLSearchParams(filters).toString()}`
+				);
+				if (_data.count === undefined) return _data;
+				total = _data.count;
+				results = results.concat(_data.results);
+				offset++;
+			}
+			return results;
+		};
+	}
+	count(_baseQuery) {
+		return async () => {
+			const data = await this.get(`${_baseQuery}&limit=1`);
+			return data.count || data.length;
+		};
+	}
 	_encodeKeys(obj) {
 		for (let key in obj) {
 			let newkey = key.replace("-", "_");
@@ -225,7 +253,7 @@ class Wrapper {
 				return this.post(url + "/registry/asset", args);
 			},
 			testSyllabus: args => {
-				return this.post(url + "/registry/syllabus/test", args);
+				return this.post(url + "/admissions/syllabus/test?ignore=assignments", args);
 			},
 			searchOnJSON: slug => {
 				return this.get(url + "/admissions/admin/syllabus/asset/" + slug);
@@ -237,26 +265,27 @@ class Wrapper {
 	}
 	project() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=PROJECT&language=${lang}&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
 		return {
-			all: syllabus_slug => {
-				return this.get(url + "/registry/asset?type=project&language=us");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	replit() {
 		let url = this.options.apiPathV2;
+		const _query =
+			url + `/registry/asset?asset_type=EXERCISE&language=${lang}&external=both&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
 		return {
-			all: () => {
-				return this.get(url + "/registry/asset?type=exercise&language=us");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	quiz() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=QUIZ&language=${lang}&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
 		return {
-			all: () => {
-				return this.get(url + "/registry/asset?type=quiz&language=us");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	user() {
@@ -382,13 +411,13 @@ class Wrapper {
 			}
 		};
 	}
-	profile() {
+	profile(syllabusSlug) {
 		let url = this.options.apiPathV2;
 		return {
 			all: () => {
 				return this.get(url + "/admissions/syllabus");
 			},
-			version: syllabusSlug => {
+			getAllVersions: () => {
 				return this.get(`${url}/admissions/syllabus/${syllabusSlug}/version`);
 			},
 			get: id => {
@@ -399,6 +428,9 @@ class Wrapper {
 			},
 			update: (id, args) => {
 				return this.post(url + "/profile/" + id, args);
+			},
+			updateVersion: (versionNumber, args) => {
+				return this.put(`${url}/admissions/syllabus/${syllabusSlug}/version/${versionNumber}?ignore=projects`, args);
 			},
 			delete: id => {
 				return this.delete(url + "/profile/" + id);
@@ -416,11 +448,10 @@ class Wrapper {
 
 	lesson() {
 		let url = this.options.apiPathV2;
+		const _query = url + `/registry/asset?asset_type=LESSON&language=${lang}&visibility=PUBLIC,UNLISTED&status=DRAFT,OPTIMIZED,PUBLISHED`;
 		return {
-			all: () => {
-				//return this.get(url + "/lesson/all/v2");
-				return this.get(url + "/registry/asset?type=lesson&language=us");
-			},
+			filter: this.filter(_query),
+			count: this.count(_query),
 			get: id => {
 				return this.get(url + "/registry/asset/" + id);
 			}
@@ -428,18 +459,18 @@ class Wrapper {
 	}
 	technology() {
 		let url = this.options.apiPathV2;
+		const _query = url + "/registry/technology?";
 		return {
-			all: () => {
-				return this.get(url + "/registry/technology");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	translation() {
 		let url = this.options.apiPathV2;
+		const _query = url + "/registry/translation?";
 		return {
-			all: () => {
-				return this.get(url + "/registry/translation");
-			}
+			filter: this.filter(_query),
+			count: this.count(_query)
 		};
 	}
 	catalog() {

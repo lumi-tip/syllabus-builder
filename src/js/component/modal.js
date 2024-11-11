@@ -94,7 +94,7 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	useEffect(() => {
 		const profileEffects = async () => {
 			actions.cleanSyllabus({ academy, profile: profile?.slug });
-			let versions = await API.profile().version(profile?.slug);
+			let versions = await API.profile(profile?.slug).getAllVersions();
 			if (versions.length === 0) versions = [{ version: "new version", value: "new version" }];
 			setVersionOptions(versions.sort((a, b) => (a.version > b.version ? 1 : -1)));
 		};
@@ -107,7 +107,9 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	useEffect(() => {
 		const versionEffects = async () => {
 			// actions.cleanSyllabus({ academy, profile: profile?.slug });
-			if (version) actions.getApiSyllabusVersion(academy, profile?.slug, version.value || version);
+			if (version) {
+				actions.getApiSyllabusVersion(academy, profile?.slug, version.value || version);
+			}
 		};
 
 		if (version) versionEffects();
@@ -232,4 +234,54 @@ ExtendedInstructions.propTypes = {
 };
 ExtendedInstructions.defaultProps = {
 	defaultValue: "Hello *World*!"
+};
+
+export const IntegrityReport = ({ messages, onClose }) => {
+	return (
+		<div className="modal show d-block" tabIndex="-1" role="dialog">
+			<div className="modal-dialog" role="document">
+				<div className="modal-content">
+					<div className="modal-body text-left" style={{ maxHeight: "400px", overflowY: "auto" }}>
+						<h3>
+							<i className="fas fa-bug"></i> Integrity Report
+						</h3>
+						<p>After running a scan on the syllabus we found the following problems: </p>
+						{messages.errors.length == 0 ? (
+							<p>
+								<i className="fas fa-check text-success" /> No major errors found.
+							</p>
+						) : (
+							<ul className="pl-2">
+								{messages.errors.map((m, i) => (
+									<li key={i}>{m}</li>
+								))}
+							</ul>
+						)}
+						{messages.warnings.length > 0 && (
+							<>
+								<p className="mb-2">
+									<i className="fas fa-exclamation-triangle text-warning"></i> Some minor warnings:
+								</p>
+								<ul className="pl-2">
+									{messages.warnings.map((m, i) => (
+										<li key={i}>{m}</li>
+									))}
+								</ul>
+							</>
+						)}
+					</div>
+					<div className="modal-footer">
+						<button onClick={() => onClose()} type="button" className="btn btn-secondary btn-small" data-dismiss="modal">
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+IntegrityReport.propTypes = {
+	messages: PropTypes.array,
+	onClose: PropTypes.func
 };

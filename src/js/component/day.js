@@ -4,9 +4,10 @@ import { useDrop } from "react-dnd";
 import { ContentPiece, SmartInput } from "./index.js";
 import { ContentContext } from "../context.js";
 import swal from "sweetalert";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import { mappers } from "./utils";
 import EditContentPiece from "./modals/EditContentPiece";
+import api from "../api";
 
 const icons = {
 	lesson: "fas fa-book",
@@ -14,7 +15,7 @@ const icons = {
 	project: "fas fa-laptop-code",
 	quiz: "fas fa-clipboard-check"
 };
-const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
+const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit, onSwap }) => {
 	const [editAsset, setEditAsset] = useState(null);
 	const [{ isOver, canDrop }, drop] = useDrop({
 		accept: type,
@@ -36,9 +37,10 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			{editAsset && (
 				<EditContentPiece
 					defaultValue={editAsset}
-					onSave={_piece => {
+					onSave={async _piece => {
 						setEditAsset(null);
 						onEdit(_piece);
+						return _piece;
 					}}
 					onCancel={() => setEditAsset(null)}
 				/>
@@ -63,19 +65,27 @@ const Column = ({ heading, onDrop, pieces, type, onDelete, onEdit }) => {
 			</h4>
 			<ul className="py-0 px-1">
 				{pieces.length == 0 && <small className="p-0">No content</small>}
-				{pieces.map((p, i) => {
-					return (
-						<ContentPiece
-							key={i}
-							type={p.type}
-							data={p}
-							status={p.status}
-							isEditable={p.custom}
-							onEdit={_piece => setEditAsset(_piece)}
-							onDelete={() => onDelete(p)}
-						/>
-					);
-				})}
+				{pieces
+					.sort((a, b) => (a.position > b.position ? -1 : 1))
+					.map((p, i, _pieces) => {
+						return (
+							<ContentPiece
+								withSwap
+								withMandatory
+								key={i}
+								type={p.type}
+								data={p}
+								status={p.status}
+								isEditable={p.custom}
+								onEdit={_piece => {
+									setEditAsset(_piece);
+								}}
+								onUp={() => onSwap(p, _pieces[i - 1])}
+								onDown={() => onSwap(p, _pieces[i + 1])}
+								onDelete={() => onDelete(p)}
+							/>
+						);
+					})}
 			</ul>
 		</div>
 	);
@@ -88,7 +98,8 @@ Column.propTypes = {
 	translations: PropTypes.array,
 	onDrop: PropTypes.func,
 	onDelete: PropTypes.func,
-	onEdit: PropTypes.func
+	onEdit: PropTypes.func,
+	onSwap: PropTypes.func
 };
 Column.defaultProps = {
 	pieces: [],
@@ -282,7 +293,19 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 							);
 						})}
 					{addNewTech ? (
-						<Select
+						<AsyncSelect
+							loadOptions={async searchToken => {
+								try {
+									const technologies = await api.technology().filter({ like: searchToken });
+									return technologies.map(tech => ({
+										value: tech.slug,
+										label: tech.title
+									}));
+								} catch (error) {
+									console.error("Error fetching technologies:", error);
+									return [];
+								}
+							}}
 							styles={selectStyles}
 							label="Add technologies"
 							onChange={t => {
@@ -292,10 +315,6 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								});
 								setAddNewTech(false);
 							}}
-							options={store.technologies.map(t => ({
-								value: t.slug,
-								label: t.title
-							}))}
 						/>
 					) : (
 						<button className="btn btn-sm btn-dark" style={{ fontSize: "10px" }} onClick={() => setAddNewTech(true)}>
@@ -363,6 +382,19 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 										});
 									});
 							}}
+							onSwap={(a, b) => {
+								let fromPosition = a?.position;
+								let toPosition = b?.position;
+								if (a !== undefined && b !== undefined)
+									actions.days().update(_data.id, {
+										..._data,
+										[m.storeName]: _data[m.storeName].map(i => {
+											if (i.slug === a.slug) i.position = toPosition;
+											else if (i.slug === b.slug) i.position = fromPosition;
+											return i;
+										})
+									});
+							}}
 							onDrop={async item => {
 								const exists = actions.days().findPiece(item, m.storeName);
 
@@ -398,6 +430,13 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 											return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 										})
 									});
+								}
+
+								// if the new column is empty this will be the first in possition
+								if (item.position === undefined && _data[m.storeName].length === 0) item.data.position = 0;
+								// the position of this new item should be the smallest in the list
+								else if (item.position === undefined) {
+									item.data.position = _data[m.storeName].sort((a, b) => (a.position > b.position ? 1 : -1))[0].position - 1;
 								}
 
 								actions.pieces().in(item, {
