@@ -81,8 +81,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			translations: [],
 			report: [],
 			imported_days: [],
-			imported_syllabus: [],
-			syllabus_error: []
+			imported_syllabus: []
 		},
 
 		actions: {
@@ -94,7 +93,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					academies: data.roles.map(r => r.academy)
 				});
 			},
-<<<<<<< HEAD
 			setSyllabusErrors: (errors) => {
 				setStore({
 					syllabus_errors: errors
@@ -105,27 +103,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 					syllabus_errors: []
 				});
 			},
-			fetch: (models, forceUpdate = false) => {
-				if (!Array.isArray(models)) models = [models];
-				return models.map(
-					entity =>
-						new Promise((resolve, reject) => {
-							if (forceUpdate || !Array.isArray(mapEntity[entity]) || mapEntity[entity].length == 0)
-								API[entity]()
-									.all()
-									.then(_data => {
-										let data = _data.data || _data;
-										if (!Array.isArray(data)) data = Object.values(data);
-										const newStore = {
-											[mapEntity[entity]]: data
-												.filter(e => {
-													const keep =
-														typeof e.lang === "undefined" ||
-														e.lang == "us" ||
-														e.lang == "en" ||
-														["project", "replit", "exercise", "lesson"].includes(entity);
-													return keep;
-=======
 			fetch: (models, filters = {}, forceUpdate = false) => {
 				if (!Array.isArray(models)) models = [models];
 				filters = removeNull(filters);
@@ -161,7 +138,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 												serialize({
 													...e,
 													type: entity
->>>>>>> origin
 												})
 											)
 									};
@@ -247,9 +223,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 							projects:
 								d.assignments !== undefined
 									? d.assignments.map(p => {
-<<<<<<< HEAD
 										const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
 										if (project === undefined) {
+											console.log("project not found", p);
 											if (typeof p === "object") {
 												actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
 												return {
@@ -257,32 +233,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 													type: "project"
 												};
 											} else {
+												console.log("invalid project", p);
 												actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
 												return {
 													type: "project",
 													slug: p,
 													title: "Invalid project"
 												};
-=======
-											const project = projects.find(_pro => (p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p));
-											if (project === undefined) {
-												console.log("project not found", p);
-												if (typeof p === "object") {
-													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
-													return {
-														...p,
-														type: "project"
-													};
-												} else {
-													console.log("invalid project", p);
-													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
-													return {
-														type: "project",
-														slug: p,
-														title: "Invalid project"
-													};
-												}
->>>>>>> origin
 											}
 										}
 
@@ -334,110 +291,61 @@ const getState = ({ getStore, getActions, setStore }) => {
 								technologies: d.technologies || [],
 								lessons:
 									d.lessons !== undefined
-<<<<<<< HEAD
-										? d.lessons.map(l => {
+										? d.lessons.map((l, position) => {
+											l.position = defaultVal(l.position, position);
 											l.type = "lesson";
 											return l;
 										})
 										: (d.lessons = []),
 								replits:
 									d.replits !== undefined
-										? d.replits.map(l => {
+										? d.replits.map((l, position) => {
+											l.position = defaultVal(l.position, position);
 											l.type = "replit";
 											return l;
 										})
-=======
-										? d.lessons.map((l, position) => {
-												l.position = defaultVal(l.position, position);
-												l.type = "lesson";
-												return l;
-										  })
-										: (d.lessons = []),
-								replits:
-									d.replits !== undefined
-										? d.replits.map((l, position) => {
-												l.position = defaultVal(l.position, position);
-												l.type = "replit";
-												return l;
-										  })
->>>>>>> origin
 										: (d.replits = []),
-								//from the json it comes like an assignment, but its really a project
+								// from the JSON it comes like an assignment, but it's really a project
 								projects:
 									d.assignments !== undefined
-<<<<<<< HEAD
-										? d.assignments.map(p => {
+										? d.assignments.map((a, position) => {
 											const project = projects.find(_pro =>
-												p.slug !== undefined ? _pro.slug === p.slug : _pro.slug === p
+												a.slug !== undefined ? _pro.slug === a.slug : _pro.slug === a
 											);
 											if (project === undefined) {
-												if (typeof p === "object") {
-													actions.report().add("warning", `Project not found ${p.slug || p} on position ${i + 1}`, p);
+												if (typeof a === "object") {
+													actions.report().add("warning", `Project not found ${a.slug || a} on position ${i + 1}`, a);
 													return {
-														...p,
+														...a,
 														type: "project"
 													};
 												} else {
-													actions.report().add("error", `Invalid project ${p} on position ${i + 1}`, p);
+													console.log("invalid project", a);
+													actions.report().add("error", `Invalid project ${a} on position ${i + 1}`, a);
 													return {
 														type: "project",
-														slug: p,
+														slug: a,
 														title: "Invalid project"
 													};
-=======
-										? d.assignments.map((a, position) => {
-												const project = projects.find(_pro =>
-													a.slug !== undefined ? _pro.slug === a.slug : _pro.slug === a
-												);
-												if (project === undefined) {
-													if (typeof a === "object") {
-														actions.report().add("warning", `Project not found ${a.slug || a} on position ${i + 1}`, a);
-														return {
-															...a,
-															type: "project"
-														};
-													} else {
-														console.log("invalid project", a);
-														actions.report().add("error", `Invalid project ${a} on position ${i + 1}`, a);
-														return {
-															type: "project",
-															slug: a,
-															title: "Invalid project"
-														};
-													}
->>>>>>> origin
 												}
-											}
-
-<<<<<<< HEAD
-											return project;
-										})
-=======
+											} else {
 												project.target = a.target;
 												project.position = defaultVal(a.position, position);
 												project.title = a.title;
 												project.mandatory = a.mandatory;
 												return project;
-										  })
->>>>>>> origin
+											}
+										})
 										: (d.assignments = []),
 								quizzes:
 									d.quizzes !== undefined
 										? d.quizzes
-<<<<<<< HEAD
 											.filter(f => f.slug != undefined)
-											.map(l => {
+											.map((l, position) => {
+												l.position = defaultVal(l.position, position);
 												l.type = "quiz";
 												return l;
 											})
-=======
-												.filter(f => f.slug != undefined)
-												.map((l, position) => {
-													l.position = defaultVal(l.position, position);
-													l.type = "quiz";
-													return l;
-												})
->>>>>>> origin
 										: (d.quizzes = [])
 							};
 						})
@@ -668,12 +576,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					}
 				};
 			},
-<<<<<<< HEAD
-			database: function () {
-=======
 			// only used to update the original asset from the database
-			database: function() {
->>>>>>> origin
+			database: function () {
 				const store = getStore();
 				return {
 					add: async data => {
@@ -695,7 +599,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 							return true;
 						} catch (error) {
-							console.error("Error testing syllabus:", error);
+							console.error(error);
 							throw error;
 						}
 					}
@@ -719,11 +623,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 					});
 					return report;
 				} catch (error) {
-					console.error("Error testing syllabus:", error);
+					console.error(error);
 					throw error;
 				}
 			},
 			getApiSyllabusVersion: async (academy, profile, version) => {
+				console.log("getApiSyllabusVersion", academy, profile, version);
 				const store = getStore();
 				const meta = {
 					academy_author: academy,
@@ -767,9 +672,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 						throw Error("There was an error fetching the syllabus");
 					}
 				}
+
 				return await actions.upload({ content: data }, _store.info);
 			},
 			getApiSyllabusVersionForNewDay: async (academy, profile, version) => {
+				console.log("getApiSyllabusVersionForNewDay", academy, profile, version);
 				// ignore version, academy or profile null
 				if (
 					!version ||
@@ -905,23 +812,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 					},
 					basicFormat: () => {
 						const store = getStore();
-					
+
 						const foundLanguageKey = "us";
-					
+
 						const newDays = store.days.map(day => {
 							const defaultLabel = typeof day.label === "object" ? "" : day.label;
 							const defaultDescription = typeof day.description === "object" ? "" : day.description;
-					
+
 							const newLabel = day.label[foundLanguageKey] || defaultLabel;
 							const newDescription = day.description[foundLanguageKey] || defaultDescription;
-					
+
 							return {
 								...day,
 								label: newLabel,
-								description: newDescription,
+								description: newDescription
 							};
 						});
-					
+
 						setStore({ days: newDays });
 					},
 					replacePiece: (piece, type) => {

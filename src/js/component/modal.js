@@ -59,10 +59,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 	const [version, setVersion] = useState(store.info.slug && store.info.slug != "" ? store.info.version : null);
 	const [versionOptions, setVersionOptions] = useState([]);
 
-	useEffect(()=> {
-		actions.cleanSyllabusErrors();
-	},[]);
-
 	useEffect(() => {
 		if (store.info.slug && store.info.slug != "") {
 			if (store.info.version && store.info.version != "") {
@@ -137,7 +133,6 @@ export const SyllabusDetails = ({ onConfirm }) => {
 									<Select
 										className="form-control p-0 border-none"
 										label="Select Profile"
-										placeholder="Select Profile"
 										onChange={p => {
 											setProfile(p.value);
 										}}

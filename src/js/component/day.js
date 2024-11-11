@@ -140,7 +140,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 			}
 		});
 	};
-
+	
 	useEffect(() => {
 		let updated = false;
 		for (let key in data) {
@@ -162,8 +162,8 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				</div>
 			)}
 			<div className="d-flex justify-content-between" style={{ margin: '0 0 10px 1.5rem' }}>
-				<p className="mb-0" style={{textWrap:"nowrap", marginRight:"10px"}}>Module {_data.position}{"→"}{" "}</p>
-				<div className="d-flex flex-wrap" style={{flexGrow: "100"}}>
+				<p className="mb-0" style={{ textWrap: "nowrap", marginRight: "10px" }}>Module {_data.position}{"→"}{" "}</p>
+				<div className="d-flex flex-wrap" style={{ flexGrow: "100" }}>
 					{typeof (_data.label) === "object" && Object.keys(_data.label).length > 0 ?
 						Object.keys(_data.label).map((translation) => (
 							<>
@@ -171,7 +171,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									<span>{translation}: </span>
 									<SmartInput
 										title={translation}
-										className={`border ${store.syllabus_errors.some(day => day.id === _data.id) && !_data.label[translation] ? "border-danger" : "border-secondary"}`}
+										className={`border ${store?.syllabus_errors?.some(day => day.id === _data.id) && !_data.label[translation] ? "border-danger" : "border-secondary"}`}
 										style={{ width: "auto" }}
 										placeholder="Today's topic (very short)..."
 										maxLength={35}
@@ -188,7 +188,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									<span onClick={() => handleDeleteLang(translation)}>
 										<i className="fas fa-trash" />
 									</span>
-									{!_data.label[translation] && store.syllabus_errors.some(day => day.id === _data.id) &&
+									{!_data.label[translation] && store?.syllabus_errors?.some(day => day.id === _data.id) &&
 										<p className="text-danger text-center mb-0" style={{ fontSize: '12px' }}>
 											Complete this field
 										</p>
@@ -216,7 +216,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 				<div className="col-6 pl-1">
 					<SmartInput
 						type="textarea"
-						className="transparent w-100 bg-white-light rounded h-100"
+						className="transparent w-100 bg-white-light rounded"
 						placeholder="Type a description for the teacher..."
 						onChange={teacher_instructions =>
 							actions.days().update(_data.id, {
@@ -245,7 +245,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 								<div className="w-100 d-flex flex-column">
 									<SmartInput
 										type="textarea"
-										className={`transparent w-100 bg-white-light rounded border ${store.syllabus_errors.some(day => day.id === _data.id) && !_data.description[translation] ? "border-danger" : "border-secondary"}`}
+										className={`transparent w-100 bg-white-light rounded border ${store?.syllabus_errors?.some(day => day.id === _data.id) && !_data.description[translation] ? "border-danger" : "border-secondary"}`}
 										placeholder="Type a description for the students..."
 										style={{ height: "100px" }}
 										onChange={(newValue) => {
@@ -258,7 +258,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 										}}
 										initialValue={_data.description[translation]}
 									/>
-									{!_data.description[translation] && store.syllabus_errors.some(day => day.id === _data.id) && (
+									{!_data.description[translation] && store?.syllabus_errors?.some(day => day.id === _data.id) && (
 										<p className="text-danger mb-0" style={{ fontSize: '12px' }}>Complete this field</p>
 									)}
 								</div>
@@ -427,6 +427,7 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									actions.pieces().out(item.data, {
 										id: exists.day.id,
 										[m.storeName]: exists.day[m.storeName].filter(l => {
+											console.log("item will be replaced", item, l);
 											return typeof item.slug === "undefined" ? l.slug != item.data.slug : l.slug != item.slug;
 										})
 									});

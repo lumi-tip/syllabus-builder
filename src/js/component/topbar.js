@@ -21,6 +21,7 @@ export const TopBar = ({ readOnly }) => {
 	const [openSyllabusDetails, setOpenSyllabusDetails] = useState(false);
 	const notInfoEmpty = key => store.info[key] && store.info[key] !== undefined && store.info[key] != "";
 	const academy = store.academies.find(a => a.id == store.info.academy_author);
+	const total_days = store.days.reduce((prev, curr) => prev + (curr.duration_in_days || 1), 0);
 	const languagesArr = ["us", "es"];
 
 	const handleBasicFormat = () => {
@@ -63,7 +64,6 @@ export const TopBar = ({ readOnly }) => {
 
 	const confirmEditSyllabus = async (store, actions) => {
 		let errors = [];
-		await waitSeconds(2000); // wait 2 seconds
 
 		const total_days = store.days.reduce((prev, curr) => prev + (curr.duration_in_days || 1), 0);
 

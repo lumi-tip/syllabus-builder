@@ -134,6 +134,7 @@ const EditContentPiece = ({ defaultValue, onSave, onCancel, style }) => {
 	};
 
 	const validateSlug = async _slug => {
+		// console.log(`Original: ${defaultValue,}`)
 		if (_slug === defaultValue.slug) return true;
 
 		if (!_slug || _slug == "" || !/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(data.slug)) {
