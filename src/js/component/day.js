@@ -122,6 +122,25 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 	const [addNewTech, setAddNewTech] = useState(false);
 	const [concept, setConcept] = useState("");
 
+	const handleDeleteLang = (language) => {
+		swal({
+			title: "Are you sure?!",
+			text: `Do you want to eliminate language '${language}' from all modules?.`,
+			icon: "warning",
+			buttons: ["Cancel", "Eliminate"],
+			dangerMode: true
+		}).then((willDelete) => {
+			if (willDelete) {
+				actions.days().deleteLang(language);
+				swal("Language successfully eliminated", {
+					icon: "success"
+				});
+			} else {
+				swal("Action canceled");
+			}
+		});
+	};
+	
 	useEffect(() => {
 		let updated = false;
 		for (let key in data) {
@@ -142,31 +161,55 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					<i className="fas fa-chevron-down" />
 				</div>
 			)}
-			<div className="d-flex">
-				<div className={"pointer trash-day"} onClick={() => onDelete(_data.id)}>
-					<i className="fas fa-trash" />
+			<div className="d-flex justify-content-between" style={{ margin: '0 0 10px 1.5rem' }}>
+				<p className="mb-0" style={{ textWrap: "nowrap", marginRight: "10px" }}>Module {_data.position}{"→"}{" "}</p>
+				<div className="d-flex flex-wrap" style={{ flexGrow: "100" }}>
+					{typeof (_data.label) === "object" && Object.keys(_data.label).length > 0 ?
+						Object.keys(_data.label).map((translation) => (
+							<>
+								<div key={translation} style={{ margin: "0 10px 0 0" }}>
+									<span>{translation}: </span>
+									<SmartInput
+										title={translation}
+										className={`border ${store?.syllabus_errors?.some(day => day.id === _data.id) && !_data.label[translation] ? "border-danger" : "border-secondary"}`}
+										style={{ width: "auto" }}
+										placeholder="Today's topic (very short)..."
+										maxLength={35}
+										onChange={(newValue) => {
+											const updatedLabel = {
+												..._data.label,
+												[translation]: newValue
+											};
+
+											actions.days().update(_data.id, { ..._data, label: updatedLabel });
+										}}
+										initialValue={_data.label[translation]}
+									/>
+									<span onClick={() => handleDeleteLang(translation)}>
+										<i className="fas fa-trash" />
+									</span>
+									{!_data.label[translation] && store?.syllabus_errors?.some(day => day.id === _data.id) &&
+										<p className="text-danger text-center mb-0" style={{ fontSize: '12px' }}>
+											Complete this field
+										</p>
+									}
+								</div>
+							</>
+
+						))
+						:
+						<SmartInput
+							className="transparent"
+							style={{ width: "300px" }}
+							placeholder="Today's topic (very short)..."
+							maxLength={25}
+							onChange={label => actions.days().update(_data.id, { ..._data, label })}
+							initialValue={_data.label}
+						/>
+					}
 				</div>
-				<h3>Module {_data.position}: </h3>
-				<SmartInput
-					className="transparent"
-					style={{ width: "fit-content", maxWidth: "300px", minWidth: "100px" }}
-					placeholder="Type Today's topic (very short)..."
-					maxLength={25}
-					onChange={label => actions.days().update(_data.id, { ..._data, label })}
-					initialValue={_data.label}
-				/>
-				<div className="pt-1">
-					Duration:
-					<SmartInput
-						className="border border-secondary"
-						type="number"
-						step="0.5"
-						style={{ width: "40px" }}
-						maxLength={2}
-						onChange={v => actions.days().update(_data.id, { ..._data, duration_in_days: parseFloat(v) })}
-						initialValue={_data.duration_in_days?.toString() || 1}
-					/>
-					Days
+				<div className="pointer float-right pe-2" onClick={() => onDelete(_data.id)}>
+					<i className="fas fa-trash" />
 				</div>
 			</div>
 			<div className="row no-gutters">
@@ -195,13 +238,41 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 					</small>
 				</div>
 				<div className="col-6 pl-1">
-					<SmartInput
-						type="textarea"
-						className="transparent w-100 bg-white-light rounded"
-						placeholder="Type a description for the students..."
-						onChange={description => actions.days().update(_data.id, { ..._data, description })}
-						initialValue={_data.description}
-					/>
+					{typeof (_data.description) === "object" && Object.keys(_data.description).length > 0 ?
+						Object.keys(_data.description).map((translation) => (
+							<div key={translation} className="d-flex">
+								<span className="font-weight-bold">{translation}: </span>
+								<div className="w-100 d-flex flex-column">
+									<SmartInput
+										type="textarea"
+										className={`transparent w-100 bg-white-light rounded border ${store?.syllabus_errors?.some(day => day.id === _data.id) && !_data.description[translation] ? "border-danger" : "border-secondary"}`}
+										placeholder="Type a description for the students..."
+										style={{ height: "100px" }}
+										onChange={(newValue) => {
+											const updatedDescription = {
+												..._data.description,
+												[translation]: newValue
+											};
+
+											actions.days().update(_data.id, { ..._data, description: updatedDescription });
+										}}
+										initialValue={_data.description[translation]}
+									/>
+									{!_data.description[translation] && store?.syllabus_errors?.some(day => day.id === _data.id) && (
+										<p className="text-danger mb-0" style={{ fontSize: '12px' }}>Complete this field</p>
+									)}
+								</div>
+							</div>
+						))
+						:
+						<SmartInput
+							type="textarea"
+							className="transparent w-100 bg-white-light rounded"
+							placeholder="Type a description for the students..."
+							onChange={description => actions.days().update(_data.id, { ..._data, description })}
+							initialValue={_data.description}
+						/>
+					}
 				</div>
 				<div className="col-12 mx-1 rounded">
 					{_data["technologies"] !== undefined &&
@@ -332,16 +403,22 @@ const Day = ({ data, onMoveUp, onMoveDown, onDelete, onEditInstructions }) => {
 									exists.found === false || exists.day.id === _data.id
 										? "replace"
 										: await swal({
-												title: "Are you sure?",
-												text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
-												icon: "warning",
-												buttons: {
-													duplicate: "Copy item",
-													replace: "Move item",
-													cancel: true
-												},
-												dangerMode: true
-										  });
+											title: "Are you sure?",
+											text: `This ${item.type} is already added to this syllabus on day ${exists.day.position}`,
+											icon: "warning",
+											buttons:
+												item.type === "project"
+													? {
+														replace: "Move item",
+														cancel: true
+													}
+													: {
+														duplicate: "Copy item",
+														replace: "Move item",
+														cancel: true
+													},
+											dangerMode: true
+										});
 
 								// cancel action
 								if (!confirm || confirm === undefined) return false;

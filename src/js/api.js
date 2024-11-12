@@ -1,4 +1,3 @@
-/* global fetch, localStorage, window */
 import swal from "sweetalert";
 import { getCurrentUrl } from "./utils/url";
 import { getAPIErrors } from "./component/utils";
